@@ -228,7 +228,7 @@ const Accueil = () => {
             </div>
             <div className="space-y-4">
               {[
-                { label: "Carte NFC", price: "10 000 F" },
+                { label: "Carte NFC", price: "5 000 F" },
                 { label: "Abonnement annuel", price: "10 000 F" },
               ].map((item) => (
                 <div key={item.label} className="flex justify-between items-center py-2 border-b border-border/50">
@@ -237,8 +237,8 @@ const Accueil = () => {
                 </div>
               ))}
               <div className="flex justify-between items-center py-3 bg-primary/10 rounded-lg px-4">
-                <span className="font-semibold">Première année</span>
-                <span className="text-primary font-bold text-xl">20 000 F</span>
+                <span className="font-semibold">Total</span>
+                <span className="text-primary font-bold text-xl">15 000 F</span>
               </div>
               {/* <div className="flex justify-between items-center py-2 border-b border-border/50">
                 <span className="text-muted-foreground">Renouvellement</span>
@@ -307,7 +307,7 @@ const Accueil = () => {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Commission carte</span>
-                      <span className="font-semibold text-primary">2 000 F</span>
+                      <span className="font-semibold text-primary">1 000 F</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Commission abonnement</span>
@@ -315,7 +315,7 @@ const Accueil = () => {
                     </div>
                     <div className="flex justify-between items-center py-2 bg-primary/10 rounded-lg px-3 mt-2">
                       <span className="font-semibold text-sm">Total par client</span>
-                      <span className="text-primary font-bold text-lg">4 000 F</span>
+                      <span className="text-primary font-bold text-lg">3 000 F</span>
                     </div>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ const Accueil = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-border/50">
                     <span className="text-muted-foreground">Gain immédiat</span>
-                    <span className="font-bold text-lg">10 × 4 000 = <span className="text-primary">40 000 F</span></span>
+                    <span className="font-bold text-lg">10 × 3 000 = <span className="text-primary">30 000 F</span></span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-border/50">
                     <span className="text-muted-foreground">Revenu annuel récurrent</span>
