@@ -145,7 +145,9 @@ async def create_profile(
             "name": name, "job": job, "company": company, "phone": phone, "email": email,
             "location": location, "website": website, "instagram": instagram,
             "linkedin": linkedin, "facebook": facebook, "tiktok": tiktok,
-            "snapchat": snapchat, "telegram": telegram, "design_type": design_type, # AJOUTÉ
+            "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,"design_type": design_type, # AJOUTÉ
+            
+            
             "photo_url": photo_res['secure_url'], "cover_url": cover_res['secure_url'],
             "unique_link": generate_unique_link(name), "is_archived": False,
             "created_at": now, "updated_at": now
@@ -176,7 +178,8 @@ async def update_profile(
         "name": name, "job": job, "phone": phone, "company": company, "email": email,
         "location": location, "website": website, "instagram": instagram,
         "linkedin": linkedin, "facebook": facebook, "tiktok": tiktok,
-        "snapchat": snapchat, "telegram": telegram, "design_type": design_type, # AJOUTÉ
+        "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,
+        "design_type": design_type, # AJOUTÉ
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     if photo:
