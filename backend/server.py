@@ -130,6 +130,7 @@ async def create_profile(
     instagram: Optional[str] = Form(None), linkedin: Optional[str] = Form(None),
     facebook: Optional[str] = Form(None), tiktok: Optional[str] = Form(None),
     snapchat: Optional[str] = Form(None), telegram: Optional[str] = Form(None), # AJOUTÉ
+    youtube: Optional[str] = Form(None), twitter: Optional[str] = Form(None), # AJOUTÉ
     design_type: str = Form("classic"),
     photo: UploadFile = File(...), cover: UploadFile = File(...)
 ):
@@ -164,6 +165,7 @@ async def update_profile(
     instagram: Optional[str] = Form(None), linkedin: Optional[str] = Form(None),
     facebook: Optional[str] = Form(None), tiktok: Optional[str] = Form(None),
     snapchat: Optional[str] = Form(None), telegram: Optional[str] = Form(None), # AJOUTÉ
+    youtube: Optional[str] = Form(None), twitter: Optional[str] = Form(None), # AJOUTÉ
     design_type: str = Form("classic"),
     photo: Optional[UploadFile] = File(None), cover: Optional[UploadFile] = File(None)
 ):

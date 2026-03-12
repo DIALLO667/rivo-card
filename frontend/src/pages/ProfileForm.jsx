@@ -26,6 +26,8 @@ export default function ProfileForm() {
     tiktok: '',
     snapchat: '',
     telegram: '', // AJOUTÉ
+    youtube: '', // AJOUTÉ
+    twitter: '', // AJOUTÉ
     design_type: 'classic'
   });
   
@@ -55,6 +57,8 @@ export default function ProfileForm() {
             tiktok: res.data.tiktok || '',
             snapchat: res.data.snapchat || '',
             telegram: res.data.telegram || '', // AJOUTÉ
+            youtube: res.data.youtube || '', // AJOUTÉ
+            twitter: res.data.twitter || '', // AJOUTÉ
             design_type: res.data.design_type || 'classic'
           });
         } catch (err) {
@@ -164,6 +168,8 @@ export default function ProfileForm() {
               <Input name="tiktok" placeholder="TikTok" value={formData.tiktok} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
               <Input name="snapchat" placeholder="Snapchat" value={formData.snapchat} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
               <Input name="telegram" placeholder="Telegram" value={formData.telegram} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
+              <Input name="youtube" placeholder="Youtube" value={formData.youtube} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
+              <Input name="twitter" placeholder="Twitter" value={formData.twitter} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
             </div>
             <Input name="website" placeholder="Site Web (https://...)" value={formData.website} onChange={handleInputChange} className="bg-white/5 border-white/10 text-xs h-10" />
           </div>

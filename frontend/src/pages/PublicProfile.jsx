@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Phone, Globe, Mail, Instagram, Facebook, Linkedin, ShieldAlert, MapPin, Send } from 'lucide-react';
+import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send } from 'lucide-react';
 
 const API = "https://jamaney-backend.onrender.com/api";
 
@@ -54,7 +54,9 @@ export default function PublicProfile() {
     { id: 'linkedin', icon: <Linkedin size={28} />, color: '#0A66C2', url: profile.linkedin },
     { id: 'facebook', icon: <Facebook size={28} />, color: '#1877F2', url: profile.facebook },
     { id: 'tiktok', icon: <TikTokIcon size={28} />, color: '#FFFFFF', url: profile.tiktok },
-    { id: 'telegram', icon: <Send size={28} />, color: '#0088cc', url: profile.telegram }, // AJOUTÉ
+    { id: 'telegram', icon: <Send size={28} />, color: '#0088cc', url: profile.telegram }, 
+    { id: 'youtube', icon: <Youtube size={28} />, color: '#FF0000', url: profile.youtube },
+    { id: 'twitter', icon: <Twitter size={28} />, color: '#1DA1F2', url: profile.twitter },
     { 
       id: 'snapchat', 
       icon: (
@@ -170,6 +172,9 @@ export default function PublicProfile() {
               href={social.url.startsWith('http') ? social.url : 
                     social.id === 'snapchat' ? `https://snapchat.com/add/${social.url}` : 
                     social.id === 'telegram' ? `https://t.me/${social.url.replace('@','')}` :
+                    social.id === 'youtube' ? `https://youtube.com/${social.url}` :
+                    social.id === 'twitter' ? `https://twitter.com/${social.url}` :
+                    
                     `https://${social.id}.com/${social.url}`} 
               target="_blank" rel="noreferrer"
               className="transition-all hover:scale-125 hover:-translate-y-1 flex items-center justify-center"
