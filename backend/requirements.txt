@@ -8,3 +8,4 @@ cloudinary
 pyjwt
 passlib[bcrypt]
 requests
+Pillow
