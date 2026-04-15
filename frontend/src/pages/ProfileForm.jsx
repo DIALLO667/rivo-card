@@ -98,15 +98,10 @@ export default function ProfileForm() {
       setLoading(false);
       return;
     }
-    // If profile card, ensure phone and cover are present; job is optional
+    // If profile card, ensure phone is present; cover is optional
     if (cardType === 'profile') {
       if (!formData.phone || !formData.phone.toString().trim()) {
         toast.error('Le téléphone est requis pour une carte profile');
-        setLoading(false);
-        return;
-      }
-      if (!coverFile) {
-        toast.error('La couverture est requise pour une carte profile');
         setLoading(false);
         return;
       }

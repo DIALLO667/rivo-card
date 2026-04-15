@@ -211,14 +211,12 @@ async def create_profile(
         raise HTTPException(status_code=400, detail="card_type must be 'profile' or 'cv'")
     if template_id not in ("template1", "template2"):
         raise HTTPException(status_code=400, detail="template_id must be 'template1' or 'template2'")
-    # For profile cards, require job and phone and cover
+    # For profile cards, require job and phone (cover is optional)
     if card_type == "profile":
         if not job:
             raise HTTPException(status_code=400, detail="job is required for profile cards")
         if not phone:
             raise HTTPException(status_code=400, detail="phone is required for profile cards")
-        if cover is None:
-            raise HTTPException(status_code=400, detail="cover is required for profile cards")
     try:
         # enforce upload size limits before sending to cloudinary
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
