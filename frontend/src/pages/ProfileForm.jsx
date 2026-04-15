@@ -84,20 +84,64 @@ export default function ProfileForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-  const data = new FormData();
-  Object.keys(formData).forEach(key => data.append(key, formData[key] || ""));
-  data.append('card_type', cardType);
-  data.append('template_id', templateId);
-  if (photoFile) data.append('photo', photoFile);
-  // only append cover when profile mode
-  if (cardType === 'profile' && coverFile) data.append('cover', coverFile);
 
-  // Debug: log payload as plain object for easier reading in console
-  try {
-    const debugObj = {};
-    data.forEach((value, key) => { debugObj[key] = value instanceof File ? value.name : value; });
-    console.log('ProfileForm payload:', debugObj);
-  } catch (e) { console.log('Failed to log FormData debug object', e); }
+    // Client-side validation for required fields to avoid sending empty values
+    if (!formData.name || !formData.name.toString().trim()) {
+      toast.error('Le nom est requis');
+      setLoading(false);
+      return;
+    }
+    // photo is required for both modes on the backend (signature expects UploadFile)
+    if (!photoFile) {
+      toast.error('Veuillez sélectionner une photo');
+      setLoading(false);
+      return;
+    }
+    // If profile card, ensure job, phone and cover are present
+    if (cardType === 'profile') {
+      if (!formData.job || !formData.job.toString().trim()) {
+        toast.error('Le poste (job) est requis pour une carte profile');
+        setLoading(false);
+        return;
+      }
+      if (!formData.phone || !formData.phone.toString().trim()) {
+        toast.error('Le téléphone est requis pour une carte profile');
+        setLoading(false);
+        return;
+      }
+      if (!coverFile) {
+        toast.error('La couverture est requise pour une carte profile');
+        setLoading(false);
+        return;
+      }
+    }
+
+    const data = new FormData();
+    // Only append non-empty values to avoid sending empty strings which can confuse validation
+    Object.keys(formData).forEach(key => {
+      const v = formData[key];
+      if (v !== undefined && v !== null && String(v).trim() !== '') {
+        data.append(key, v);
+      }
+    });
+    // backend expects these exact names
+    data.append('card_type', cardType);
+    data.append('template_id', templateId);
+    // append files only if present
+    if (photoFile) data.append('photo', photoFile);
+    if (cardType === 'profile' && coverFile) data.append('cover', coverFile);
+
+    // Debug: dump exact FormData entries
+    try {
+      for (let [key, value] of data.entries()) {
+        // For files, value will be a File object in browser
+        if (value && typeof value === 'object' && value.name) {
+          console.log('FormData entry:', key, '=> File name:', value.name, 'type:', value.type);
+        } else {
+          console.log('FormData entry:', key, '=>', value);
+        }
+      }
+    } catch (e) { console.log('Failed to iterate FormData', e); }
 
     // Debug: show token and target URL for easier troubleshooting
     const token = localStorage.getItem('token') || '';
@@ -108,8 +152,8 @@ export default function ProfileForm() {
       const config = {
         headers: {
           'Authorization': 'Bearer ' + token,
-          // Explicit Content-Type requested — note: axios will not add boundary when set manually.
-          'Content-Type': 'multipart/form-data'
+          // Let axios set the multipart boundary automatically by omitting manual Content-Type.
+          // If you must set it, include the correct boundary which is error-prone here.
         },
         withCredentials: true
       };
@@ -123,13 +167,16 @@ export default function ProfileForm() {
       }
       navigate('/dashboard');
     } catch (err) {
+      // Log detailed server error to help identify which field failed
+      console.error('Profile save error', err?.response || err);
+      if (err.response) {
+        console.log('Détail erreur HTTP:', err.response.status, err.response.statusText);
+        console.log('Détail erreur 400 :', err.response.data);
+      }
       if (err.response?.status === 401) {
          toast.error("Session expirée. Reconnectez-vous.");
          navigate('/login');
       } else {
-           // Log full server response for debugging 422 / validation errors
-           console.error('Profile save error', err?.response || err);
-           if (err.response?.data) console.error('Server response data:', err.response.data);
            toast.error("Erreur d'enregistrement");
       }
     } finally { setLoading(false); }
