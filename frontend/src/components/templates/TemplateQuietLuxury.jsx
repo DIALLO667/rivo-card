@@ -1,4 +1,5 @@
 import React from 'react';
+import { makeVCard } from '@/lib/urlUtils';
 import { FaArrowLeft, FaLinkedin, FaInstagram, FaWhatsapp, FaTwitter, FaCalendarAlt, FaPhone, FaBuilding, FaSave, FaMapMarkerAlt } from 'react-icons/fa';
 
 const TemplateQuietLuxury = ({ profile }) => {
@@ -62,8 +63,19 @@ const TemplateQuietLuxury = ({ profile }) => {
       {/* BOUTONS D'ACTION : TOUS ALIGNÉS */}
       <div className="w-full max-w-xs space-y-4 mb-16 relative z-10">
         
-        {/* Bouton Enregistrer */}
-        <button className="w-full rounded-xl py-4 text-[11px] font-bold tracking-[0.2em] text-black flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-[0_10px_20px_rgba(196,167,125,0.3)]"
+        {/* Bouton Enregistrer (download vCard) */}
+        <button onClick={() => {
+            const vcard = makeVCard({ name: data.name, phone: data.phone || '', email: data.email || '' });
+            const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${(data.name || 'contact').replace(/\s+/g,'_')}.vcf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+          }} className="w-full rounded-xl py-4 text-[11px] font-bold tracking-[0.2em] text-black flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-[0_10px_20px_rgba(196,167,125,0.3)]"
                 style={{ background: 'linear-gradient(135deg, #e7cf9a 0%, #C4A77D 100%)' }}>
           <FaSave className='text-sm' /> ENREGISTRER
         </button>

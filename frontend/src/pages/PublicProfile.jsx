@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send } from 'lucide-react';
 import TemplateQuietLuxury from '@/components/templates/TemplateQuietLuxury';
 import TemplateCleanLinks from '@/components/templates/TemplateCleanLinks';
+import { normalizeUrl } from '@/lib/urlUtils';
 import CVView from '@/components/templates/CVView';
 
 const API = process.env.REACT_APP_API_URL;
@@ -23,7 +24,13 @@ export default function PublicProfile() {
     if (uniqueLink) {
       axios.get(`${API}/profiles/public/${uniqueLink}`)
         .then(res => {
-          setProfile(res.data);
+          const p = res.data || {};
+          // Normalize common social URLs so templates can safely use them
+          const normalized = { ...p };
+          ['instagram','linkedin','facebook','tiktok','telegram','youtube','twitter','snapchat','website'].forEach(k => {
+            if (p[k]) normalized[k] = normalizeUrl(p[k]);
+          });
+          setProfile(normalized);
           setLoading(false);
         })
         .catch(() => setLoading(false));

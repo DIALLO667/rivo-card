@@ -24,6 +24,19 @@ const TemplateCleanLinks = ({ profile }) => {
 
   const linksToDisplay = data.links && data.links.length > 0 ? data.links : defaultLinks;
 
+  const handleVCardDownload = () => {
+    const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${data.name || ''}\nTEL:${data.phone || ''}\nEMAIL:${data.email || ''}\nEND:VCARD`;
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(data.name || 'contact').replace(/\s+/g,'_')}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     // FOND : Beige chaud identique à la maquette
     <div className="min-h-screen w-full bg-[#B8A78A] text-[#1F1F1F] font-sans flex flex-col items-center p-6 relative overflow-y-auto">
@@ -70,7 +83,7 @@ const TemplateCleanLinks = ({ profile }) => {
         {linksToDisplay.map((link, index) => (
           <a 
             key={index} 
-            href={link.url || "#"} 
+            href={link.url ? link.url : "#"} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="block w-full transition-transform active:scale-95"
@@ -94,7 +107,7 @@ const TemplateCleanLinks = ({ profile }) => {
         ))}
 
         {/* BOUTON ENREGISTRER : Mis en bas, en blanc comme le footer de la maquette */}
-        <button className="w-full bg-white text-black h-[65px] rounded-[40px] text-[13px] font-extrabold tracking-[0.1em] flex items-center justify-center gap-3 shadow-lg mt-12 border border-black/5 hover:bg-gray-50 transition-all">
+        <button onClick={handleVCardDownload} className="w-full bg-white text-black h-[65px] rounded-[40px] text-[13px] font-extrabold tracking-[0.1em] flex items-center justify-center gap-3 shadow-lg mt-12 border border-black/5 hover:bg-gray-50 transition-all">
           Rejoignez {name.split(' ')[0]} sur Rivo Card
         </button>
       </div>

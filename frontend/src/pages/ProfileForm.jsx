@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { normalizeUrl } from '@/lib/urlUtils';
 import { toast } from 'sonner';
 
 // Robust API base: ensure there's exactly one trailing /api
@@ -114,10 +115,16 @@ export default function ProfileForm() {
     // Log job state before appending to FormData
     console.log('Valeur de job avant envoi :', formData.job);
 
+    // Normalize social URLs before appending
+    const normalizedForm = { ...formData };
+    ['instagram','linkedin','facebook','tiktok','telegram','youtube','twitter','snapchat','website'].forEach(k => {
+      if (normalizedForm[k]) normalizedForm[k] = normalizeUrl(normalizedForm[k]);
+    });
+
     const data = new FormData();
     // Only append non-empty values to avoid sending empty strings which can confuse validation
-    Object.keys(formData).forEach(key => {
-      const v = formData[key];
+    Object.keys(normalizedForm).forEach(key => {
+      const v = normalizedForm[key];
       if (v !== undefined && v !== null && String(v).trim() !== '') {
         data.append(key, v);
       }
