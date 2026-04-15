@@ -44,15 +44,8 @@ db = client[db_name]
 
 app = FastAPI()
 
-# Development convenience: allow all origins to avoid CORS issues when testing locally.
-# NOTE: This is permissive and should not be used in production.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS middleware will be configured later using the CORS_ORIGINS environment variable.
+# We avoid adding a permissive middleware here to prevent accidental wide-open CORS in production.
 
 
 @app.exception_handler(RequestValidationError)
@@ -416,25 +409,29 @@ async def generate_vcard(profile_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 app.include_router(api_router)
-# In production we prefer storing assets (images, PDFs, vcards) on Cloudinary. StaticFiles kept for local dev convenience.
-app.mount("/api/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
-# allowed_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
-# app.add_middleware(CORSMiddleware, allow_origins=allowed_origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
-# For local development explicitly allow localhost frontends (avoid macOS AirPlay/other listeners)
-# Use a narrow allowlist for dev to avoid surprising wide-open CORS in production.
-DEVELOPMENT_ALLOWED_ORIGINS = [
-    "http://localhost:3001",
-    "http://localhost:3000",
-]
+# Ensure uploads directory exists (Render ephemeral file systems may not persist uploads — prefer Cloudinary)
+try:
+    os.makedirs(UPLOADS_DIR, exist_ok=True)
+except Exception:
+    logger.warning('Could not create uploads directory; continuing without local uploads')
+
+# Configure CORS from CORS_ORIGINS env var (comma-separated). Default to localhost dev domain.
+cors_env = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
+allowed_origins = [origin.strip() for origin in cors_env.split(',') if origin.strip()]
+if not allowed_origins:
+    allowed_origins = ['http://localhost:3000']
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=DEVELOPMENT_ALLOWED_ORIGINS,
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/api/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
 if __name__ == "__main__":
     # Use PORT from environment (Render sets $PORT). Default to 5100 for local dev.
     import uvicorn
