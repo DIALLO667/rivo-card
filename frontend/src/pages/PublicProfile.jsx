@@ -6,7 +6,7 @@ import TemplateQuietLuxury from '@/components/templates/TemplateQuietLuxury';
 import TemplateCleanLinks from '@/components/templates/TemplateCleanLinks';
 import CVView from '@/components/templates/CVView';
 
-const API = "https://jamaney-backend.onrender.com/api";
+const API = process.env.REACT_APP_API_URL;
 
 const TikTokIcon = ({ size = 24, color = 'currentColor' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">

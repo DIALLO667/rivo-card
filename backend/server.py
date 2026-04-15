@@ -103,6 +103,12 @@ async def health_check():
 
 api_router = APIRouter(prefix="/api")
 
+
+@api_router.get("/health")
+async def api_health():
+    # Lightweight health check for load balancers and uptime probes
+    return {"status": "ok", "message": "Server is active"}
+
 UPLOADS_DIR = ROOT_DIR / "uploads"
 UPLOADS_DIR.mkdir(exist_ok=True)
 
