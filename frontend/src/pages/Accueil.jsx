@@ -61,7 +61,7 @@ const Accueil = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <a href="#" className="text-xl font-bold tracking-tight">
-            <span className="text-primary">JAMANEY</span>{" "}
+            <span className="text-primary">Rivo</span>{" "}
             <span className="text-foreground">CARD</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
@@ -224,7 +224,7 @@ const Accueil = () => {
           <div className="rounded-2xl border border-primary/30 bg-card p-8 space-y-6 gold-glow">
             <div className="flex items-center justify-center gap-3 mb-2">
               <CreditCard className="h-8 w-8 text-primary" />
-              <h3 className="text-2xl font-bold">JAMANEY CARD</h3>
+              <h3 className="text-2xl font-bold">RIVO CARD</h3>
             </div>
             <div className="space-y-4">
               {[

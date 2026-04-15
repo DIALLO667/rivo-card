@@ -108,7 +108,7 @@ export default function Dashboard() {
       <div className="bg-[#1a1c1e] border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-black text-[#D4AF37]">JAMANEY ADMIN</h1>
+            <h1 className="text-2xl font-black text-[#D4AF37]">Rivostudio ADMIN</h1>
             <p className="text-gray-500 text-xs tracking-widest uppercase font-bold">Gestion des membres</p>
           </div>
           <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="text-gray-400 hover:text-red-400">

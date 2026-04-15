@@ -1,0 +1,145 @@
+{
+  "identity": {
+    "brand_name": "JPM Digital",
+    "tone": "Luxury, Professional, Modern, Exclusive",
+    "themes": {
+      "admin": "Dark Luxury (Gold Accents)",
+      "public": "Modern Glassmorphism"
+    }
+  },
+  "typography": {
+    "fonts": [
+      {
+        "family": "Manrope",
+        "category": "sans-serif",
+        "url": "https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap",
+        "usage": "Admin UI, Body Text, Functional Elements"
+      },
+      {
+        "family": "Playfair Display",
+        "category": "serif",
+        "url": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap",
+        "usage": "Headings, Brand Name, Luxury Accents"
+      },
+      {
+        "family": "Outfit",
+        "category": "sans-serif",
+        "url": "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap",
+        "usage": "Public Profile Headings, Buttons, Modern Vibe"
+      }
+    ],
+    "rules": {
+      "headings": "font-serif text-3xl md:text-4xl tracking-tight text-gold-primary",
+      "body": "font-sans text-base text-gray-300 leading-relaxed",
+      "labels": "font-sans text-xs uppercase tracking-widest text-gold-muted"
+    }
+  },
+  "colors": {
+    "admin": {
+      "background": "#050505",
+      "surface": "#121212",
+      "surface_highlight": "#1E1E1E",
+      "border": "#2A2A2A",
+      "primary": "#D4AF37",
+      "primary_hover": "#C5A028",
+      "text_main": "#F5F5F5",
+      "text_muted": "#A1A1AA",
+      "success": "#10B981",
+      "error": "#EF4444"
+    },
+    "public_defaults": {
+      "glass_bg": "rgba(255, 255, 255, 0.1)",
+      "glass_border": "rgba(255, 255, 255, 0.2)",
+      "glass_shadow": "0 8px 32px 0 rgba(0, 0, 0, 0.37)"
+    },
+    "tailwind_extension": {
+      "colors": {
+        "jpm": {
+          "black": "#050505",
+          "gold": "#D4AF37",
+          "gold-dim": "#8A7E55",
+          "gold-light": "#EEDC9A",
+          "surface": "#121212"
+        }
+      },
+      "backgroundImage": {
+        "gold-gradient": "linear-gradient(135deg, #D4AF37 0%, #AA8A25 100%)",
+        "luxury-dark": "radial-gradient(circle at center, #1a1a1a 0%, #000000 100%)"
+      }
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": {
+      "light": "bg-white/10 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)]",
+      "dark": "bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]",
+      "input": "bg-white/5 border-white/10 focus:border-gold-primary/50 focus:ring-1 focus:ring-gold-primary/50 transition-all duration-300 placeholder:text-white/30"
+    },
+    "gold_accents": {
+      "text_gradient": "bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#F3E5AB]",
+      "border_glow": "border border-[#D4AF37]/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]"
+    },
+    "motion": {
+      "hover_lift": "hover:-translate-y-1 hover:shadow-lg transition-all duration-300 ease-out",
+      "click_press": "active:scale-95 transition-transform duration-100",
+      "fade_in": "animate-in fade-in zoom-in-95 duration-500"
+    }
+  },
+  "layout_strategies": {
+    "admin_dashboard": {
+      "structure": "Sidebar (Left, Fixed, 260px) + Header (Top, Sticky) + Main Content (Fluid)",
+      "sidebar_style": "bg-jpm-surface border-r border-jpm-gold/10",
+      "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6"
+    },
+    "public_profile": {
+      "structure": "Mobile-First Container (max-w-md mx-auto) -> Full Height -> Center Content",
+      "background": "Fixed full-screen image with heavy blur/overlay",
+      "card_stack": "flex flex-col gap-4 p-6 pt-12 min-h-screen"
+    }
+  },
+  "components": {
+    "ui_primitives": {
+      "button": {
+        "primary": "bg-jpm-gold text-black font-semibold rounded-lg px-6 py-3 hover:bg-jpm-gold-light transition-colors shadow-lg",
+        "secondary": "bg-white/5 text-white border border-white/10 hover:bg-white/10 backdrop-blur-sm"
+      },
+      "card": {
+        "admin": "bg-jpm-surface border border-white/5 rounded-xl p-6 shadow-sm hover:border-jpm-gold/20 transition-colors",
+        "public": "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-white"
+      },
+      "input": "h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-white focus:border-jpm-gold outline-none transition-colors"
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "stroke-[1.5px]"
+    }
+  },
+  "assets": {
+    "images": {
+      "admin_bg": "https://images.unsplash.com/photo-1761437855740-c894da924d79?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODh8MHwxfHNlYXJjaHwxfHxkYXJrJTIwbHV4dXJ5JTIwZ29sZCUyMHRleHR1cmUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3MDE1MTcyM3ww&ixlib=rb-4.1.0&q=85",
+      "public_bg_gradients": [
+        "https://images.unsplash.com/photo-1660513924321-d9142645a41d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGNvbG9yZnVsJTIwZ3JhZGllbnQlMjBnbGFzcyUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1632516643720-e7f5d7d6ecc9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGNvbG9yZnVsJTIwZ3JhZGllbnQlMjBnbGFzcyUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1755076539245-42614526d518?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGNvbG9yZnVsJTIwZ3JhZGllbnQlMjBnbGFzcyUyMGJhY2tncm91bmR8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85"
+      ],
+      "mock_avatars": [
+        "https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbCUyMHBvcnRyYWl0JTIwaGVhZHNob3R8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1769636929261-e913ed023c83?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHw0fHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbCUyMHBvcnRyYWl0JTIwaGVhZHNob3R8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1689600944138-da3b150d9cb8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMHByb2Zlc3Npb25hbCUyMHBvcnRyYWl0JTIwaGVhZHNob3R8ZW58MHx8fHwxNzcwMTUxNzIyfDA&ixlib=rb-4.1.0&q=85"
+      ]
+    }
+  },
+  "universal_guidelines": {
+    "testing": "All interactive elements MUST have data-testid attributes (e.g., data-testid='login-submit-btn')",
+    "accessibility": "Ensure contrast ratio of gold text on black meets WCAG AA. Use lighter gold (#EEDC9A) for small text.",
+    "spacing": "Use comfortable spacing. Minimum gap-4 in grids. Padding p-6 or p-8 for cards.",
+    "interactions": "All buttons must have hover/active states. No dead clicks.",
+    "mobile": "Public pages must be strictly mobile-first. Width constrained to max-w-md on desktop with a centered layout."
+  },
+  "implementation_steps": [
+    "Update tailwind.config.js with the 'jpm' color palette and font families.",
+    "Install 'lucide-react', 'framer-motion', 'sonner', 'clsx', 'tailwind-merge' if not present.",
+    "Create a reusable 'GlassCard' component for the public profile.",
+    "Create a 'DashboardLayout' component with the dark/gold sidebar.",
+    "Ensure all img tags use object-cover and have proper alt text."
+  ]
+}
