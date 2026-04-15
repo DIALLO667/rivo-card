@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
-// Use environment variable set by Vercel or local .env for production; fall back to localhost dev URL
-// REACT_APP_API_URL should include the '/api' suffix in production (for example: https://.../api)
-const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:5100/api";
+// Robust API base: ensure there's exactly one trailing /api
+const BASE_URL = process.env.REACT_APP_API_URL || '';
+const API = (BASE_URL.replace(/\/api$/, '') || 'http://127.0.0.1:5100') + '/api';
 
 export default function ProfileForm() {
   const { profileId } = useParams();
@@ -107,8 +107,9 @@ export default function ProfileForm() {
     try {
       const config = {
         headers: {
-          // Let axios set Content-Type (it will add boundary). Manually setting it can break multipart uploads.
-          'Authorization': 'Bearer ' + token
+          'Authorization': 'Bearer ' + token,
+          // Explicit Content-Type requested — note: axios will not add boundary when set manually.
+          'Content-Type': 'multipart/form-data'
         },
         withCredentials: true
       };
