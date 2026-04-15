@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
-// Use environment variable set by Vercel or local .env for production; fall back to localhost for dev
-const API = (process.env.REACT_APP_API_URL || "http://127.0.0.1:5100") + "/api".replace(/\/api\/api$/, "/api");
+// Use environment variable set by Vercel or local .env for production; fall back to localhost dev URL
+// REACT_APP_API_URL should include the '/api' suffix in production (for example: https://.../api)
+const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:5100/api";
 
 export default function ProfileForm() {
   const { profileId } = useParams();
@@ -82,8 +83,6 @@ export default function ProfileForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-
     setLoading(true);
   const data = new FormData();
   Object.keys(formData).forEach(key => data.append(key, formData[key] || ""));
@@ -100,11 +99,16 @@ export default function ProfileForm() {
     console.log('ProfileForm payload:', debugObj);
   } catch (e) { console.log('Failed to log FormData debug object', e); }
 
+    // Debug: show token and target URL for easier troubleshooting
+    const token = localStorage.getItem('token') || '';
+    console.log('Token utilisé :', token);
+    console.log('Requête vers :', API + '/profiles');
+
     try {
       const config = {
         headers: {
           // Let axios set Content-Type (it will add boundary). Manually setting it can break multipart uploads.
-          'Authorization': `Bearer ${token}`
+          'Authorization': 'Bearer ' + token
         },
         withCredentials: true
       };
