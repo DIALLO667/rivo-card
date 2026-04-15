@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeVCard } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
 import { FaArrowLeft, FaLinkedin, FaInstagram, FaWhatsapp, FaTwitter, FaCalendarAlt, FaPhone, FaBuilding, FaSave, FaMapMarkerAlt } from 'react-icons/fa';
 
 const TemplateQuietLuxury = ({ profile }) => {
@@ -12,58 +12,71 @@ const TemplateQuietLuxury = ({ profile }) => {
   };
 
   const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(data.location)}`;
+  // Build safe hrefs
+  const telHref = data.phone ? (String(data.phone).startsWith('tel:') ? data.phone : `tel:${String(data.phone).replace(/\s+/g, '')}`) : null;
+  const mailHref = data.email ? (String(data.email).startsWith('mailto:') ? data.email : `mailto:${data.email}`) : null;
+  const websiteHref = data.website ? normalizeUrl(data.website) : null;
+  const whatsappHref = data.phone ? `https://wa.me/${String(data.phone).replace(/[^\d+]/g, '')}` : null;
 
   return (
-    <div className="min-h-screen w-full text-white font-sans p-6 flex flex-col items-center relative overflow-y-auto" 
+    <div className="w-full flex flex-col items-center relative" 
          style={{ 
-           background: `radial-gradient(circle at 50% 0%, #2c2c2c 0%, #0f0f0f 100%)`,
+           background: '#000000', // Noir pur obligatoire pour le haut
+           backgroundImage: `radial-gradient(circle at 50% 10%, #2c2c2c 0%, #000000 100%)`, // Dégradé ajusté
+           minHeight: '100vh',
+           minHeight: '-webkit-fill-available', 
          }}>
       
       {/* Texture de fond */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/brushed-alum.png')` }}></div>
+      <div className="fixed inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/brushed-alum.png')` }}></div>
 
-      {/* BOUTON RETOUR */}
-      <button 
-        onClick={() => window.history.back()}
-        className="absolute top-6 left-6 z-50 text-white/40 hover:text-[#C4A77D] transition"
-      >
-        <FaArrowLeft className="text-xl" />
-      </button>
+      {/* BARRE DE STATUT : Uniquement pour l'espacement sur iPhone/Android */}
+      <div className="h-6 w-full"></div>
 
-      {/* LOGO RIVO */}
-      <div className="flex items-center gap-2 mt-4 mb-10 relative z-10">
-          <div className="w-7 h-7 border border-[#C4A77D] rounded flex items-center justify-center font-bold text-[#C4A77D] text-xs shadow-[0_0_10px_rgba(196,167,125,0.3)]">R</div>
-          <div className="text-xl font-medium tracking-tight text-white">Rivo <span className='font-light text-white/60'>Card</span></div>
+      {/* BOUTON RETOUR ET LOGO : Plus de marge en haut */}
+      <div className="w-full px-6 flex justify-between items-center z-50 mb-6 mt-4">
+        <button 
+          onClick={() => window.history.back()}
+          className="text-white/40 hover:text-[#C4A77D] transition p-2 -ml-2"
+        >
+          <FaArrowLeft className="text-xl" />
+        </button>
+        
+        <div className="flex items-center gap-2 relative z-10">
+            <div className="w-6 h-6 border border-[#C4A77D] rounded flex items-center justify-center font-bold text-[#C4A77D] text-[10px] shadow-[0_0_10px_rgba(196,167,125,0.3)]">R</div>
+            <div className="text-lg font-medium tracking-tight text-white">Rivo <span className='font-light text-white/60'>Card</span></div>
+        </div>
+        
+        <div className="w-8"></div>
       </div>
 
       {/* PHOTO */}
-      <div className="relative mb-8 z-10">
-        <div className="absolute inset-0 rounded-full blur-md bg-[#C4A77D]/20 animate-pulse"></div>
+      <div className="relative mb-6 z-10">
+        <div className="absolute inset-0 rounded-full blur-md bg-[#C4A77D]/20"></div>
         <img 
           src={data.photo_url} 
           alt={data.name} 
-          className="w-36 h-36 rounded-full object-cover border-[3px] border-[#C4A77D] relative z-10 shadow-2xl"
+          className="w-32 h-32 rounded-full object-cover border-[2px] border-[#C4A77D] relative z-10 shadow-2xl"
         />
       </div>
 
       {/* TEXTE */}
-      <div className="text-center mb-10 w-full max-w-sm px-4 relative z-10">
-        <h1 className="text-4xl font-bold mb-2 tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#f3e5ab' }}>
+      <div className="text-center mb-8 w-full max-w-sm px-6 relative z-10">
+        <h1 className="text-3xl font-bold mb-2 tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: '#f3e5ab' }}>
           {data.name}
         </h1>
-        <p className="text-[12px] text-[#C4A77D] tracking-[0.2em] uppercase font-semibold mb-1">
+        <p className="text-[11px] text-[#C4A77D] tracking-[0.2em] uppercase font-semibold mb-1">
           {data.job_title}
         </p>
-        <p className="text-[12px] text-white/50 tracking-widest uppercase font-light mb-4">
+        <p className="text-[11px] text-white/50 tracking-widest uppercase font-light mb-4">
           {data.company}
         </p>
-        <div className="h-[1px] w-12 bg-[#C4A77D]/40 mx-auto"></div>
+        <div className="h-[1px] w-10 bg-[#C4A77D]/40 mx-auto"></div>
       </div>
 
-      {/* BOUTONS D'ACTION : TOUS ALIGNÉS */}
-      <div className="w-full max-w-xs space-y-4 mb-16 relative z-10">
+      {/* BOUTONS D'ACTION */}
+      <div className="w-full max-w-[85%] space-y-3 mb-12 relative z-10">
         
-        {/* Bouton Enregistrer (download vCard) */}
         <button onClick={() => {
             const vcard = makeVCard({ name: data.name, phone: data.phone || '', email: data.email || '' });
             const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
@@ -75,40 +88,58 @@ const TemplateQuietLuxury = ({ profile }) => {
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-          }} className="w-full rounded-xl py-4 text-[11px] font-bold tracking-[0.2em] text-black flex items-center justify-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-[0_10px_20px_rgba(196,167,125,0.3)]"
+          }} className="w-full rounded-xl py-4 text-[11px] font-bold tracking-[0.2em] text-black flex items-center justify-center gap-3 transition-all active:scale-95 shadow-[0_10px_20px_rgba(196,167,125,0.2)]"
                 style={{ background: 'linear-gradient(135deg, #e7cf9a 0%, #C4A77D 100%)' }}>
           <FaSave className='text-sm' /> ENREGISTRER
         </button>
         
-        {/* Bouton Adresse (Google Maps) - Nouveau format bouton */}
-        <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
-            <button className="w-full bg-white/5 border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 hover:border-[#C4A77D]/50 transition-all shadow-xl backdrop-blur-sm">
-                <FaMapMarkerAlt className='text-[#C4A77D]' /> ADRESSE
-            </button>
-        </a>
+    <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+      <button className="w-full bg-white/5 border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm">
+        <FaMapMarkerAlt className='text-[#C4A77D]' /> ADRESSE
+      </button>
+    </a>
 
-        {/* Autres Boutons */}
         {[
-          { icon: FaCalendarAlt, text: "PRENDRE RENDEZ-VOUS" },
-          { icon: FaPhone, text: "APPELER LE BUREAU" },
-          { icon: FaBuilding, text: "VOIR LE PORTFOLIO" }
+          { icon: FaCalendarAlt, text: "RENDEZ-VOUS", href: websiteHref },
+          { icon: FaPhone, text: "APPELER", href: telHref },
+          { icon: FaBuilding, text: "PORTFOLIO", href: websiteHref }
         ].map((btn, i) => (
-          <button key={i} className="w-full bg-white/5 border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 hover:border-[#C4A77D]/50 transition-all shadow-xl backdrop-blur-sm">
-            <btn.icon className='text-[#C4A77D]' /> {btn.text}
-          </button>
+          btn.href ? (
+            <a key={i} href={btn.href} target={btn.href.startsWith('http') ? '_blank' : undefined} rel={btn.href.startsWith('http') ? 'noopener noreferrer' : undefined} className="block w-full">
+              <button className="w-full bg-white/5 border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm">
+                <btn.icon className='text-[#C4A77D]' /> {btn.text}
+              </button>
+            </a>
+          ) : (
+            <button key={i} className="w-full bg-white/5 border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm">
+              <btn.icon className='text-[#C4A77D]' /> {btn.text}
+            </button>
+          )
         ))}
       </div>
 
       {/* RESEAUX SOCIAUX */}
-      <div className="w-full max-w-sm flex justify-center gap-5 mt-auto pb-10 relative z-10">
-        {[FaLinkedin, FaInstagram, FaWhatsapp, FaTwitter].map((Icon, index) => (
-            <div key={index} className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-[#C4A77D] group cursor-pointer transition-all duration-300 bg-white/5 shadow-inner">
-                <Icon className="text-xl text-[#C4A77D] group-hover:text-black transition-colors" />
+      <div className="mt-auto w-full max-w-sm flex justify-center gap-4 px-6 pb-8 relative z-10">
+        {/* Social links: use profile fields when available */}
+        {[
+          { key: 'linkedin', Icon: FaLinkedin, href: data.linkedin },
+          { key: 'instagram', Icon: FaInstagram, href: data.instagram },
+          { key: 'whatsapp', Icon: FaWhatsapp, href: whatsappHref },
+          { key: 'twitter', Icon: FaTwitter, href: data.twitter }
+        ].map((s, index) => (
+          s.href ? (
+            <a key={index} href={s.href} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group cursor-pointer transition-all bg-white/5">
+              <s.Icon className="text-lg text-[#C4A77D] group-active:text-black transition-colors" />
+            </a>
+          ) : (
+            <div key={index} className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group bg-white/5">
+              <s.Icon className="text-lg text-[#C4A77D] transition-colors" />
             </div>
+          )
         ))}
       </div>
 
-      <div className="text-[8px] text-white/20 tracking-[0.4em] uppercase pb-4">
+      <div className="text-[7px] text-white/20 tracking-[0.4em] uppercase pb-6">
         RIVO CARD • LUXE ÉDITION
       </div>
     </div>

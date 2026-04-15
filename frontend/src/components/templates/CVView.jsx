@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaArrowLeft, FaDownload } from 'react-icons/fa';
+import { FaDownload } from 'react-icons/fa';
 
 const CVView = ({ profile, downloadUrl }) => {
   const [isDownloading, setIsDownloading] = useState(false);
@@ -9,30 +9,20 @@ const CVView = ({ profile, downloadUrl }) => {
     photo_url: 'https://via.placeholder.com/600x800' 
   };
 
-  // FONCTION DE TÉLÉCHARGEMENT FORCÉ (Conserve la qualité)
   const handleDownload = async (e) => {
-    e.preventDefault(); // Empêche le comportement par défaut du lien
+    e.preventDefault();
     setIsDownloading(true);
 
     try {
-      // 1. On récupère le fichier de l'URL
       const response = await fetch(downloadUrl);
       if (!response.ok) throw new Error('Erreur réseau');
-
-      // 2. On le transforme en Blob (Binaire)
       const blob = await response.blob();
-
-      // 3. On crée une URL locale temporaire
       const blobUrl = window.URL.createObjectURL(blob);
-
-      // 4. On crée un lien invisible et on simule un clic
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `CV_${data.name.replace(/\s+/g, '_')}.pdf`; // Nom du fichier
+      link.download = `CV_${data.name.replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
-
-      // 5. Nettoyage
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
@@ -44,54 +34,62 @@ const CVView = ({ profile, downloadUrl }) => {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0D0D0D] flex flex-col relative overflow-hidden">
+    <div className="w-full bg-[#0D0D0D] flex flex-col relative overflow-hidden"
+         style={{ 
+           height: '100vh',
+           height: '-webkit-fill-available' // Support mobile dynamique
+         }}>
       
-      {/* BARRE D'ACTION SUPÉRIEURE : Bouton Retour et Bouton Télécharger */}
-      <div className="absolute top-8 inset-x-8 z-50 flex justify-between items-center">
-        
-        {/* BOUTON RETOUR : Plus discret */}
-        <button 
-          onClick={() => window.history.back()} 
-          className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-lg flex items-center justify-center border border-white/10 text-white/50 hover:text-[#C4A77D] hover:border-[#C4A77D]/20 transition-all"
-        >
-          <FaArrowLeft size={18} />
-        </button>
-
-        {/* LE BOUTON DE TÉLÉCHARGEMENT (POSITIONNÉ EN HAUT) */}
-        <a 
-          href={downloadUrl} 
-          onClick={handleDownload} // Appel de la fonction JavaScript
-          className={`px-5 py-2.5 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 transition-all shadow-[0_10px_20px_rgba(0,0,0,0.4)] ${
-            isDownloading 
-              ? 'bg-gray-600 text-gray-300 animate-pulse cursor-not_allowed' 
-              : 'bg-[#C4A77D] text-black hover:scale-[1.03] active:scale-95'
-          }`}
-        >
-          <FaDownload size={12} />
-          {isDownloading ? 'TÉLÉCHARGEMENT...' : 'TÉLÉCHARGER (PDF)'}
-        </a>
+      {/* HEADER / LOGO - Plus discret en haut */}
+      <div className="w-full pt-8 pb-4 flex justify-center items-center z-50">
+        <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border border-[#C4A77D] rounded flex items-center justify-center font-bold text-[#C4A77D] text-[8px]">R</div>
+            <div className="text-sm font-medium tracking-widest text-white/80 uppercase">Rivo <span className='font-light opacity-50'>Resume</span></div>
+        </div>
       </div>
 
-      {/* AFFICHAGE DU CV : Remplit tout l'écran */}
-      <div className="flex-1 w-full relative flex justify-center items-center bg-[#1A1A1A]">
-        <img 
-          src={data.photo_url} 
-          alt={`CV de ${data.name}`} 
-          className="h-full w-full object-contain shadow-2xl" 
-        />
+      {/* ZONE CENTRALE : IMAGE + BOUTON FLOTTANT */}
+      <div className="flex-1 w-full relative flex flex-col justify-center items-center bg-[#141414] overflow-hidden">
         
-        {/* Dégradé subtil en bas pour l'esthétique */}
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+        {/* L'IMAGE DU CV */}
+        <div className="relative h-full w-full flex items-center justify-center p-2">
+           <img 
+            src={data.photo_url} 
+            alt={`CV de ${data.name}`} 
+            className="max-h-full max-w-full object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm" 
+          />
+
+          {/* BOUTON TÉLÉCHARGER : Flottant sur l'image pour libérer le haut */}
+          <button 
+            onClick={handleDownload}
+            className={`absolute bottom-16 sm:bottom-20 px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 transition-all shadow-2xl z-50 ${
+              isDownloading 
+                ? 'bg-gray-700 text-gray-400 animate-pulse' 
+                : 'bg-[#C4A77D] text-black active:scale-95 border border-white/20'
+            }`}
+          >
+            <FaDownload size={14} />
+            {isDownloading ? 'EN COURS...' : 'TÉLÉCHARGER LE PDF'}
+          </button>
+        </div>
+        
+        {/* Dégradés pour l'immersion */}
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#141414] to-transparent pointer-events-none"></div>
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#0D0D0D] to-transparent pointer-events-none"></div>
       </div>
 
-      {/* FOOTER FIXE : Infos personnelles épurées */}
-      <div className="w-full bg-[#0D0D0D] p-6 text-center border-t border-white/5 relative z-10">
-        <h2 className="text-white text-base font-light tracking-[0.2em] uppercase mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+      {/* FOOTER FIXE - Adapté au mobile */}
+      <div className="w-full bg-[#0D0D0D] px-6 py-8 text-center border-t border-white/5 relative z-10">
+        <h2 className="text-[#f3e5ab] text-lg font-bold tracking-[0.15em] uppercase mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
           {data.name}
         </h2>
-        <p className="text-[#C4A77D] text-[9px] tracking-[0.3em] uppercase opacity-80">
-          Rivo Card • Dakar Edition
-        </p>
+        <div className="flex justify-center items-center gap-4 opacity-30">
+          <div className="h-[1px] w-8 bg-white"></div>
+          <p className="text-white text-[7px] tracking-[0.4em] uppercase">
+            Dakar Edition
+          </p>
+          <div className="h-[1px] w-8 bg-white"></div>
+        </div>
       </div>
 
     </div>
