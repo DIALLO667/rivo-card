@@ -59,17 +59,17 @@ const CVView = ({ profile, downloadUrl }) => {
             className="max-h-full max-w-full object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-sm" 
           />
 
-          {/* BOUTON TÉLÉCHARGER : Flottant sur l'image pour libérer le haut */}
-          <button 
+          {/* BOUTON TÉLÉCHARGER : petit et positionné en haut à droite */}
+          <button
             onClick={handleDownload}
-            className={`absolute bottom-16 sm:bottom-20 px-8 py-4 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-3 transition-all shadow-2xl z-50 ${
-              isDownloading 
-                ? 'bg-gray-700 text-gray-400 animate-pulse' 
-                : 'bg-[#C4A77D] text-black active:scale-95 border border-white/20'
+            className={`absolute top-6 right-6 sm:top-8 sm:right-8 px-4 py-2 rounded-lg text-[10px] font-semibold tracking-[0.08em] flex items-center justify-center gap-2 transition-all shadow-md z-50 ${
+              isDownloading
+                ? 'bg-gray-700 text-gray-400 animate-pulse'
+                : 'bg-[#C4A77D] text-black active:scale-95 border border-white/10'
             }`}
           >
-            <FaDownload size={14} />
-            {isDownloading ? 'EN COURS...' : 'TÉLÉCHARGER LE PDF'}
+            <FaDownload size={12} />
+            {isDownloading ? 'EN COURS' : 'PDF'}
           </button>
         </div>
         
