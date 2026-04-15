@@ -97,13 +97,8 @@ export default function ProfileForm() {
       setLoading(false);
       return;
     }
-    // If profile card, ensure job, phone and cover are present
+    // If profile card, ensure phone and cover are present; job is optional
     if (cardType === 'profile') {
-      if (!formData.job || !formData.job.toString().trim()) {
-        toast.error('Le poste (job) est requis pour une carte profile');
-        setLoading(false);
-        return;
-      }
       if (!formData.phone || !formData.phone.toString().trim()) {
         toast.error('Le téléphone est requis pour une carte profile');
         setLoading(false);
@@ -115,6 +110,9 @@ export default function ProfileForm() {
         return;
       }
     }
+
+    // Log job state before appending to FormData
+    console.log('Valeur de job avant envoi :', formData.job);
 
     const data = new FormData();
     // Only append non-empty values to avoid sending empty strings which can confuse validation
@@ -212,11 +210,17 @@ export default function ProfileForm() {
             </div>
           </div>
 
-          {/* Name always visible */}
-          <div className="space-y-1">
-             <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Nom Complet *</label>
-             <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
-          </div>
+       {/* Name always visible */}
+       <div className="space-y-1">
+         <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Nom Complet *</label>
+         <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
+       </div>
+
+       {/* Job / Profession field (mapped to backend 'job') */}
+       <div className="space-y-1">
+         <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession / Métier</label>
+         <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" placeholder="Ex: Développeur" />
+       </div>
 
           {/* If profile mode show full form, else show minimal CV fields */}
           {cardType === 'profile' ? (
