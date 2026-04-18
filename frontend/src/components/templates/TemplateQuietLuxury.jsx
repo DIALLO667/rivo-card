@@ -15,6 +15,7 @@ const TemplateQuietLuxury = ({ profile }) => {
   // Build safe hrefs
   const telHref = data.phone ? (String(data.phone).startsWith('tel:') ? data.phone : `tel:${String(data.phone).replace(/\s+/g, '')}`) : null;
   const mailHref = data.email ? (String(data.email).startsWith('mailto:') ? data.email : `mailto:${data.email}`) : null;
+  const appointmentHref = data.email ? `mailto:${data.email}?subject=${encodeURIComponent('envoyez un mail')}` : null;
   const websiteHref = data.website ? normalizeUrl(data.website) : null;
   const whatsappHref = data.phone ? `https://wa.me/${String(data.phone).replace(/[^\d+]/g, '')}` : null;
 
@@ -100,7 +101,7 @@ const TemplateQuietLuxury = ({ profile }) => {
     </a>
 
         {[
-          { icon: FaCalendarAlt, text: "RENDEZ-VOUS", href: websiteHref },
+          { icon: FaEnvelope, text: "email", href: appointmentHref },
           { icon: FaPhone, text: "APPELER", href: telHref },
           { icon: FaBuilding, text: "PORTFOLIO", href: websiteHref }
         ].map((btn, i) => (
@@ -118,26 +119,29 @@ const TemplateQuietLuxury = ({ profile }) => {
         ))}
       </div>
 
-      {/* RESEAUX SOCIAUX */}
-      <div className="mt-auto w-full max-w-sm flex justify-center gap-4 px-6 pb-8 relative z-10">
-        {/* Social links: use profile fields when available */}
-        {[
-          { key: 'linkedin', Icon: FaLinkedin, href: data.linkedin },
-          { key: 'instagram', Icon: FaInstagram, href: data.instagram },
-          { key: 'whatsapp', Icon: FaWhatsapp, href: whatsappHref },
-          { key: 'twitter', Icon: FaTwitter, href: data.twitter }
-        ].map((s, index) => (
-          s.href ? (
-            <a key={index} href={s.href} target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group cursor-pointer transition-all bg-white/5">
-              <s.Icon className="text-lg text-[#C4A77D] group-active:text-black transition-colors" />
-            </a>
-          ) : (
-            <div key={index} className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group bg-white/5">
-              <s.Icon className="text-lg text-[#C4A77D] transition-colors" />
-            </div>
-          )
-        ))}
-      </div>
+    {/* RESEAUX SOCIAUX DYNAMIQUES */}
+<div className="mt-auto w-full max-w-sm flex flex-wrap justify-center gap-4 px-6 pb-8 relative z-10">
+  {[
+    { Icon: FaLinkedin, href: data.linkedin_url || data.linkedin },
+    { Icon: FaInstagram, href: data.instagram_url || data.instagram },
+    { Icon: FaWhatsapp, href: whatsappHref },
+    { Icon: FaTwitter, href: data.twitter_url || data.twitter },
+    { Icon: FaFacebook, href: data.facebook_url }, // Ajoute FaFacebook aux imports en haut
+    { Icon: FaGlobe, href: data.website_url || data.website }
+  ]
+  .filter(social => social.href) // On ne garde que ceux qui ont un lien
+  .map((s, index) => (
+    <a 
+      key={index} 
+      href={s.href.startsWith('http') || s.href.startsWith('https') ? s.href : `https://${s.href}`} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group cursor-pointer transition-all bg-white/5"
+    >
+      <s.Icon className="text-lg text-[#C4A77D] group-active:text-black transition-colors" />
+    </a>
+  ))}
+</div>
 
       <div className="text-[7px] text-white/20 tracking-[0.4em] uppercase pb-6">
         RIVO CARD • LUXE ÉDITION
