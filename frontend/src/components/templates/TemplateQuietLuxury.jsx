@@ -1,7 +1,20 @@
 import React from 'react';
 import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
-import { FaArrowLeft, FaLinkedin, FaInstagram, FaWhatsapp, FaTwitter, FaCalendarAlt,FaEnvelope , FaPhone, FaBuilding, FaSave, FaMapMarkerAlt } from 'react-icons/fa';
-
+import { 
+  FaArrowLeft, 
+  FaLinkedin, 
+  FaInstagram, 
+  FaWhatsapp, 
+  FaTwitter, 
+  FaCalendarAlt, 
+  FaPhone, 
+  FaBuilding, 
+  FaSave, 
+  FaMapMarkerAlt, 
+  FaEnvelope, 
+  FaFacebook, 
+  FaGlobe 
+} from 'react-icons/fa';
 const TemplateQuietLuxury = ({ profile }) => {
   const data = profile || {
     name: "Salla Seck",
