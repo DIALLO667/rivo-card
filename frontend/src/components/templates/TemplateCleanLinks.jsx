@@ -89,7 +89,7 @@ const TemplateCleanLinks = ({ profile }) => {
         {/* BOUTON REDIRECTION SITE */}
         <div className="pt-6">
           <a 
-            href="https://rivostudiotech.com" 
+            href="https://rivo-card.netlify.app/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="block w-full"
