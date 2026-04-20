@@ -18,7 +18,6 @@ const TemplateQuietLuxury = ({ profile }) => {
   const websiteHref = data.website && data.website !== "https://" ? normalizeUrl(data.website) : null;
   const whatsappHref = data.phone ? `https://wa.me/${String(data.phone).replace(/[^\d+]/g, '')}` : null;
   
-  // Détection dynamique pour l'adaptation du design
   const hasPortfolio = !!websiteHref;
 
   const socialLinks = [
@@ -35,16 +34,17 @@ const TemplateQuietLuxury = ({ profile }) => {
   ].filter(s => s.href && s.href !== "" && s.href !== "https://");
 
   return (
-    <div className="w-full flex flex-col items-center relative overflow-x-hidden" 
+    <div className="w-full flex flex-col items-center relative overflow-x-hidden min-h-screen" 
          style={{ 
-           background: '#000000',
-           backgroundImage: `radial-gradient(circle at 50% 10%, #2c2c2c 0%, #000000 100%)`,
-           minHeight: '100vh',
+           backgroundColor: '#000000',
+           backgroundImage: `radial-gradient(circle at 50% 0%, #2c2c2c 0%, #000000 70%)`,
+           backgroundAttachment: 'fixed'
          }}>
       
+      {/* Texture de fond */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/carbon-fibre.png')` }}></div>
 
-      {/* HEADER : pt-14 pour dégager l'encoche/notch du téléphone */}
+      {/* HEADER : Correction de la zone safe en haut */}
       <div className="w-full px-6 flex justify-between items-center z-50 pt-14 pb-4">
         <button onClick={() => window.history.back()} className="text-white/40 hover:text-[#C4A77D] transition p-2">
           <FaArrowLeft className="text-lg" />
@@ -56,7 +56,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         <div className="w-10"></div>
       </div>
 
-      {/* PHOTO : Tailles adaptatives */}
+      {/* PHOTO : Marges adaptatives */}
       <div className={`relative z-10 flex flex-col items-center transition-all ${hasPortfolio ? 'mt-4 mb-6' : 'mt-8 mb-10'}`}>
         <div className="absolute inset-0 rounded-full blur-2xl bg-[#C4A77D]/15"></div>
         <img 
@@ -66,16 +66,24 @@ const TemplateQuietLuxury = ({ profile }) => {
         />
       </div>
 
-      {/* INFOS PROFIL */}
+      {/* TEXTES */}
       <div className={`text-center w-full max-w-sm px-8 relative z-10 ${hasPortfolio ? 'mb-8' : 'mb-12'}`}>
         <h1 className={`${hasPortfolio ? 'text-3xl' : 'text-4xl'} font-bold mb-2 tracking-tight text-[#f3e5ab]`} style={{ fontFamily: "'Playfair Display', serif" }}>
           {name}
         </h1>
-        {job && <p className="text-[11px] text-[#C4A77D] tracking-[0.2em] uppercase font-bold mb-1">{job}</p>}
-        {company && <p className="text-[10px] text-white/40 tracking-widest uppercase font-light">{company}</p>}
+        {job && (
+          <p className="text-[11px] text-[#C4A77D] tracking-[0.2em] uppercase font-bold mb-1">
+            {job}
+          </p>
+        )}
+        {company && (
+          <p className="text-[10px] text-white/40 tracking-widest uppercase font-light">
+            {company}
+          </p>
+        )}
       </div>
 
-      {/* BOUTONS D'ACTION */}
+      {/* BOUTONS */}
       <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10">
         <button onClick={() => {
             const vcard = makeVCard({ name, phone: data.phone || '', email: data.email || '' });
@@ -121,8 +129,8 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
       </div>
 
-      {/* RÉSEAUX SOCIAUX : Agrandis et espacés si pas de portfolio */}
-      <div className={`w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 transition-all ${hasPortfolio ? 'mt-8 mb-10' : 'mt-14 mb-16'}`}>
+      {/* RÉSEAUX SOCIAUX : Marges fixes pour éviter le collage en bas */}
+      <div className={`w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 transition-all ${hasPortfolio ? 'mt-10 mb-10' : 'mt-16 mb-16'}`}>
         {socialLinks.map((s, index) => (
           <a key={index} href={s.href} target="_blank" rel="noopener noreferrer" 
              className={`${hasPortfolio ? 'w-11 h-11' : 'w-[52px] h-[52px]'} rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group transition-all bg-white/[0.05]`}>
