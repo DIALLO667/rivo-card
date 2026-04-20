@@ -37,15 +37,16 @@ const TemplateQuietLuxury = ({ profile }) => {
     <div className="w-full flex flex-col items-center relative overflow-x-hidden min-h-screen" 
          style={{ 
            backgroundColor: '#000000',
-           backgroundImage: `radial-gradient(circle at 50% 0%, #2c2c2c 0%, #000000 70%)`,
-           backgroundAttachment: 'fixed'
+           backgroundImage: `radial-gradient(circle at 50% 0%, #2c2c2c 0%, #000000 85%)`,
+           backgroundAttachment: 'fixed', // Indispensable pour que le fond ne bouge pas au scroll
+           backgroundSize: 'cover'
          }}>
       
-      {/* Texture de fond */}
+      {/* Texture de fond fixée */}
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/carbon-fibre.png')` }}></div>
 
-      {/* HEADER : Correction de la zone safe en haut */}
-      <div className="w-full px-6 flex justify-between items-center z-50 pt-14 pb-4">
+      {/* HEADER : pt-16 pour libérer totalement l'espace des encoches sur iPhone/Android */}
+      <div className="w-full px-6 flex justify-between items-center z-50 pt-16 pb-4">
         <button onClick={() => window.history.back()} className="text-white/40 hover:text-[#C4A77D] transition p-2">
           <FaArrowLeft className="text-lg" />
         </button>
@@ -56,7 +57,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         <div className="w-10"></div>
       </div>
 
-      {/* PHOTO : Marges adaptatives */}
+      {/* PHOTO : Marges équilibrées pour éviter l'effet "collé" */}
       <div className={`relative z-10 flex flex-col items-center transition-all ${hasPortfolio ? 'mt-4 mb-6' : 'mt-8 mb-10'}`}>
         <div className="absolute inset-0 rounded-full blur-2xl bg-[#C4A77D]/15"></div>
         <img 
@@ -66,9 +67,9 @@ const TemplateQuietLuxury = ({ profile }) => {
         />
       </div>
 
-      {/* TEXTES */}
+      {/* TEXTES : Responsive text sizes */}
       <div className={`text-center w-full max-w-sm px-8 relative z-10 ${hasPortfolio ? 'mb-8' : 'mb-12'}`}>
-        <h1 className={`${hasPortfolio ? 'text-3xl' : 'text-4xl'} font-bold mb-2 tracking-tight text-[#f3e5ab]`} style={{ fontFamily: "'Playfair Display', serif" }}>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight text-[#f3e5ab]" style={{ fontFamily: "'Playfair Display', serif" }}>
           {name}
         </h1>
         {job && (
@@ -83,15 +84,15 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
       </div>
 
-      {/* BOUTONS */}
-      <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10">
+      {/* BOUTONS D'ACTION : Largeur adaptative */}
+      <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10 mb-10">
         <button onClick={() => {
             const vcard = makeVCard({ name, phone: data.phone || '', email: data.email || '' });
             const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = `${name.replace(/\s+/g,'_')}.vcf`;
             document.body.appendChild(a); a.click(); a.remove();
-          }} className={`w-full rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[11px] font-black tracking-[0.15em] text-black flex items-center justify-center gap-3 transition-all shadow-lg`}
+          }} className={`w-full rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[11px] font-black tracking-[0.15em] text-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg`}
                 style={{ background: 'linear-gradient(135deg, #e7cf9a 0%, #C4A77D 100%)' }}>
           <FaSave className='text-base' /> ENREGISTRER CONTACT
         </button>
@@ -129,17 +130,17 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
       </div>
 
-      {/* RÉSEAUX SOCIAUX : Marges fixes pour éviter le collage en bas */}
-      <div className={`w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 transition-all ${hasPortfolio ? 'mt-10 mb-10' : 'mt-16 mb-16'}`}>
+      {/* RÉSEAUX SOCIAUX : Marges fixes et calculées */}
+      <div className="w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 mb-16">
         {socialLinks.map((s, index) => (
           <a key={index} href={s.href} target="_blank" rel="noopener noreferrer" 
-             className={`${hasPortfolio ? 'w-11 h-11' : 'w-[52px] h-[52px]'} rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group transition-all bg-white/[0.05]`}>
-            <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-2xl'} text-[#C4A77D] group-active:text-black transition-colors`} />
+             className={`${hasPortfolio ? 'w-11 h-11' : 'w-[52px] h-[52px]'} rounded-full border border-white/10 flex items-center justify-center active:scale-90 transition-all bg-white/[0.05]`}>
+            <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-2xl'} text-[#C4A77D]`} />
           </a>
         ))}
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER : Reste en bas grâce à mt-auto */}
       <div className="w-full text-center pb-8 mt-auto relative z-10">
         <div className="text-[7px] text-white/20 tracking-[0.4em] uppercase">
           RIVO CARD • LUXE ÉDITION
