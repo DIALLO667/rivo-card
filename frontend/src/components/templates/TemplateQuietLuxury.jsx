@@ -18,7 +18,7 @@ const TemplateQuietLuxury = ({ profile }) => {
   const websiteHref = data.website && data.website !== "https://" ? normalizeUrl(data.website) : null;
   const whatsappHref = data.phone ? `https://wa.me/${String(data.phone).replace(/[^\d+]/g, '')}` : null;
   
-  // Détection de la présence du portfolio pour l'adaptation
+  // Détection de la présence du portfolio
   const hasPortfolio = !!websiteHref;
 
   const socialLinks = [
@@ -55,7 +55,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         <div className="w-8"></div>
       </div>
 
-      {/* PHOTO : Taille adaptative (w-32 par défaut, w-36 si pas de portfolio) */}
+      {/* PHOTO */}
       <div className={`relative z-10 ${hasPortfolio ? 'mb-6' : 'mb-10'}`}>
         <div className="absolute inset-0 rounded-full blur-xl bg-[#C4A77D]/10"></div>
         <img 
@@ -66,7 +66,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         />
       </div>
 
-      {/* TEXTE : Marges ajustées */}
+      {/* TEXTE */}
       <div className={`text-center w-full max-w-sm px-6 relative z-10 ${hasPortfolio ? 'mb-8' : 'mb-12'}`}>
         <h1 className={`${hasPortfolio ? 'text-3xl' : 'text-4xl'} font-bold mb-2 tracking-tight text-[#f3e5ab] transition-all`} style={{ fontFamily: "'Playfair Display', serif" }}>
           {name}
@@ -83,7 +83,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
       </div>
 
-      {/* BOUTONS D'ACTION : py-4 par défaut, py-[18px] si pas de portfolio */}
+      {/* BOUTONS D'ACTION */}
       <div className="w-full max-w-[85%] space-y-3 relative z-10">
         <button onClick={() => {
             const vcard = makeVCard({ name, phone: data.phone || '', email: data.email || '' });
@@ -129,12 +129,12 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
       </div>
 
-      {/* RÉSEAUX SOCIAUX : w-11 par défaut, w-13 si pas de portfolio */}
-      <div className={`mt-auto w-full max-w-sm flex flex-wrap justify-center gap-5 px-6 relative z-10 ${hasPortfolio ? 'pb-8' : 'pb-14'}`}>
+      {/* RÉSEAUX SOCIAUX : Correction de la taille des icônes */}
+      <div className={`mt-auto w-full max-w-sm flex flex-wrap justify-center gap-5 px-6 relative z-10 ${hasPortfolio ? 'pb-8' : 'pb-16'}`}>
         {socialLinks.map((s, index) => (
           <a key={index} href={s.href} target="_blank" rel="noopener noreferrer" 
-             className={`${hasPortfolio ? 'w-11 h-11' : 'w-13 h-13'} rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group transition-all bg-white/5`}>
-            <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-xl'} text-[#C4A77D] group-active:text-black transition-colors`} />
+             className={`${hasPortfolio ? 'w-11 h-11' : 'w-[52px] h-[52px]'} rounded-full border border-white/10 flex items-center justify-center active:bg-[#C4A77D] group transition-all bg-white/5`}>
+            <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-2xl'} text-[#C4A77D] group-active:text-black transition-colors`} />
           </a>
         ))}
       </div>
