@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { normalizeUrl } from '@/lib/urlUtils';
 import { toast } from 'sonner';
 
-// Robust API base: ensure there's exactly one trailing /api
 const BASE_URL = process.env.REACT_APP_API_URL || '';
 const API = (BASE_URL.replace(/\/api$/, '') || 'http://127.0.0.1:5100') + '/api';
 
@@ -16,22 +15,9 @@ export default function ProfileForm() {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: '',
-    job: '',
-    company: '',
-    phone: '',
-    email: '',
-    location: '',
-    website: '',
-    instagram: '',
-    facebook: '',
-    linkedin: '',
-    tiktok: '',
-    snapchat: '',
-    telegram: '', // AJOUTÉ
-    youtube: '', // AJOUTÉ
-    twitter: '', // AJOUTÉ
-    design_type: 'classic'
+    name: '', job: '', company: '', phone: '', email: '', location: '',
+    website: '', instagram: '', facebook: '', linkedin: '', tiktok: '',
+    snapchat: '', telegram: '', youtube: '', twitter: '', design_type: 'classic'
   });
   
   const [photoFile, setPhotoFile] = useState(null);
@@ -61,12 +47,11 @@ export default function ProfileForm() {
             linkedin: res.data.linkedin || '',
             tiktok: res.data.tiktok || '',
             snapchat: res.data.snapchat || '',
-            telegram: res.data.telegram || '', // AJOUTÉ
-            youtube: res.data.youtube || '', // AJOUTÉ
-            twitter: res.data.twitter || '', // AJOUTÉ
+            telegram: res.data.telegram || '',
+            youtube: res.data.youtube || '',
+            twitter: res.data.twitter || '',
             design_type: res.data.design_type || 'classic'
           });
-          // set cardType and templateId if available
           if (res.data.card_type) setCardType(res.data.card_type);
           if (res.data.template_id) setTemplateId(res.data.template_id);
         } catch (err) {
@@ -86,75 +71,48 @@ export default function ProfileForm() {
     e.preventDefault();
     setLoading(true);
 
-    // Client-side validation for required fields to avoid sending empty values
-    if (!formData.name || !formData.name.toString().trim()) {
+    if (!formData.name?.trim()) {
       toast.error('Le nom est requis');
       setLoading(false);
       return;
     }
-    // photo is required for both modes on the backend (signature expects UploadFile)
-    if (!photoFile) {
+
+    // LOGIQUE CORRIGÉE : Photo obligatoire seulement à la création
+    if (!profileId && !photoFile) {
       toast.error('Veuillez sélectionner une photo');
       setLoading(false);
       return;
     }
-    // If profile card, ensure phone is present; cover is optional
-    if (cardType === 'profile') {
-      if (!formData.phone || !formData.phone.toString().trim()) {
-        toast.error('Le téléphone est requis pour une carte profile');
-        setLoading(false);
-        return;
-      }
+
+    if (cardType === 'profile' && !formData.phone?.trim()) {
+      toast.error('Le téléphone est requis');
+      setLoading(false);
+      return;
     }
 
-    // Log job state before appending to FormData
-    console.log('Valeur de job avant envoi :', formData.job);
-
-    // Normalize social URLs before appending
+    const data = new FormData();
     const normalizedForm = { ...formData };
     ['instagram','linkedin','facebook','tiktok','telegram','youtube','twitter','snapchat','website'].forEach(k => {
       if (normalizedForm[k]) normalizedForm[k] = normalizeUrl(normalizedForm[k]);
     });
 
-    const data = new FormData();
-    // Only append non-empty values to avoid sending empty strings which can confuse validation
     Object.keys(normalizedForm).forEach(key => {
       const v = normalizedForm[key];
       if (v !== undefined && v !== null && String(v).trim() !== '') {
         data.append(key, v);
       }
     });
-    // backend expects these exact names
+
     data.append('card_type', cardType);
     data.append('template_id', templateId);
-    // append files only if present
+    
+    // N'ajoute les fichiers QUE s'ils sont sélectionnés
     if (photoFile) data.append('photo', photoFile);
     if (cardType === 'profile' && coverFile) data.append('cover', coverFile);
 
-    // Debug: dump exact FormData entries
-    try {
-      for (let [key, value] of data.entries()) {
-        // For files, value will be a File object in browser
-        if (value && typeof value === 'object' && value.name) {
-          console.log('FormData entry:', key, '=> File name:', value.name, 'type:', value.type);
-        } else {
-          console.log('FormData entry:', key, '=>', value);
-        }
-      }
-    } catch (e) { console.log('Failed to iterate FormData', e); }
-
-    // Debug: show token and target URL for easier troubleshooting
-    const token = localStorage.getItem('token') || '';
-    console.log('Token utilisé :', token);
-    console.log('Requête vers :', API + '/profiles');
-
     try {
       const config = {
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          // Let axios set the multipart boundary automatically by omitting manual Content-Type.
-          // If you must set it, include the correct boundary which is error-prone here.
-        },
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
         withCredentials: true
       };
 
@@ -167,18 +125,7 @@ export default function ProfileForm() {
       }
       navigate('/dashboard');
     } catch (err) {
-      // Log detailed server error to help identify which field failed
-      console.error('Profile save error', err?.response || err);
-      if (err.response) {
-        console.log('Détail erreur HTTP:', err.response.status, err.response.statusText);
-        console.log('Détail erreur 400 :', err.response.data);
-      }
-      if (err.response?.status === 401) {
-         toast.error("Session expirée. Reconnectez-vous.");
-         navigate('/login');
-      } else {
-           toast.error("Erreur d'enregistrement");
-      }
+      toast.error("Erreur d'enregistrement");
     } finally { setLoading(false); }
   };
 
@@ -190,7 +137,6 @@ export default function ProfileForm() {
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* selectors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Type de carte</label>
@@ -200,7 +146,7 @@ export default function ProfileForm() {
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Template (aperçu)</label>
+              <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Template</label>
               <div className="flex gap-3 mt-2">
                 <div onClick={() => setTemplateId('template1')} className={`w-20 h-28 rounded-lg p-2 flex items-end justify-center cursor-pointer ${templateId==='template1' ? 'ring-2 ring-[#C4A77D]' : 'ring-0'}`}>
                   <div className="w-full h-full bg-[#050505] rounded-md flex items-center justify-center text-xs text-white">Quiet</div>
@@ -212,29 +158,18 @@ export default function ProfileForm() {
             </div>
           </div>
 
-       {/* Name always visible */}
-       <div className="space-y-1">
-         <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Nom Complet *</label>
-         <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
-       </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Nom Complet *</label>
+            <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
+          </div>
 
-       {/* Job / Profession field (mapped to backend 'job') */}
-       <div className="space-y-1">
-         <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession / Métier</label>
-         <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" placeholder="Ex: Développeur" />
-       </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession / Métier</label>
+            <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" placeholder="Ex: Développeur" />
+          </div>
 
-          {/* If profile mode show full form, else show minimal CV fields */}
-          {cardType === 'profile' ? (
+          {cardType === 'profile' && (
             <>
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-[#D4AF37] ml-1 uppercase">Style des Icônes</label>
-                <select name="design_type" value={formData.design_type} onChange={handleInputChange} className="w-full bg-white/5 border border-white/10 h-12 px-4 rounded-md text-sm outline-none">
-                  <option value="classic" className="bg-[#1a1c1e]">Premium Gold (Jaune Jamaney)</option>
-                  <option value="modern" className="bg-[#1a1c1e]">Vibrant Color (Couleurs Réelles)</option>
-                </select>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Entreprise</label>
@@ -273,21 +208,12 @@ export default function ProfileForm() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-[#D4AF37]">Photo de Profil</label>
+                  <label className="text-sm font-semibold text-[#D4AF37]">Photo de Profil {profileId && "(Optionnel)"}</label>
                   <input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files[0])} className="text-[10px] text-gray-400" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#D4AF37]">Couverture</label>
                   <input type="file" accept="image/*" onChange={e => setCoverFile(e.target.files[0])} className="text-[10px] text-gray-400" />
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-6 pt-4 border-t border-white/5">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-[#D4AF37]">Photo (CV)</label>
-                  <input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files[0])} className="text-[10px] text-gray-400" />
                 </div>
               </div>
             </>
