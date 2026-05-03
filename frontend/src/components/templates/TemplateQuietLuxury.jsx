@@ -101,13 +101,14 @@ const TemplateQuietLuxury = ({ profile }) => {
         <div className="w-10" />
       </div>
 
-      {/* photo */}
+      {/* photo - increased size and centered */}
       <div className={`relative z-10 flex flex-col items-center transition-all ${hasPortfolio ? 'mt-4 mb-6' : 'mt-8 mb-10'}`}>
         <div className="absolute inset-0 rounded-full blur-2xl bg-[#C4A77D]/15" />
         <img
           src={photo}
           alt={name}
-          className={`${hasPortfolio ? 'w-32 h-32' : 'w-36 h-36'} rounded-full object-cover border-[2px] border-[#C4A77D] relative z-10 shadow-2xl transition-all duration-500`}
+          className={`${hasPortfolio ? 'w-36 h-36' : 'w-40 h-40'} rounded-full object-cover object-center border-[2px] border-[#C4A77D] relative z-10 shadow-2xl transition-all duration-500`}
+          style={{ transform: 'translateZ(0)' }}
         />
       </div>
 
@@ -124,8 +125,7 @@ const TemplateQuietLuxury = ({ profile }) => {
       <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10 mb-10">
         <button
           onClick={downloadVCard}
-          className={`w-full rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[11px] font-black tracking-[0.15em] text-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg`}
-          style={{ background: 'linear-gradient(135deg, #e7cf9a 0%, #C4A77D 100%)' }}
+          className={`w-full rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[11px] font-black tracking-[0.15em] text-white flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg bg-[#5279A8]`}
         >
           <FaSave className="text-base" /> ENREGISTRER CONTACT
         </button>
