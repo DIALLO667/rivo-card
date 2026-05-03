@@ -95,9 +95,10 @@ function TemplateCleanLinks({ profile }) {
             className="w-full h-full rounded-full overflow-hidden border-[3px] border-white relative z-10 shadow-lg"
             style={{
               backgroundImage: `url(${photo})`,
-              backgroundSize: 'cover',       // cover mode to fill circle
-              backgroundPosition: 'center',  // center the face
-              backgroundRepeat: 'no-repeat'
+              backgroundSize: 'contain',      // changed to contain
+              backgroundPosition: 'center',   // center the image
+              backgroundRepeat: 'no-repeat',
+              backgroundColor: '#ffffff'      // fallback to avoid transparent gaps
             }}
             aria-label={name}
             role="img"
