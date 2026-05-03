@@ -91,18 +91,15 @@ function TemplateCleanLinks({ profile }) {
       <div className="flex flex-col items-center pt-16 mb-8 text-center w-full px-6">
         <div className="w-36 h-36 rounded-full mb-6 relative">
           <div className="absolute inset-0 rounded-full blur-xl bg-blue-400/40 animate-pulse"></div>
-          <div
-            className="w-full h-full rounded-full overflow-hidden border-[3px] border-white relative z-10 shadow-lg"
-            style={{
-              backgroundImage: `url(${photo})`,
-              backgroundSize: 'contain',      // changed to contain
-              backgroundPosition: 'center',   // center the image
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: '#ffffff'      // fallback to avoid transparent gaps
-            }}
-            aria-label={name}
-            role="img"
-          />
+          <div className="w-full h-full rounded-full overflow-hidden border-[3px] border-white relative z-10 shadow-lg flex items-center justify-center">
+            {/* use img with object-cover and object-top as requested */}
+            <img
+              src={photo}
+              alt={name}
+              className="w-full h-full object-cover object-top"
+              style={{ display: 'block' }}
+            />
+          </div>
         </div>
 
         <h1 className="text-2xl font-extrabold tracking-tight mb-1 text-[#2D3A54]">{name}</h1>
