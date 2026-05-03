@@ -1,4 +1,3 @@
-// ...existing code...
 import React from 'react';
 import { normalizeUrl, makeVCard } from '@/lib/urlUtils';
 import {
@@ -13,14 +12,13 @@ import {
   FaEllipsisV
 } from 'react-icons/fa';
 
-export default function TemplateCleanLinks({ profile }) {
+function TemplateCleanLinks({ profile }) {
   const data = profile || {};
   const name = data.name || 'Utilisateur';
   const job = data.job || ''; // optional
-  const photo = data.photo_url || 'https://via.placeholder.com/150';
+  const photo = data.photo_url || 'https://via.placeholder.com/300';
   const bio = data.bio || 'ALL MY LINKS 👋';
 
-  // canonical candidates mapped to form field names
   const candidates = [
     { key: 'instagram', label: 'Instagram', value: data.instagram, Icon: FaInstagram },
     { key: 'linkedin', label: 'LinkedIn', value: data.linkedin, Icon: FaLinkedinIn },
@@ -31,15 +29,15 @@ export default function TemplateCleanLinks({ profile }) {
     { key: 'website', label: 'Site', value: data.website, Icon: FaGlobe }
   ];
 
-  // If backend provides data.links array, prefer it (but normalized to our keys if possible)
   const rawLinks =
     Array.isArray(data.links) && data.links.length > 0
-      ? data.links.map(l => ({
+      ? data.links.map((l) => ({
           key: (l.key || l.platform || '').toLowerCase(),
           label: l.label || l.platform || l.key || 'Link',
-          value: l.url || l.href || l.value
+          value: l.url || l.href || l.value,
+          Icon: null
         }))
-      : candidates.map(c => ({ key: c.key, label: c.label, value: c.value }));
+      : candidates.map(c => ({ key: c.key, label: c.label, value: c.value, Icon: c.Icon }));
 
   const makeHref = (raw, key) => {
     if (!raw && raw !== 0) return null;
@@ -57,11 +55,11 @@ export default function TemplateCleanLinks({ profile }) {
       const href = makeHref(item.value, key);
       if (!href) return null;
       const candidate = candidates.find(c => c.key === key);
-      const Icon = candidate ? candidate.Icon : FaGlobe;
+      const Icon = candidate ? candidate.Icon : item.Icon || FaGlobe;
       return { key, label: item.label || candidate?.label || key, href, Icon };
     })
     .filter(Boolean)
-    .slice(0, 4); // show up to 4 links chosen via form
+    .slice(0, 4); // max 4 links shown
 
   const downloadVCard = () => {
     const vcard = makeVCard({
@@ -89,12 +87,17 @@ export default function TemplateCleanLinks({ profile }) {
         minHeight: '-webkit-fill-available'
       }}
     >
-      {/* header */}
+      {/* HEADER */}
       <div className="flex flex-col items-center pt-16 mb-8 text-center w-full px-6">
-        <div className="w-28 h-28 rounded-full mb-6 relative">
+        <div className="w-36 h-36 rounded-full mb-6 relative">
           <div className="absolute inset-0 rounded-full blur-xl bg-blue-400/40 animate-pulse"></div>
-          <div className="w-full h-full rounded-full overflow-hidden border-[3px] border-white relative z-10 shadow-lg">
-            <img src={photo} alt={name} className="w-full h-full object-cover" />
+          <div className="w-full h-full rounded-full overflow-hidden border-[3px] border-white relative z-10 shadow-lg flex items-center justify-center">
+            <img
+              src={photo}
+              alt={name}
+              className="w-full h-full object-cover object-center"
+              style={{ display: 'block' }}
+            />
           </div>
         </div>
 
@@ -111,7 +114,7 @@ export default function TemplateCleanLinks({ profile }) {
         </div>
       </div>
 
-      {/* links */}
+      {/* LINKS */}
       <div className="w-full max-w-[90%] sm:max-w-[400px] space-y-4 mb-16 px-2">
         {normalized.map((link, index) => {
           const isExternal = link.href.startsWith('http://') || link.href.startsWith('https://');
@@ -145,23 +148,24 @@ export default function TemplateCleanLinks({ profile }) {
         </div>
       </div>
 
-      {/* footer */}
+      {/* FOOTER */}
       <div className="mt-auto pb-8 opacity-20 text-[8px] font-bold tracking-[0.4em] flex gap-4 text-[#2D3A54]">
         <span>RIVO STUDIO</span>
         <span>•</span>
         <span>CLEAN EDITION</span>
       </div>
 
-      {/* floating save contact */}
+      {/* floating save contact - changed to blue to match other CTAs */}
       <button
         onClick={downloadVCard}
         title="Enregistrer contact"
         style={{ position: 'fixed', right: 18, bottom: 18 }}
-        className="bg-[#C4A77D] text-white p-3 rounded-full shadow-lg"
+        className="bg-[#5279A8] text-white p-3 rounded-full shadow-lg"
       >
         <FaSave />
       </button>
     </div>
   );
 }
-// ...existing code...
+
+export default TemplateCleanLinks;
