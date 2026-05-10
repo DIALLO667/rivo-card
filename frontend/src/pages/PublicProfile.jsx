@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send } from 'lucide-react';
 import TemplateQuietLuxury from '@/components/templates/TemplateQuietLuxury';
 import TemplateCleanLinks from '@/components/templates/TemplateCleanLinks';
-import Perso from '@/components/templates/perso';
 import TemplateCustomizable from '@/components/templates/TemplateCustomizable';
 import { normalizeUrl } from '@/lib/urlUtils';
 import CVView from '@/components/templates/CVView';
@@ -98,7 +97,8 @@ export default function PublicProfile() {
     if (profile.template_id === 'template2') {
       return <TemplateCleanLinks profile={profile} />;
     }
-    if (profile.template_id === 'template_customizable') {
+    // use customizable template for legacy 'perso' id or new customizable id
+    if (profile.template_id === 'template_customizable' || profile.template_id === 'perso') {
       return <TemplateCustomizable profile={profile} />;
     }
     return <TemplateQuietLuxury profile={profile} />;
