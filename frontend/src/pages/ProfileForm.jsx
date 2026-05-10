@@ -154,6 +154,9 @@ export default function ProfileForm() {
                 <div onClick={() => setTemplateId('template2')} className={`w-20 h-28 rounded-lg p-2 flex items-end justify-center cursor-pointer ${templateId==='template2' ? 'ring-2 ring-[#C4A77D]' : 'ring-0'}`}>
                   <div className="w-full h-full bg-[#C5A87F] rounded-md flex items-center justify-center text-xs text-black">Links</div>
                 </div>
+                <div onClick={() => setTemplateId('template_customizable')} className={`w-20 h-28 rounded-lg p-2 flex items-end justify-center cursor-pointer ${templateId==='template_customizable' ? 'ring-2 ring-[#C4A77D]' : 'ring-0'}`}>
+                  <div className="w-full h-full bg-gradient-to-br from-[#0a0a0b] to-[#7c3aed] rounded-md flex items-center justify-center text-xs text-white">Custom</div>
+                </div>
               </div>
             </div>
           </div>
