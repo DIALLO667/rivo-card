@@ -167,7 +167,7 @@ export default function ProfileForm() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession / Métier</label>
+            <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession </label>
             <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" placeholder="Ex: Développeur" />
           </div>
 
