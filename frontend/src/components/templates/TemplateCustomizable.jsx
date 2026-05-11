@@ -17,6 +17,8 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
     bg: profile?.bg_color || '#0a0a0b',
     button: profile?.button_color || '#f5c27a',
     icon: profile?.icon_color || '#f5c27a',
+    name: profile?.name_color || '',
+    job: profile?.job_color || '',
     font: profile?.font_choice || 'sans', // 'sans' | 'serif'
     iconStyle: profile?.icon_style || 'default', // 'default' | 'rounded'
   };
@@ -43,6 +45,8 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         bg_color: defaults.bg,
         button_color: defaults.button,
         icon_color: defaults.icon,
+        name_color: defaults.name,
+        job_color: defaults.job,
         font_choice: defaults.font,
         icon_style: defaults.iconStyle,
       });
@@ -65,6 +69,8 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         bg_color: prefs.bg,
         button_color: prefs.button,
         icon_color: prefs.icon,
+          name_color: prefs.name,
+          job_color: prefs.job,
         font_choice: prefs.font,
         icon_style: prefs.iconStyle,
       });
@@ -195,8 +201,8 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         <img src={photo} alt={name} className={`w-24 h-24 sm:w-36 sm:h-36 rounded-full object-cover border-[3px]`} style={{ borderColor: prefs.button }} />
       </div>
       <div className="text-center w-full max-w-sm px-6 sm:px-8 relative z-10 mb-4">
-        <h1 className="text-2xl sm:text-4xl font-bold mb-1 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
-        {job && <p className="text-[12px] tracking-[0.12em] uppercase font-semibold" style={{ color: prefs.button }}>{job}</p>}
+  <h1 className="text-2xl sm:text-4xl font-bold mb-1 tracking-tight" style={{ color: prefs.name || prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
+  {job && <p className="text-[12px] tracking-[0.12em] uppercase font-semibold" style={{ color: prefs.job || prefs.button }}>{job}</p>}
         {company && <p className="text-[11px] text-white/40 tracking-widest uppercase font-light">{company}</p>}
       </div>
 

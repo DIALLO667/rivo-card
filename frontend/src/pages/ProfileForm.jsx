@@ -27,6 +27,8 @@ export default function ProfileForm() {
   const [bgColor, setBgColor] = useState('');
   const [buttonColor, setButtonColor] = useState('');
   const [iconColor, setIconColor] = useState('');
+  const [nameColor, setNameColor] = useState('');
+  const [jobColor, setJobColor] = useState('');
   const [fontChoice, setFontChoice] = useState('sans');
   const [iconStyle, setIconStyle] = useState('default');
 
@@ -63,6 +65,8 @@ export default function ProfileForm() {
           if (res.data.bg_color) setBgColor(res.data.bg_color);
           if (res.data.button_color) setButtonColor(res.data.button_color);
           if (res.data.icon_color) setIconColor(res.data.icon_color);
+          if (res.data.name_color) setNameColor(res.data.name_color);
+          if (res.data.job_color) setJobColor(res.data.job_color);
           if (res.data.font_choice) setFontChoice(res.data.font_choice);
           if (res.data.icon_style) setIconStyle(res.data.icon_style);
         } catch (err) {
@@ -119,6 +123,8 @@ export default function ProfileForm() {
       if (bgColor) data.append('bg_color', bgColor);
       if (buttonColor) data.append('button_color', buttonColor);
       if (iconColor) data.append('icon_color', iconColor);
+      if (nameColor) data.append('name_color', nameColor);
+      if (jobColor) data.append('job_color', jobColor);
       if (fontChoice) data.append('font_choice', fontChoice);
       if (iconStyle) data.append('icon_style', iconStyle);
     }
@@ -185,7 +191,13 @@ export default function ProfileForm() {
                 <p className="text-xs text-white/80 font-bold mb-2">Personnalisation</p>
                 <div className="grid grid-cols-1 gap-3">
                   {/** Color control helper */}
-                  {[["Fond", bgColor, setBgColor, 'bg_color'], ["Bouton", buttonColor, setButtonColor, 'button_color'], ["Icônes", iconColor, setIconColor, 'icon_color']].map(([label, value, setter, keyName]) => (
+                  {[
+                    ["Fond", bgColor, setBgColor, 'bg_color'],
+                    ["Bouton", buttonColor, setButtonColor, 'button_color'],
+                    ["Icônes", iconColor, setIconColor, 'icon_color'],
+                    ["Nom", nameColor, setNameColor, 'name_color'],
+                    ["Profession", jobColor, setJobColor, 'job_color']
+                  ].map(([label, value, setter, keyName]) => (
                     <div key={keyName} className="flex items-center gap-2">
                       <label className="text-[11px] w-20">{label}</label>
                       <input type="color" value={value} onChange={e => setter(e.target.value)} className="w-12 h-8 p-0 border-0" />

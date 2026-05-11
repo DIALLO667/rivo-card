@@ -205,6 +205,8 @@ async def create_profile(
     bg_color: Optional[str] = Form(None),
     button_color: Optional[str] = Form(None),
     icon_color: Optional[str] = Form(None),
+    name_color: Optional[str] = Form(None),
+    job_color: Optional[str] = Form(None),
     font_choice: Optional[str] = Form(None),
     icon_style: Optional[str] = Form(None),
     photo: UploadFile = File(...), cover: Optional[UploadFile] = File(None)
@@ -240,6 +242,8 @@ async def create_profile(
             "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,"design_type": design_type, # AJOUTÉ
             "card_type": card_type, "template_id": template_id,
             "bg_color": bg_color,
+            "name_color": name_color,
+            "job_color": job_color,
             "button_color": button_color,
             "icon_color": icon_color,
             "font_choice": font_choice,
@@ -282,6 +286,8 @@ async def update_profile(
     card_type: str = Form("profile"),
     template_id: str = Form("template1"),
     bg_color: Optional[str] = Form(None),
+    name_color: Optional[str] = Form(None),
+    job_color: Optional[str] = Form(None),
     button_color: Optional[str] = Form(None),
     icon_color: Optional[str] = Form(None),
     font_choice: Optional[str] = Form(None),
@@ -309,6 +315,8 @@ async def update_profile(
         "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,
         "design_type": design_type, # AJOUTÉ
         "bg_color": bg_color,
+        "name_color": name_color,
+        "job_color": job_color,
         "button_color": button_color,
         "icon_color": icon_color,
         "font_choice": font_choice,
