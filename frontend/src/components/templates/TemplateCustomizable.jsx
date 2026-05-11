@@ -187,40 +187,15 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
     <div className="w-full flex flex-col items-center relative overflow-x-hidden min-h-screen" style={{ background: prefs.bg }}>
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/carbon-fibre.png')` }} />
 
-      <div className="w-full px-6 flex justify-between items-center z-50 pt-16 pb-4">
-        <div className="w-8" />
-        <div className="flex items-center gap-3">
-          {/* SVG logo: gold gradient circle with stylized R */}
-          <div className="w-12 h-12">
-            <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" className="w-12 h-12">
-              <defs>
-                <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#f9d68a" />
-                  <stop offset="100%" stopColor="#c79b48" />
-                </linearGradient>
-                <filter id="s" x="-20%" y="-20%" width="140%" height="140%">
-                  <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.25" />
-                </filter>
-              </defs>
-              <circle cx="32" cy="32" r="30" fill="url(#g1)" filter="url(#s)" />
-              <text x="32" y="39" fontFamily="Georgia, 'Times New Roman', serif" fontWeight="700" fontSize="30" textAnchor="middle" fill="#fff" fillOpacity="0.95">R</text>
-            </svg>
-          </div>
-          <div>
-            <div className="text-lg font-medium tracking-tight text-white">Rivo <span className='font-light text-white/60'>Studio</span></div>
-            <div className="text-[10px] text-white/40">Personnalisez votre carte</div>
-          </div>
-        </div>
-        <div className="w-10"></div>
-      </div>
+      {/* header removed to keep template focused and mobile-friendly */}
+      <div className="h-4" />
 
       <div className={`relative z-10 flex flex-col items-center` }>
         <div className="absolute inset-0 rounded-full blur-2xl" style={{ background: `${prefs.button}20` }} />
-        <img src={photo} alt={name} className={`w-32 h-32 rounded-full object-cover border-[2px]`} style={{ borderColor: prefs.button }} />
+        <img src={photo} alt={name} className={`w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover border-[2px]`} style={{ borderColor: prefs.button }} />
       </div>
-
-      <div className="text-center w-full max-w-sm px-8 relative z-10 mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
+      <div className="text-center w-full max-w-sm px-6 sm:px-8 relative z-10 mb-6">
+        <h1 className="text-2xl sm:text-4xl font-bold mb-1 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
         {job && <p className="text-[11px] tracking-[0.2em] uppercase font-bold" style={{ color: prefs.button }}>{job}</p>}
         {company && <p className="text-[10px] text-white/40 tracking-widest uppercase font-light">{company}</p>}
       </div>
@@ -263,70 +238,15 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         )}
       </div>
 
-      <div className="w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 mb-16">
+      <div className="w-full max-w-sm flex flex-wrap justify-center gap-4 px-6 relative z-10 mb-12">
         {socialList.slice(0,4).map((s, index) => (
           <a key={index} href={normalizeUrl(s.url)} target="_blank" rel="noreferrer" className={`w-11 h-11 rounded-full border border-white/10 flex items-center justify-center transition-all`} style={{ background: 'rgba(255,255,255,0.03)' }}>
             <div style={{ color: prefs.icon }}>{s.icon}</div>
           </a>
         ))}
       </div>
-
-      <div className="w-full text-center pb-8 mt-auto relative z-10">
-        <div className="text-[7px] text-white/20 tracking-[0.4em] uppercase">RIVO CARD • CUSTOM EDITION</div>
-      </div>
-      {/* Personalization floating panel */}
-      <div className="fixed right-6 bottom-8 z-50">
-        <div className="bg-white/6 backdrop-blur rounded-2xl p-4 w-64 shadow-2xl border border-white/6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <FaPalette style={{ color: prefs.button }} />
-              <div className="text-sm font-semibold text-white">Personnalisation</div>
-            </div>
-            <div className="text-xs text-white/40">Live</div>
-          </div>
-
-          <div className="mb-2">
-            <div className="text-[11px] text-white/60 mb-1">Couleur arrière-plan</div>
-            <div className="flex items-center gap-3">
-              <input aria-label="bg-color" type="color" value={prefs.bg} onChange={(e) => updatePrefs({ bg: e.target.value })} className="w-9 h-8 p-0 border rounded" />
-              <button onClick={() => copyToClipboard(prefs.bg)} className="text-xs px-2 py-1 bg-white/6 rounded text-white">{prefs.bg}</button>
-            </div>
-            <div className="flex gap-2 mt-2">
-              {colorPresets.map((c) => (
-                <button key={c} onClick={() => updatePrefs({ bg: c })} className="w-6 h-6 rounded-full ring-1 ring-white/10" style={{ background: c, outline: c === prefs.bg ? '2px solid rgba(255,255,255,0.15)' : 'none' }} />
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-2">
-            <div className="text-[11px] text-white/60 mb-1">Couleur bouton</div>
-            <div className="flex items-center gap-3">
-              <input aria-label="button-color" type="color" value={prefs.button} onChange={(e) => updatePrefs({ button: e.target.value })} className="w-9 h-8 p-0 border rounded" />
-              <button onClick={() => copyToClipboard(prefs.button)} className="text-xs px-2 py-1 bg-white/6 rounded text-white">{prefs.button}</button>
-            </div>
-          </div>
-
-          <div className="mb-2">
-            <div className="text-[11px] text-white/60 mb-1">Couleur icônes</div>
-            <div className="flex items-center gap-3">
-              <input aria-label="icon-color" type="color" value={prefs.icon} onChange={(e) => updatePrefs({ icon: e.target.value })} className="w-9 h-8 p-0 border rounded" />
-              <button onClick={() => copyToClipboard(prefs.icon)} className="text-xs px-2 py-1 bg-white/6 rounded text-white">{prefs.icon}</button>
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <div className="text-[11px] text-white/60 mb-1">Police</div>
-            <div className="flex gap-2">
-              <button onClick={() => updatePrefs({ font: 'sans' })} className={`flex-1 py-1 text-xs rounded ${prefs.font === 'sans' ? 'bg-white/10' : 'bg-white/3'}`}>Sans</button>
-              <button onClick={() => updatePrefs({ font: 'serif' })} className={`flex-1 py-1 text-xs rounded ${prefs.font === 'serif' ? 'bg-white/10' : 'bg-white/3'}`}>Serif</button>
-            </div>
-          </div>
-
-          <div className="flex gap-2">
-            <button onClick={save} className="flex-1 py-2 rounded bg-white/10 text-sm font-semibold">Enregistrer</button>
-            <button onClick={resetPrefs} className="flex-1 py-2 rounded bg-white/6 text-sm">Réinitialiser</button>
-          </div>
-        </div>
+      <div className="w-full text-center pb-6 mt-auto relative z-10">
+        <div className="text-[8px] text-white/20 tracking-[0.25em] uppercase">Custom edition</div>
       </div>
     </div>
   );
