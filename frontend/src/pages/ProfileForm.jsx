@@ -183,28 +183,28 @@ export default function ProfileForm() {
             {templateId === 'template_customizable' && (
               <div className="mt-4 p-4 bg-white/5 rounded-md">
                 <p className="text-xs text-white/80 font-bold mb-2">Personnalisation</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="text-[10px]">Fond
-                    <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-8 mt-1" />
-                  </label>
-                  <label className="text-[10px]">Bouton
-                    <input type="color" value={buttonColor} onChange={e => setButtonColor(e.target.value)} className="w-full h-8 mt-1" />
-                  </label>
-                  <label className="text-[10px]">Icônes
-                    <input type="color" value={iconColor} onChange={e => setIconColor(e.target.value)} className="w-full h-8 mt-1" />
-                  </label>
-                  <label className="text-[10px]">Police
-                    <select value={fontChoice} onChange={e => setFontChoice(e.target.value)} className="w-full h-8 mt-1 bg-white/5">
+                <div className="grid grid-cols-1 gap-3">
+                  {/** Color control helper */}
+                  {[["Fond", bgColor, setBgColor, 'bg_color'], ["Bouton", buttonColor, setButtonColor, 'button_color'], ["Icônes", iconColor, setIconColor, 'icon_color']].map(([label, value, setter, keyName]) => (
+                    <div key={keyName} className="flex items-center gap-2">
+                      <label className="text-[11px] w-20">{label}</label>
+                      <input type="color" value={value} onChange={e => setter(e.target.value)} className="w-12 h-8 p-0 border-0" />
+                      <input type="text" value={value} onChange={e => setter(e.target.value)} className="bg-white/5 text-sm h-8 px-2 flex-1" />
+                      <button type="button" onClick={() => { navigator.clipboard && navigator.clipboard.writeText(value); }} className="ml-2 bg-white/10 px-3 py-1 rounded">Copier</button>
+                    </div>
+                  ))}
+                  <div className="flex items-center gap-2">
+                    <label className="text-[11px] w-20">Police</label>
+                    <select value={fontChoice} onChange={e => setFontChoice(e.target.value)} className="bg-white/5 h-8 px-2">
                       <option value="sans">Sans</option>
                       <option value="serif">Serif</option>
                     </select>
-                  </label>
-                  <label className="text-[10px] col-span-2">Style icône
-                    <select value={iconStyle} onChange={e => setIconStyle(e.target.value)} className="w-full h-8 mt-1 bg-white/5">
+                    <label className="text-[11px] ml-4">Style icônes</label>
+                    <select value={iconStyle} onChange={e => setIconStyle(e.target.value)} className="bg-white/5 h-8 px-2">
                       <option value="default">Carré</option>
                       <option value="rounded">Arrondi</option>
                     </select>
-                  </label>
+                  </div>
                 </div>
               </div>
             )}

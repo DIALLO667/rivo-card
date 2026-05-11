@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Phone, Globe, Mail, Instagram, Facebook, Linkedin, Youtube, Twitter, Send } from 'lucide-react';
-import { normalizeUrl } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
+import { FaSave, FaMapMarkerAlt, FaEnvelope, FaPhone, FaGlobe } from 'react-icons/fa';
 
 // Minimal, self-contained customizable template inspired by TemplateQuietLuxury.
 // - Accepts `profile` prop.
@@ -121,134 +121,102 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   const fontClass = prefs.font === 'serif' ? 'font-serif' : 'font-sans';
   const buttonTextColor = isHexLight(prefs.button) ? '#0b0b0b' : '#ffffff';
 
+  const name = profile?.name || 'Utilisateur';
+  const job = profile?.job || '';
+  const company = profile?.company || '';
+  const photo = profile?.photo_url || profile?.avatar || 'https://via.placeholder.com/150';
+
+  const telHref = profile?.phone ? `tel:${String(profile.phone).replace(/\s+/g, '')}` : null;
+  const mailHref = profile?.email ? `mailto:${profile.email}` : null;
+  const websiteHref = profile?.website && profile.website !== 'https://' ? normalizeUrl(profile.website) : null;
+
+  const downloadVCard = () => {
+    const vcard = makeVCard({ name, phone: profile?.phone || '', email: profile?.email || '' });
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className={`w-full max-w-[420px] rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] ${fontClass}`} style={{ background: prefs.bg }}>
-      <div className="p-6">
-        <div className="flex items-center gap-4">
-          <div
-            className={`w-20 h-20 bg-white/10 flex items-center justify-center overflow-hidden ${prefs.iconStyle === 'rounded' ? 'rounded-full' : 'rounded-md'}`}
-            style={{ border: `2px solid ${prefs.icon}` }}
-          >
-            {/* avatar */}
-            {profile?.avatar || profile?.photo ? (
-              <img src={profile.avatar || profile.photo} alt={profile.name} className="w-full h-full object-cover" />
-            ) : (
-              <div className="text-white/80 uppercase font-bold">{(profile?.name || 'R').charAt(0)}</div>
-            )}
+    <div className="w-full flex flex-col items-center relative overflow-x-hidden min-h-screen" style={{ background: prefs.bg }}>
+      <div className="fixed inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/carbon-fibre.png')` }} />
+
+      <div className="w-full px-6 flex justify-between items-center z-50 pt-16 pb-4">
+        <div className="w-8" />
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 border" style={{ borderColor: prefs.button, color: prefs.button }}>
+            <div className="text-[10px] font-bold" style={{ color: prefs.button }}>R</div>
           </div>
-          <div className="flex-1">
-            <div className="text-white font-black text-xl leading-tight">{profile?.name}</div>
-            <div className="text-white/70 text-sm mt-1">{profile?.title}</div>
-          </div>
+          <div className="text-lg font-medium tracking-tight text-white">Rivo <span className='font-light text-white/60'>Card</span></div>
         </div>
+        <div className="w-10"></div>
+      </div>
 
-        <p className="text-white/70 text-sm mt-4">
-          {profile?.bio}
-        </p>
+      <div className={`relative z-10 flex flex-col items-center` }>
+        <div className="absolute inset-0 rounded-full blur-2xl" style={{ background: `${prefs.button}20` }} />
+        <img src={photo} alt={name} className={`w-32 h-32 rounded-full object-cover border-[2px]`} style={{ borderColor: prefs.button }} />
+      </div>
 
-        <div className="mt-6 flex flex-col gap-3">
-          {socialList.map(s => (
-            <a
-              key={s.id}
-              href={normalizeUrl(s.url)}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-3 px-4 py-3"
-              style={{
-                background: 'transparent',
-                borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 8,
-                color: prefs.icon,
-                border: `1px solid ${prefs.icon}30`,
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <div style={{ color: prefs.icon }}>{s.icon}</div>
-              <div className="text-white/90 text-sm">{s.label || (s.id.charAt(0).toUpperCase() + s.id.slice(1))}</div>
-            </a>
-          ))}
-        </div>
+      <div className="text-center w-full max-w-sm px-8 relative z-10 mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
+        {job && <p className="text-[11px] tracking-[0.2em] uppercase font-bold" style={{ color: prefs.button }}>{job}</p>}
+        {company && <p className="text-[10px] text-white/40 tracking-widest uppercase font-light">{company}</p>}
+      </div>
 
-        {/* Controls */}
-        <div className="mt-6 p-4 bg-white/5 rounded-lg">
-          <div className="grid grid-cols-2 gap-3">
-            {/* Background color */}
-            <label className="flex flex-col text-xs text-white/80">
-              Fond
-              <div className="mt-2 flex items-center gap-2">
-                <input disabled={!editable} type="color" value={prefs.bg} onChange={e => updatePrefs({ bg: e.target.value })} className="h-9 w-12 p-0 border-0" />
-                <div className="flex gap-1">
-                  {colorPresets.map(c => (
-                    <button key={c} disabled={!editable} onClick={() => updatePrefs({ bg: c })} style={{ background: c }} className="w-6 h-6 rounded-sm border border-white/10" />
-                  ))}
-                </div>
-                <input disabled={!editable} type="text" value={prefs.bg} onChange={e => updatePrefs({ bg: e.target.value })} className="ml-2 h-9 bg-white/5 text-white px-2" />
-              </div>
-            </label>
+      <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10 mb-10">
+        <button onClick={downloadVCard} className="w-full rounded-xl py-4 text-[11px] font-black tracking-[0.15em] text-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg" style={{ background: prefs.button, color: buttonTextColor, borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 8 }}>
+          <FaSave /> ENREGISTRER CONTACT
+        </button>
 
-            {/* Button color */}
-            <label className="flex flex-col text-xs text-white/80">
-              Bouton
-              <div className="mt-2 flex items-center gap-2">
-                <input disabled={!editable} type="color" value={prefs.button} onChange={e => updatePrefs({ button: e.target.value })} className="h-9 w-12 p-0 border-0" />
-                <div className="flex gap-1">
-                  {colorPresets.map(c => (
-                    <button key={c} disabled={!editable} onClick={() => updatePrefs({ button: c })} style={{ background: c }} className="w-6 h-6 rounded-sm border border-white/10" />
-                  ))}
-                </div>
-                <input disabled={!editable} type="text" value={prefs.button} onChange={e => updatePrefs({ button: e.target.value })} className="ml-2 h-9 bg-white/5 text-white px-2" />
-              </div>
-            </label>
-
-            {/* Icon color */}
-            <label className="flex flex-col text-xs text-white/80">
-              Icônes
-              <div className="mt-2 flex items-center gap-2">
-                <input disabled={!editable} type="color" value={prefs.icon} onChange={e => updatePrefs({ icon: e.target.value })} className="h-9 w-12 p-0 border-0" />
-                <div className="flex gap-1">
-                  {colorPresets.map(c => (
-                    <button key={c} disabled={!editable} onClick={() => updatePrefs({ icon: c })} style={{ background: c }} className="w-6 h-6 rounded-sm border border-white/10" />
-                  ))}
-                </div>
-                <input disabled={!editable} type="text" value={prefs.icon} onChange={e => updatePrefs({ icon: e.target.value })} className="ml-2 h-9 bg-white/5 text-white px-2" />
-              </div>
-            </label>
-
-            {/* Font */}
-            <label className="flex flex-col text-xs text-white/80">
-              Police
-              <select disabled={!editable} value={prefs.font} onChange={e => updatePrefs({ font: e.target.value })} className="mt-2 h-9 bg-white/5 text-white">
-                <option value="sans">Sans (moderne)</option>
-                <option value="serif">Serif (élégant)</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col text-xs text-white/80 col-span-2">
-              Style icônes / boutons
-              <select disabled={!editable} value={prefs.iconStyle} onChange={e => updatePrefs({ iconStyle: e.target.value })} className="mt-2 h-9 bg-white/5 text-white">
-                <option value="default">Carré (par défaut)</option>
-                <option value="rounded">Arrondi / Cercle</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              onClick={save}
-              disabled={!editable}
-              className="px-4 py-2 font-bold text-sm"
-              style={{
-                background: prefs.button,
-                color: buttonTextColor,
-                borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 8,
-              }}
-            >
-              Enregistrer
+        {profile?.location && (
+          <a href={normalizeUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+              <FaMapMarkerAlt style={{ color: prefs.button }} /> Adresse
             </button>
-            {saved && <div className="text-sm text-white/80">Préférences enregistrées</div>}
-          </div>
-        </div>
+          </a>
+        )}
 
+        {profile?.email && mailHref && (
+          <a href={mailHref} className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+              <FaEnvelope style={{ color: prefs.button }} /> RDV par email
+            </button>
+          </a>
+        )}
+
+        {profile?.phone && telHref && (
+          <a href={telHref} className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+              <FaPhone style={{ color: prefs.button }} /> APPELER
+            </button>
+          </a>
+        )}
+
+        {websiteHref && (
+          <a href={websiteHref} target="_blank" rel="noreferrer" className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase font-bold">
+              <FaGlobe style={{ color: prefs.button }} /> Portfolio / Site Web
+            </button>
+          </a>
+        )}
+      </div>
+
+      <div className="w-full max-w-sm flex flex-wrap justify-center gap-6 px-6 relative z-10 mb-16">
+        {socialList.slice(0,4).map((s, index) => (
+          <a key={index} href={normalizeUrl(s.url)} target="_blank" rel="noreferrer" className={`w-11 h-11 rounded-full border border-white/10 flex items-center justify-center transition-all`} style={{ background: 'rgba(255,255,255,0.03)' }}>
+            <div style={{ color: prefs.icon }}>{s.icon}</div>
+          </a>
+        ))}
+      </div>
+
+      <div className="w-full text-center pb-8 mt-auto relative z-10">
+        <div className="text-[7px] text-white/20 tracking-[0.4em] uppercase">RIVO CARD • CUSTOM EDITION</div>
       </div>
     </div>
   );
