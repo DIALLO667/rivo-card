@@ -109,13 +109,13 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   const colorPresets = ['#0a0a0b', '#ffffff', '#f5c27a', '#ff4757', '#4ade80', '#60a5fa', '#7c3aed', '#f97316'];
 
   const socialList = [
-    { id: 'instagram', url: profile.instagram, icon: <FaInstagram size={20} />, label: 'Instagram' },
-    { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin size={20} />, label: 'LinkedIn' },
-    { id: 'facebook', url: profile.facebook, icon: <FaFacebook size={20} />, label: 'Facebook' },
-    { id: 'youtube', url: profile.youtube, icon: <FaYoutube size={20} />, label: 'YouTube' },
-    { id: 'twitter', url: profile.twitter, icon: <FaTwitter size={20} />, label: 'Twitter' },
-    { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane size={20} />, label: 'Telegram' },
-    { id: 'website', url: profile.website, icon: <FaGlobe size={20} />, label: 'Site' },
+    { id: 'instagram', url: profile.instagram, icon: <FaInstagram size={24} />, label: 'Instagram' },
+    { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin size={24} />, label: 'LinkedIn' },
+    { id: 'facebook', url: profile.facebook, icon: <FaFacebook size={24} />, label: 'Facebook' },
+    { id: 'youtube', url: profile.youtube, icon: <FaYoutube size={24} />, label: 'YouTube' },
+    { id: 'twitter', url: profile.twitter, icon: <FaTwitter size={24} />, label: 'Twitter' },
+    { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane size={24} />, label: 'Telegram' },
+    { id: 'website', url: profile.website, icon: <FaGlobe size={24} />, label: 'Site' },
     // ... add other networks as needed
   ].filter(s => s.url);
 
@@ -192,22 +192,22 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
 
       <div className={`relative z-10 flex flex-col items-center` }>
         <div className="absolute inset-0 rounded-full blur-2xl" style={{ background: `${prefs.button}20` }} />
-        <img src={photo} alt={name} className={`w-20 h-20 sm:w-32 sm:h-32 rounded-full object-cover border-[2px]`} style={{ borderColor: prefs.button }} />
+          <img src={photo} alt={name} className={`w-28 h-28 sm:w-40 sm:h-40 rounded-full object-cover border-[3px]`} style={{ borderColor: prefs.button }} />
       </div>
       <div className="text-center w-full max-w-sm px-6 sm:px-8 relative z-10 mb-6">
-        <h1 className="text-2xl sm:text-4xl font-bold mb-1 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
+        <h1 className="text-3xl sm:text-5xl font-bold mb-1 tracking-tight" style={{ color: prefs.button, fontFamily: prefs.font === 'serif' ? "'Playfair Display', serif" : 'inherit' }}>{name}</h1>
         {job && <p className="text-[11px] tracking-[0.2em] uppercase font-bold" style={{ color: prefs.button }}>{job}</p>}
         {company && <p className="text-[10px] text-white/40 tracking-widest uppercase font-light">{company}</p>}
       </div>
 
       <div className="w-full max-w-[85%] sm:max-w-sm space-y-3.5 relative z-10 mb-10">
-        <button onClick={downloadVCard} className="w-full rounded-xl py-4 text-[11px] font-black tracking-[0.15em] text-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg" style={{ background: prefs.button, color: buttonTextColor, borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 8 }}>
+        <button onClick={downloadVCard} className="w-full rounded-xl py-5 text-sm font-black tracking-[0.12em] text-black flex items-center justify-center gap-3 active:scale-95 transition-all shadow-lg" style={{ background: prefs.button, color: buttonTextColor, borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 10 }}>
           <FaSave /> ENREGISTRER CONTACT
         </button>
 
         {profile?.location && (
           <a href={normalizeUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
               <FaMapMarkerAlt style={{ color: prefs.button }} /> Adresse
             </button>
           </a>
@@ -215,7 +215,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
 
         {profile?.email && mailHref && (
           <a href={mailHref} className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
               <FaEnvelope style={{ color: prefs.button }} /> RDV par email
             </button>
           </a>
@@ -223,7 +223,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
 
         {profile?.phone && telHref && (
           <a href={telHref} className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
               <FaPhone style={{ color: prefs.button }} /> APPELER
             </button>
           </a>
@@ -240,7 +240,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
 
       <div className="w-full max-w-sm flex flex-wrap justify-center gap-4 px-6 relative z-10 mb-12">
         {socialList.slice(0,4).map((s, index) => (
-          <a key={index} href={normalizeUrl(s.url)} target="_blank" rel="noreferrer" className={`w-11 h-11 rounded-full border border-white/10 flex items-center justify-center transition-all`} style={{ background: 'rgba(255,255,255,0.03)' }}>
+          <a key={index} href={normalizeUrl(s.url)} target="_blank" rel="noreferrer" className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/10 flex items-center justify-center transition-all`} style={{ background: 'rgba(255,255,255,0.03)' }}>
             <div style={{ color: prefs.icon }}>{s.icon}</div>
           </a>
         ))}
