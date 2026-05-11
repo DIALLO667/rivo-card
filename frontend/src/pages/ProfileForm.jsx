@@ -59,6 +59,12 @@ export default function ProfileForm() {
           });
           if (res.data.card_type) setCardType(res.data.card_type);
           if (res.data.template_id) setTemplateId(res.data.template_id);
+          // populate customizable prefs if present
+          if (res.data.bg_color) setBgColor(res.data.bg_color);
+          if (res.data.button_color) setButtonColor(res.data.button_color);
+          if (res.data.icon_color) setIconColor(res.data.icon_color);
+          if (res.data.font_choice) setFontChoice(res.data.font_choice);
+          if (res.data.icon_style) setIconStyle(res.data.icon_style);
         } catch (err) {
           toast.error("Impossible de charger les données");
         }
