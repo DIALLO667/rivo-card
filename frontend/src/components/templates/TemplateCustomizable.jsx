@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
-import { FaSave, FaMapMarkerAlt, FaEnvelope, FaPhone, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette } from 'react-icons/fa';
+import { FaSave, FaMapMarkerAlt, FaEnvelope, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette, FaPhoneAlt } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
+import { SiTiktok } from 'react-icons/si';
 
 // Minimal, self-contained customizable template inspired by TemplateQuietLuxury.
 // - Accepts `profile` prop.
@@ -119,6 +120,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
     { id: 'instagram', url: profile.instagram, icon: <FaInstagram className="text-lg" />, label: 'Instagram' },
     { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin className="text-lg" />, label: 'LinkedIn' },
     { id: 'facebook', url: profile.facebook, icon: <FaFacebook className="text-lg" />, label: 'Facebook' },
+    { id: 'tiktok', url: profile.tiktok, icon: <SiTiktok className="text-lg" />, label: 'TikTok' },
     { id: 'youtube', url: profile.youtube, icon: <FaYoutube className="text-lg" />, label: 'YouTube' },
     { id: 'twitter', url: profile.twitter, icon: <FaTwitter className="text-lg" />, label: 'Twitter' },
     { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane className="text-lg" />, label: 'Telegram' },
@@ -230,7 +232,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         {profile?.phone && telHref && (
           <a href={telHref} className="block w-full">
             <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
-              <FaPhone style={{ color: prefs.button, transform: 'none' }} className="text-lg" /> APPELER
+              <FaPhoneAlt style={{ color: prefs.button }} className="text-lg" /> APPELER
             </button>
           </a>
         )}
