@@ -42,7 +42,7 @@ const TemplateQuietLuxury = ({ profile }) => {
     { Icon: FaYoutube, href: data.youtube },
     { Icon: FaTwitter, href: data.twitter },
     { Icon: FaWhatsapp, href: whatsappHref },
-    { Icon: FaGlobe, href: websiteHref },
+    // Note: website (FaGlobe) is shown as a primary CTA above, exclude from social icons to avoid duplication
     { Icon: FaPhone, href: telHref },
     { Icon: FaEnvelope, href: mailHref }
   ];
@@ -142,7 +142,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         {data.phone && telHref && (
           <a href={telHref} className="block w-full">
             <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
-              <FaPhone className='text-[#C4A77D] text-base' /> APPELER
+              <FaPhone className='text-[#C4A77D] text-lg' style={{ transform: 'none' }} /> APPELER
             </button>
           </a>
         )}
@@ -167,7 +167,7 @@ const TemplateQuietLuxury = ({ profile }) => {
               target={isExternal ? "_blank" : undefined}
               rel={isExternal ? "noopener noreferrer" : undefined}
               className={`${hasPortfolio ? 'w-11 h-11' : 'w-[52px] h-[52px]'} rounded-full border border-white/10 flex items-center justify-center active:scale-90 transition-all bg-white/[0.05]`}>
-              <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-2xl'} text-[#C4A77D]`} />
+              <s.Icon className={`${hasPortfolio ? 'text-lg' : 'text-xl'} text-[#C4A77D]`} />
             </a>
           );
         })}

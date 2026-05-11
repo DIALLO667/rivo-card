@@ -26,7 +26,7 @@ function TemplateCleanLinks({ profile }) {
     { key: 'snapchat', label: 'Snapchat', value: data.snapchat, Icon: FaSnapchatGhost },
     { key: 'phone', label: 'Téléphone', value: data.phone, Icon: FaPhone },
     { key: 'email', label: 'Email', value: data.email, Icon: FaEnvelope },
-    { key: 'website', label: 'Site', value: data.website, Icon: FaGlobe }
+    // website removed from quick links to avoid duplicate portfolio button elsewhere
   ];
 
   const rawLinks =
@@ -129,7 +129,7 @@ function TemplateCleanLinks({ profile }) {
             >
               <div className="w-full bg-[#5279A8] text-white h-[64px] rounded-[32px] flex items-center px-7 relative shadow-md border border-white/20">
                 <div className="text-white absolute left-7">
-                  <link.Icon size={20} />
+                  <link.Icon size={18} />
                 </div>
                 <span className="flex-1 text-center text-[13px] font-semibold tracking-wide">
                   {link.label}

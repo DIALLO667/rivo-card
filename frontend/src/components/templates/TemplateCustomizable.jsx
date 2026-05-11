@@ -108,15 +108,15 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   // small set of color presets for quick selection
   const colorPresets = ['#0a0a0b', '#ffffff', '#f5c27a', '#ff4757', '#4ade80', '#60a5fa', '#7c3aed', '#f97316'];
 
+  // Build social icons (exclude website to avoid duplication with the Portfolio button)
   const socialList = [
-    { id: 'instagram', url: profile.instagram, icon: <FaInstagram size={20} />, label: 'Instagram' },
-    { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin size={20} />, label: 'LinkedIn' },
-    { id: 'facebook', url: profile.facebook, icon: <FaFacebook size={20} />, label: 'Facebook' },
-    { id: 'youtube', url: profile.youtube, icon: <FaYoutube size={20} />, label: 'YouTube' },
-    { id: 'twitter', url: profile.twitter, icon: <FaTwitter size={20} />, label: 'Twitter' },
-    { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane size={20} />, label: 'Telegram' },
-    { id: 'website', url: profile.website, icon: <FaGlobe size={20} />, label: 'Site' },
-    // ... add other networks as needed
+    { id: 'instagram', url: profile.instagram, icon: <FaInstagram className="text-lg" />, label: 'Instagram' },
+    { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin className="text-lg" />, label: 'LinkedIn' },
+    { id: 'facebook', url: profile.facebook, icon: <FaFacebook className="text-lg" />, label: 'Facebook' },
+    { id: 'youtube', url: profile.youtube, icon: <FaYoutube className="text-lg" />, label: 'YouTube' },
+    { id: 'twitter', url: profile.twitter, icon: <FaTwitter className="text-lg" />, label: 'Twitter' },
+    { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane className="text-lg" />, label: 'Telegram' },
+    // website intentionally excluded here
   ].filter(s => s.url);
 
   const fontClass = prefs.font === 'serif' ? 'font-serif' : 'font-sans';
@@ -224,7 +224,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         {profile?.phone && telHref && (
           <a href={telHref} className="block w-full">
             <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
-              <FaPhone style={{ color: prefs.button }} /> APPELER
+              <FaPhone style={{ color: prefs.button, transform: 'none' }} className="text-lg" /> APPELER
             </button>
           </a>
         )}
@@ -232,7 +232,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         {websiteHref && (
           <a href={websiteHref} target="_blank" rel="noreferrer" className="block w-full">
             <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase font-bold">
-              <FaGlobe style={{ color: prefs.button }} /> Portfolio / Site Web
+              <FaGlobe className="text-lg" style={{ color: prefs.button }} /> Portfolio / Site Web
             </button>
           </a>
         )}
