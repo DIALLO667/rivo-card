@@ -184,7 +184,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   };
 
   return (
-    <div className="w-full flex flex-col items-center relative overflow-x-hidden min-h-screen" style={{ background: prefs.bg }}>
+  <div className="w-full flex flex-col items-center justify-center relative overflow-x-hidden min-h-screen" style={{ background: prefs.bg }}>
       <div className="fixed inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url('https://www.transparenttextures.com/patterns/carbon-fibre.png')` }} />
 
       {/* header removed to keep template focused and mobile-friendly */}
@@ -245,7 +245,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
           </a>
         ))}
       </div>
-      <div className="w-full text-center pb-6 mt-auto relative z-10">
+      <div className="w-full text-center py-6 relative z-10">
         <div className="text-[8px] text-white/20 tracking-[0.25em] uppercase">Custom edition</div>
       </div>
     </div>
