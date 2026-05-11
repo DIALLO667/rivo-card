@@ -202,6 +202,11 @@ async def create_profile(
     design_type: str = Form("classic"),
     card_type: str = Form("profile"),
     template_id: str = Form("template1"),
+    bg_color: Optional[str] = Form(None),
+    button_color: Optional[str] = Form(None),
+    icon_color: Optional[str] = Form(None),
+    font_choice: Optional[str] = Form(None),
+    icon_style: Optional[str] = Form(None),
     photo: UploadFile = File(...), cover: Optional[UploadFile] = File(None)
 ):
     user = await get_user_from_token(request)
@@ -209,8 +214,9 @@ async def create_profile(
     # validate card_type and template_id before performing uploads
     if card_type not in ("profile", "cv"):
         raise HTTPException(status_code=400, detail="card_type must be 'profile' or 'cv'")
-    if template_id not in ("template1", "template2"):
-        raise HTTPException(status_code=400, detail="template_id must be 'template1' or 'template2'")
+    # accept the new customizable template
+    if template_id not in ("template1", "template2", "template_customizable"):
+        raise HTTPException(status_code=400, detail="template_id must be 'template1', 'template2' or 'template_customizable'")
     # For profile cards, require job and phone (cover is optional)
     if card_type == "profile":
         if not job:
@@ -233,6 +239,11 @@ async def create_profile(
             "linkedin": linkedin, "facebook": facebook, "tiktok": tiktok,
             "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,"design_type": design_type, # AJOUTÉ
             "card_type": card_type, "template_id": template_id,
+            "bg_color": bg_color,
+            "button_color": button_color,
+            "icon_color": icon_color,
+            "font_choice": font_choice,
+            "icon_style": icon_style,
             "photo_url": photo_res['secure_url'], "cover_url": (cover_res['secure_url'] if cover_res else None),
             "unique_link": generate_unique_link(name), "is_archived": False,
             "created_at": now, "updated_at": now
@@ -270,6 +281,11 @@ async def update_profile(
     design_type: str = Form("classic"),
     card_type: str = Form("profile"),
     template_id: str = Form("template1"),
+    bg_color: Optional[str] = Form(None),
+    button_color: Optional[str] = Form(None),
+    icon_color: Optional[str] = Form(None),
+    font_choice: Optional[str] = Form(None),
+    icon_style: Optional[str] = Form(None),
     photo: Optional[UploadFile] = File(None), cover: Optional[UploadFile] = File(None)
 ):
     user = await get_user_from_token(request)
@@ -277,8 +293,9 @@ async def update_profile(
     # validate card_type and template_id for update
     if card_type not in ("profile", "cv"):
         raise HTTPException(status_code=400, detail="card_type must be 'profile' or 'cv'")
-    if template_id not in ("template1", "template2"):
-        raise HTTPException(status_code=400, detail="template_id must be 'template1' or 'template2'")
+    # accept the new customizable template
+    if template_id not in ("template1", "template2", "template_customizable"):
+        raise HTTPException(status_code=400, detail="template_id must be 'template1', 'template2' or 'template_customizable'")
     if card_type == 'profile':
         if not job:
             raise HTTPException(status_code=400, detail="job is required for profile cards")
@@ -291,6 +308,11 @@ async def update_profile(
         "linkedin": linkedin, "facebook": facebook, "tiktok": tiktok,
         "snapchat": snapchat, "telegram": telegram, "youtube": youtube, "twitter": twitter,
         "design_type": design_type, # AJOUTÉ
+        "bg_color": bg_color,
+        "button_color": button_color,
+        "icon_color": icon_color,
+        "font_choice": font_choice,
+        "icon_style": icon_style,
         "card_type": card_type,
         "template_id": template_id,
         "updated_at": datetime.now(timezone.utc).isoformat()

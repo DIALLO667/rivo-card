@@ -24,6 +24,11 @@ export default function ProfileForm() {
   const [coverFile, setCoverFile] = useState(null);
   const [cardType, setCardType] = useState('profile');
   const [templateId, setTemplateId] = useState('template1');
+  const [bgColor, setBgColor] = useState('');
+  const [buttonColor, setButtonColor] = useState('');
+  const [iconColor, setIconColor] = useState('');
+  const [fontChoice, setFontChoice] = useState('sans');
+  const [iconStyle, setIconStyle] = useState('default');
 
   useEffect(() => {
     if (profileId) {
@@ -103,6 +108,15 @@ export default function ProfileForm() {
       }
     });
 
+    // append customizable style prefs when using the customizable template
+    if (templateId === 'template_customizable') {
+      if (bgColor) data.append('bg_color', bgColor);
+      if (buttonColor) data.append('button_color', buttonColor);
+      if (iconColor) data.append('icon_color', iconColor);
+      if (fontChoice) data.append('font_choice', fontChoice);
+      if (iconStyle) data.append('icon_style', iconStyle);
+    }
+
     data.append('card_type', cardType);
     data.append('template_id', templateId);
     
@@ -159,6 +173,35 @@ export default function ProfileForm() {
                 </div>
               </div>
             </div>
+            {/* Customizable template controls */}
+            {templateId === 'template_customizable' && (
+              <div className="mt-4 p-4 bg-white/5 rounded-md">
+                <p className="text-xs text-white/80 font-bold mb-2">Personnalisation</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="text-[10px]">Fond
+                    <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-8 mt-1" />
+                  </label>
+                  <label className="text-[10px]">Bouton
+                    <input type="color" value={buttonColor} onChange={e => setButtonColor(e.target.value)} className="w-full h-8 mt-1" />
+                  </label>
+                  <label className="text-[10px]">Icônes
+                    <input type="color" value={iconColor} onChange={e => setIconColor(e.target.value)} className="w-full h-8 mt-1" />
+                  </label>
+                  <label className="text-[10px]">Police
+                    <select value={fontChoice} onChange={e => setFontChoice(e.target.value)} className="w-full h-8 mt-1 bg-white/5">
+                      <option value="sans">Sans</option>
+                      <option value="serif">Serif</option>
+                    </select>
+                  </label>
+                  <label className="text-[10px] col-span-2">Style icône
+                    <select value={iconStyle} onChange={e => setIconStyle(e.target.value)} className="w-full h-8 mt-1 bg-white/5">
+                      <option value="default">Carré</option>
+                      <option value="rounded">Arrondi</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">
