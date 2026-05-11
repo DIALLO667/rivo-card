@@ -333,7 +333,9 @@ async def update_profile(
 async def get_profiles(request: Request):
     user = await get_user_from_token(request)
     if not user: raise HTTPException(status_code=401)
-    return await db.profiles.find({"user_id": user.user_id}, {"_id": 0}).to_list(100)
+    # Return profiles newest-first by created_at to show recently created profiles at the top
+    cursor = db.profiles.find({"user_id": user.user_id}, {"_id": 0}).sort("created_at", -1)
+    return await cursor.to_list(length=100)
 
 @api_router.get("/profiles/{profile_id}")
 async def get_single_profile(profile_id: str, request: Request):
