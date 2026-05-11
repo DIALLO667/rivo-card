@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
-import { FaSave, FaMapMarkerAlt, FaEnvelope, FaPhone, FaGlobe } from 'react-icons/fa';
+import { FaSave, FaMapMarkerAlt, FaEnvelope, FaPhone, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter } from 'react-icons/fa';
+import { FaTelegramPlane } from 'react-icons/fa';
 
 // Minimal, self-contained customizable template inspired by TemplateQuietLuxury.
 // - Accepts `profile` prop.
@@ -108,13 +109,13 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   const colorPresets = ['#0a0a0b', '#ffffff', '#f5c27a', '#ff4757', '#4ade80', '#60a5fa', '#7c3aed', '#f97316'];
 
   const socialList = [
-    { id: 'instagram', url: profile.instagram, icon: <Instagram size={20} />, label: 'Instagram' },
-    { id: 'linkedin', url: profile.linkedin, icon: <Linkedin size={20} />, label: 'LinkedIn' },
-    { id: 'facebook', url: profile.facebook, icon: <Facebook size={20} />, label: 'Facebook' },
-    { id: 'youtube', url: profile.youtube, icon: <Youtube size={20} />, label: 'YouTube' },
-    { id: 'twitter', url: profile.twitter, icon: <Twitter size={20} />, label: 'Twitter' },
-    { id: 'telegram', url: profile.telegram, icon: <Send size={20} />, label: 'Telegram' },
-    { id: 'website', url: profile.website, icon: <Globe size={20} />, label: 'Site' },
+    { id: 'instagram', url: profile.instagram, icon: <FaInstagram size={20} />, label: 'Instagram' },
+    { id: 'linkedin', url: profile.linkedin, icon: <FaLinkedin size={20} />, label: 'LinkedIn' },
+    { id: 'facebook', url: profile.facebook, icon: <FaFacebook size={20} />, label: 'Facebook' },
+    { id: 'youtube', url: profile.youtube, icon: <FaYoutube size={20} />, label: 'YouTube' },
+    { id: 'twitter', url: profile.twitter, icon: <FaTwitter size={20} />, label: 'Twitter' },
+    { id: 'telegram', url: profile.telegram, icon: <FaTelegramPlane size={20} />, label: 'Telegram' },
+    { id: 'website', url: profile.website, icon: <FaGlobe size={20} />, label: 'Site' },
     // ... add other networks as needed
   ].filter(s => s.url);
 
