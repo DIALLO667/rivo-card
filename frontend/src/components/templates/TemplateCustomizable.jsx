@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeVCard, normalizeUrl } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl, splitPhones } from '@/lib/urlUtils';
 import { FaSave, FaMapMarkerAlt, FaEnvelope, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette, FaPhoneAlt } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { SiTiktok } from 'react-icons/si';
@@ -135,12 +135,14 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   const company = profile?.company || '';
   const photo = profile?.photo_url || profile?.avatar || 'https://via.placeholder.com/150';
 
-  const telHref = profile?.phone ? `tel:${String(profile.phone).replace(/\s+/g, '')}` : null;
+  const phones = splitPhones(profile?.phone);
+  const primaryPhone = phones.length ? phones[0] : profile?.phone;
+  const telHrefs = primaryPhone ? [`tel:${String(primaryPhone).replace(/\s+/g, '')}`] : [];
   const mailHref = profile?.email ? `mailto:${profile.email}` : null;
   const websiteHref = profile?.website && profile.website !== 'https://' ? normalizeUrl(profile.website) : null;
 
   const downloadVCard = () => {
-    const vcard = makeVCard({ name, phone: profile?.phone || '', email: profile?.email || '' });
+    const vcard = makeVCard({ name, phone: phones.length ? phones : (profile?.phone || ''), email: profile?.email || '' });
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -229,12 +231,28 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
           </a>
         )}
 
-        {profile?.phone && telHref && (
-          <a href={telHref} className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
-              <FaPhoneAlt style={{ color: prefs.button }} className="text-lg" /> APPELER
-            </button>
-          </a>
+        {primaryPhone && (
+          <div className="relative w-full">
+            <div className="flex gap-2">
+              <a href={`tel:${String(primaryPhone).replace(/\s+/g, '')}`} className="flex-1">
+                <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase" style={{ borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 10, }}>
+                  <FaPhoneAlt style={{ color: prefs.button }} className="text-lg" /> APPELER
+                </button>
+              </a>
+              {phones.length > 1 && (
+                <button type="button" onClick={() => setCallMenuOpen(v => !v)} className="w-12 bg-white/[0.03] border border-white/10 text-white/90 rounded-xl flex items-center justify-center">
+                  <FaChevronDown />
+                </button>
+              )}
+            </div>
+            {callMenuOpen && phones.length > 1 && (
+              <div className="absolute right-0 mt-2 w-full sm:w-auto bg-black/90 border border-white/10 rounded-lg shadow-lg z-20">
+                {phones.map((p, i) => (
+                  <a key={`menu-tel-${i}`} href={`tel:${String(p).replace(/\s+/g, '')}`} className="block px-4 py-2 text-sm text-white hover:bg-white/5">{p}</a>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {websiteHref && (

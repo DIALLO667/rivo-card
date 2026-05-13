@@ -1,5 +1,5 @@
 import React from 'react';
-import { normalizeUrl, makeVCard } from '@/lib/urlUtils';
+import { normalizeUrl, makeVCard, splitPhones } from '@/lib/urlUtils';
 import {
   FaSnapchatGhost,
   FaTiktok,
@@ -50,8 +50,18 @@ function TemplateCleanLinks({ profile }) {
   };
 
   const normalized = rawLinks
-    .map(item => {
+    .flatMap(item => {
       const key = (item.key || '').toLowerCase();
+      // expand phone field into multiple entries
+      if (key === 'phone' && item.value) {
+        const parts = splitPhones(item.value);
+        if (parts.length > 0) {
+          return parts.map(p => {
+            const href = makeHref(p, key);
+            return { key, label: item.label || 'Téléphone', href, Icon: FaPhone };
+          }).filter(Boolean);
+        }
+      }
       const href = makeHref(item.value, key);
       if (!href) return null;
       const candidate = candidates.find(c => c.key === key);
