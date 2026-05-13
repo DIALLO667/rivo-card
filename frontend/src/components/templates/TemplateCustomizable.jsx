@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { makeVCard, normalizeUrl, splitPhones } from '@/lib/urlUtils';
-import { FaSave, FaMapMarkerAlt, FaEnvelope, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette, FaPhoneAlt } from 'react-icons/fa';
+import { FaSave, FaMapMarkerAlt, FaEnvelope, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette, FaPhoneAlt, FaChevronDown } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { SiTiktok } from 'react-icons/si';
 
@@ -26,6 +26,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
 
   const [prefs, setPrefs] = useState(defaults);
   const [saved, setSaved] = useState(false);
+  const [callMenuOpen, setCallMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!key) return;
@@ -88,6 +89,8 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
           bg_color: next.bg,
           button_color: next.button,
           icon_color: next.icon,
+          name_color: next.name,
+          job_color: next.job,
           font_choice: next.font,
           icon_style: next.iconStyle,
         });

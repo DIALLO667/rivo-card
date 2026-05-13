@@ -46,9 +46,9 @@ const TemplateQuietLuxury = ({ profile }) => {
     { Icon: FaTelegramPlane, href: data.telegram },
     { Icon: FaYoutube, href: data.youtube },
     { Icon: FaTwitter, href: data.twitter },
-    { Icon: FaWhatsapp, href: whatsappHref },
+  { Icon: FaWhatsapp, href: whatsappHref },
     // Note: website (FaGlobe) is shown as a primary CTA above, exclude from social icons to avoid duplication
-    { Icon: FaPhone, href: telHref },
+  { Icon: FaPhone, href: telHrefs.length ? telHrefs[0] : null },
     { Icon: FaEnvelope, href: mailHref }
   ];
 
