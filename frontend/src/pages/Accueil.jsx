@@ -48,8 +48,8 @@ const audiences = [
   { icon: UserCheck, label: "Professionnels" },
 ];
 
-const WHATSAPP_PARTNER = "https://api.whatsapp.com/send/?phone=%2B22383962830&text=Bonjour%2C%20je%20suis%20interesse%20pour%20devenir%20partenaire%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
-const WHATSAPP_ORDER = "https://api.whatsapp.com/send/?phone=%2B22383962830&text=Bonjour%2C%20je%20souhaite%20commander%20une%20carte%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
+const WHATSAPP_PARTNER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20suis%20interesse%20pour%20devenir%20partenaire%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
+const WHATSAPP_ORDER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20souhaite%20commander%20une%20carte%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
 
 const Accueil = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
