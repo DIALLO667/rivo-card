@@ -17,7 +17,8 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [subaccounts, setSubaccounts] = useState([]);
-  const [showCreateSub, setShowCreateSub] = useState(false);
+  // Removed inline 'create subaccount' panel; a dedicated Subaccounts page will handle that
+  // const [showCreateSub, setShowCreateSub] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -80,22 +81,7 @@ export default function Dashboard() {
     setFilteredProfiles(result);
   }, [searchQuery, profiles, filterType]);
 
-  const createSubaccount = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const fd = new FormData();
-      fd.append('email', newEmail);
-      fd.append('password', newPassword);
-      fd.append('name', newName);
-      await axios.post(`${API}/users`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
-      toast.success('Filiale créée');
-      setNewEmail(''); setNewName(''); setNewPassword(''); setShowCreateSub(false);
-      fetchSubaccounts();
-    } catch (err) {
-      console.error(err);
-      toast.error('Erreur lors de la création de la filiale');
-    }
-  };
+  // subaccounts are managed on the dedicated Subaccounts page
 
   const handleArchive = async (profileId, currentStatus) => {
     try {
@@ -145,9 +131,8 @@ export default function Dashboard() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-[#111214] border border-white/10 h-10 px-3 rounded">
-                <option value="all">Tous mes profils</option>
                 <option value="me">Mes profils</option>
-                {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
+                {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
               </select>
               <label className="flex items-center gap-2 text-sm text-gray-400">
                 <input type="checkbox" checked={ownerOverview} onChange={(e) => { setOwnerOverview(e.target.checked); fetchProfiles(); }} /> Vue d'ensemble
@@ -157,7 +142,7 @@ export default function Dashboard() {
             <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
               <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
             </Button>
-            <Button onClick={() => setShowCreateSub((v) => !v)} variant="ghost" className="h-12">
+            <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12">
               <Users className="mr-2 h-5 w-5" /> Filiales
             </Button>
           </div>
