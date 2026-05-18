@@ -16,6 +16,9 @@ export default function Subaccounts() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
 
   const fetchSubs = useCallback(async () => {
     setLoading(true);
@@ -97,6 +100,21 @@ export default function Subaccounts() {
         return;
       }
       toast.error('Échec création filiale');
+    }
+  };
+
+  const assignMohamedToAmadou = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const fd = new FormData();
+      fd.append('target_email', 'mohamed@rivostudio.com');
+      fd.append('parent_email', 'amadou@rivostudio.com');
+      await axios.post(`${API}/users/assign`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      toast.success('Mohamed assigné à Amadou');
+      fetchSubs();
+    } catch (e) {
+      console.error('assign error', e?.response || e);
+      toast.error('Impossible d\'assigner Mohamed');
     }
   };
 
@@ -191,14 +209,60 @@ export default function Subaccounts() {
               {subs.length === 0 ? <div className="text-sm text-gray-400">Aucune filiale trouvée</div> : subs.map((s) => (
                 <div key={s.user_id} className="flex items-center justify-between p-3 bg-[#0f1113] rounded">
                   <div>
-                    <div className="font-bold">{s.name}</div>
+                    <div className="font-bold">{s.name} {s.is_active === false && <span className="text-xs text-red-400 ml-2">(désactivé)</span>}</div>
                     <div className="text-xs text-gray-400">{s.email}</div>
+                    <div className="text-xs text-gray-500">Créé le: {new Date(s.created_at).toLocaleString()}</div>
                   </div>
-                  <div className="text-sm text-gray-300">Profils: {counts[s.user_id] || 0}</div>
+                  <div className="flex items-center space-x-3">
+                    <div className="text-sm text-gray-300">Profils: {counts[s.user_id] || 0}</div>
+                    <Button onClick={async () => {
+                      // toggle active
+                      try {
+                        const token = localStorage.getItem('token');
+                        const res = await axios.patch(`${API}/users/${s.user_id}/toggle_active`, null, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+                        toast.success(res.data?.is_active ? 'Filiale activée' : 'Filiale désactivée');
+                        fetchSubs();
+                      } catch (e) {
+                        console.error('toggle error', e?.response || e);
+                        toast.error('Impossible de changer l\'état');
+                      }
+                    }} className="text-sm">{s.is_active === false ? 'Activer' : 'Désactiver'}</Button>
+                    <Button onClick={() => { setEditingId(s.user_id); setEditName(s.name); setEditEmail(s.email); }} className="text-sm">Modifier</Button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
+        </div>
+        {editingId && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+            <div className="bg-[#111] p-4 rounded max-w-md w-full">
+              <h4 className="font-semibold mb-2">Modifier filiale</h4>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom" />
+              <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email" className="mt-2" />
+              <div className="mt-3 flex justify-end space-x-2">
+                <Button onClick={() => setEditingId(null)} variant="ghost">Annuler</Button>
+                <Button onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('token');
+                    const fd = new FormData();
+                    fd.append('name', editName);
+                    fd.append('email', editEmail);
+                    await axios.put(`${API}/users/${editingId}`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+                    toast.success('Filiale modifiée');
+                    setEditingId(null);
+                    fetchSubs();
+                  } catch (e) {
+                    console.error('update error', e?.response || e);
+                    toast.error('Impossible de modifier');
+                  }
+                }}>Enregistrer</Button>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="mt-4 max-w-4xl mx-auto">
+          <Button onClick={assignMohamedToAmadou} className="bg-[#D4AF37] text-black">Assigner mohamed@rivostudio.com à amadou@rivostudio.com</Button>
         </div>
       </div>
     </div>
