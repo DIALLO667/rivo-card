@@ -61,7 +61,7 @@ export default function Subaccounts() {
     } finally {
       setLoading(false);
     }
-  }, [navigate, currentUser]);
+  }, [currentUser, navigate]);
 
   const createSub = async () => {
     try {
@@ -120,11 +120,7 @@ export default function Subaccounts() {
     } catch (e) {
       console.error('fetchProfileCounts error', e?.response || e);
       const status = e?.response?.status;
-      if (status === 401) {
-        toast.error('Non authentifié — connectez-vous');
-        navigate('/login');
-        return {};
-      }
+      // Don't navigate from this helper; caller will handle authentication redirects.
       if (status === 403) {
         // Owner-only endpoint for scope=all
         toast.error('Accès refusé pour récupérer les comptes de profils');
@@ -132,7 +128,7 @@ export default function Subaccounts() {
       }
       return {};
     }
-  }, [navigate]);
+  }, []);
 
   const [counts, setCounts] = useState({});
   // fetch current user info, then subaccounts and counts only if owner
@@ -145,7 +141,7 @@ export default function Subaccounts() {
     } catch (e) {
       return null;
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
