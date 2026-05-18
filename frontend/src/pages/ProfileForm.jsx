@@ -171,6 +171,7 @@ export default function ProfileForm() {
                 <option value="cv">CV (juste une photo)</option>
               </select>
             </div>
+            
             <div>
               <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Template</label>
               <div className="flex gap-3 mt-2">
