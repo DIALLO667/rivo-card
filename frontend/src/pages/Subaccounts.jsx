@@ -11,6 +11,7 @@ export default function Subaccounts() {
   const navigate = useNavigate();
   const [subs, setSubs] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [lastRequest, setLastRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -24,6 +25,10 @@ export default function Subaccounts() {
         toast.error('Connectez-vous d\'abord');
         navigate('/login');
         return;
+      }
+      // capture debug info
+      if (typeof window !== 'undefined') {
+        setLastRequest({ url: `${API}/users`, method: 'GET', headers: { Authorization: `Bearer ${token}` }, cookie: document.cookie });
       }
       // ensure we are owner before calling owner-only endpoint
       if (currentUser && currentUser.role !== 'owner') {
@@ -74,6 +79,9 @@ export default function Subaccounts() {
       fd.append('name', name);
       fd.append('email', email);
       fd.append('password', password);
+      if (typeof window !== 'undefined') {
+        setLastRequest({ url: `${API}/users`, method: 'POST', body: { name, email }, headers: { Authorization: `Bearer ${token}` }, cookie: document.cookie });
+      }
       await axios.post(`${API}/users`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       toast.success('Filiale créée');
       setName(''); setEmail(''); setPassword('');
@@ -170,6 +178,14 @@ export default function Subaccounts() {
           <h2 className="text-2xl font-bold">Filiales</h2>
           <Button onClick={() => navigate('/dashboard')} variant="ghost">Retour</Button>
         </div>
+
+        {/* Debug panel - enable by adding ?debug=1 to the URL */}
+        {new URL(window.location.href).searchParams.get('debug') === '1' && (
+          <div className="mb-4 p-3 bg-[#111] rounded">
+            <div className="font-semibold">Debug</div>
+            <pre className="text-xs mt-2 text-gray-300 whitespace-pre-wrap">{JSON.stringify({ currentUser, lastRequest }, null, 2)}</pre>
+          </div>
+        )}
 
         <div className="mb-6 p-4 bg-[#131314] rounded-lg">
           <h3 className="font-semibold mb-2">Créer une filiale</h3>
