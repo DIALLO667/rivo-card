@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
@@ -15,26 +15,52 @@ export default function Subaccounts() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const fetchSubs = async () => {
+  const fetchSubs = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Connectez-vous d\'abord');
+        navigate('/login');
+        return;
+      }
       const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       const list = res.data?.subaccounts || [];
       setSubs(list);
     } catch (e) {
       console.error(e);
+      const status = e?.response?.status;
+      const data = e?.response?.data;
+      if (status === 401) {
+        toast.error('Non authentifié — veuillez vous connecter');
+        navigate('/login');
+        return;
+      }
+      if (status === 403) {
+        toast.error('Accès refusé — vous devez être propriétaire pour gérer les filiales');
+        return;
+      }
+      if (status === 422) {
+        toast.error('Requête invalide (422) — vérifiez votre session et réessayez');
+        console.debug('422 response:', data);
+        return;
+      }
       toast.error('Impossible de charger les filiales');
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
-  useEffect(() => { fetchSubs(); }, []);
+  useEffect(() => { fetchSubs(); }, [fetchSubs]);
 
   const createSub = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Connectez-vous d\'abord');
+        navigate('/login');
+        return;
+      }
       const fd = new FormData();
       fd.append('name', name);
       fd.append('email', email);
@@ -45,12 +71,28 @@ export default function Subaccounts() {
       fetchSubs();
     } catch (err) {
       console.error(err);
+      const status = err?.response?.status;
+      const data = err?.response?.data;
+      if (status === 401) {
+        toast.error('Non authentifié — connectez-vous');
+        navigate('/login');
+        return;
+      }
+      if (status === 403) {
+        toast.error('Accès refusé — vous n\'êtes pas propriétaire');
+        return;
+      }
+      if (status === 422) {
+        toast.error('Requête invalide (422) — champs manquants ou mal formés');
+        console.debug('422 response:', data);
+        return;
+      }
       toast.error('Échec création filiale');
     }
   };
 
   // helper: get count of profiles for a given user id (calls /api/profiles?scope=all once and counts matching user_id)
-  const fetchProfileCounts = async () => {
+  const fetchProfileCounts = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${API}/profiles`, { headers: { Authorization: `Bearer ${token}` }, params: { scope: 'all' }, withCredentials: true });
@@ -59,9 +101,21 @@ export default function Subaccounts() {
       all.forEach((p) => { counts[p.user_id] = (counts[p.user_id] || 0) + 1; });
       return counts;
     } catch (e) {
+      console.error('fetchProfileCounts error', e?.response || e);
+      const status = e?.response?.status;
+      if (status === 401) {
+        toast.error('Non authentifié — connectez-vous');
+        navigate('/login');
+        return {};
+      }
+      if (status === 403) {
+        // Owner-only endpoint for scope=all
+        toast.error('Accès refusé pour récupérer les comptes de profils');
+        return {};
+      }
       return {};
     }
-  };
+  }, [navigate]);
 
   const [counts, setCounts] = useState({});
   useEffect(() => {
@@ -71,7 +125,7 @@ export default function Subaccounts() {
       if (mounted) setCounts(c);
     })();
     return () => { mounted = false; };
-  }, [subs]);
+  }, [subs, fetchProfileCounts]);
 
   return (
     <div className="min-h-screen bg-[#0f1113] text-white px-6 py-8">
