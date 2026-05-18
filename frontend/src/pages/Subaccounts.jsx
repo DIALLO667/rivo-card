@@ -30,8 +30,10 @@ export default function Subaccounts() {
       if (typeof window !== 'undefined') {
         setLastRequest({ url: `${API}/users`, method: 'GET', headers: { Authorization: `Bearer ${token}` }, cookie: document.cookie });
       }
-      // ensure we are owner before calling owner-only endpoint
-      if (currentUser && currentUser.role !== 'owner') {
+      // ensure we are owner (or super-admin) before calling owner-only endpoint
+      const isSuperAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com');
+      const isOwner = currentUser && currentUser.role === 'owner';
+      if (currentUser && !(isOwner || isSuperAdmin)) {
         toast.error('Accès refusé — vous n\'êtes pas propriétaire');
         setLoading(false);
         return;
@@ -75,6 +77,12 @@ export default function Subaccounts() {
         toast.error('Accès refusé — vous n\'êtes pas propriétaire');
         return;
       }
+        const isSuperAdminCreate = currentUser && (currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com');
+        const isOwnerCreate = currentUser && currentUser.role === 'owner';
+        if (currentUser && !(isOwnerCreate || isSuperAdminCreate)) {
+          toast.error('Accès refusé — vous n\'êtes pas propriétaire');
+          return;
+        }
       const fd = new FormData();
       fd.append('name', name);
       fd.append('email', email);
