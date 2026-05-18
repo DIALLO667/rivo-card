@@ -238,7 +238,11 @@ async def login(data: LoginRequest, response: Response):
 async def get_me(request: Request):
     user = await get_user_from_token(request)
     if not user: raise HTTPException(status_code=401)
-    return user
+    # Return a sanitized user document from the database so callers can see role/parent_id without exposing password
+    user_doc = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password": 0})
+    if not user_doc:
+        raise HTTPException(status_code=401)
+    return user_doc
 
 # --- PROFILE ROUTES ---
 @api_router.post("/profiles")
