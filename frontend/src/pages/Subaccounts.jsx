@@ -30,14 +30,7 @@ export default function Subaccounts() {
       if (typeof window !== 'undefined') {
         setLastRequest({ url: `${API}/users`, method: 'GET', headers: { Authorization: `Bearer ${token}` }, cookie: document.cookie });
       }
-      // ensure we are owner (or super-admin) before calling owner-only endpoint
-      const isSuperAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com');
-      const isOwner = currentUser && currentUser.role === 'owner';
-      if (currentUser && !(isOwner || isSuperAdmin)) {
-        toast.error('Accès refusé — vous n\'êtes pas propriétaire');
-        setLoading(false);
-        return;
-      }
+      // Removed client-side owner-only guard so the UI will attempt to call the endpoint
       const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       const list = res.data?.subaccounts || [];
       setSubs(list);
@@ -63,7 +56,7 @@ export default function Subaccounts() {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, navigate]);
+  }, [navigate]);
 
   const createSub = async () => {
     try {
@@ -73,16 +66,7 @@ export default function Subaccounts() {
         navigate('/login');
         return;
       }
-      if (currentUser && currentUser.role !== 'owner') {
-        toast.error('Accès refusé — vous n\'êtes pas propriétaire');
-        return;
-      }
-        const isSuperAdminCreate = currentUser && (currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com');
-        const isOwnerCreate = currentUser && currentUser.role === 'owner';
-        if (currentUser && !(isOwnerCreate || isSuperAdminCreate)) {
-          toast.error('Accès refusé — vous n\'êtes pas propriétaire');
-          return;
-        }
+      // Removed client-side create guard so creation attempts are sent to the backend (which enforces auth)
       const fd = new FormData();
       fd.append('name', name);
       fd.append('email', email);
@@ -162,12 +146,7 @@ export default function Subaccounts() {
         navigate('/login');
         return;
       }
-      if (me.role !== 'owner') {
-        toast.error('Vous n\'êtes pas propriétaire — accès restreint');
-        // don't call fetchSubs or counts
-        setLoading(false);
-        return;
-      }
+      // Allow non-owner users to view/create subaccounts client-side; backend will enforce permissions.
       await fetchSubs();
       const c = await fetchProfileCounts();
       if (mounted) setCounts(c);
