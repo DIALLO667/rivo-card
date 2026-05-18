@@ -10,6 +10,7 @@ const API = process.env.REACT_APP_API_URL || '';
 export default function Subaccounts() {
   const navigate = useNavigate();
   const [subs, setSubs] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,6 +23,12 @@ export default function Subaccounts() {
       if (!token) {
         toast.error('Connectez-vous d\'abord');
         navigate('/login');
+        return;
+      }
+      // ensure we are owner before calling owner-only endpoint
+      if (currentUser && currentUser.role !== 'owner') {
+        toast.error('Accès refusé — vous n\'êtes pas propriétaire');
+        setLoading(false);
         return;
       }
       const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
@@ -49,9 +56,7 @@ export default function Subaccounts() {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
-
-  useEffect(() => { fetchSubs(); }, [fetchSubs]);
+  }, [navigate, currentUser]);
 
   const createSub = async () => {
     try {
@@ -59,6 +64,10 @@ export default function Subaccounts() {
       if (!token) {
         toast.error('Connectez-vous d\'abord');
         navigate('/login');
+        return;
+      }
+      if (currentUser && currentUser.role !== 'owner') {
+        toast.error('Accès refusé — vous n\'êtes pas propriétaire');
         return;
       }
       const fd = new FormData();
@@ -118,14 +127,41 @@ export default function Subaccounts() {
   }, [navigate]);
 
   const [counts, setCounts] = useState({});
+  // fetch current user info, then subaccounts and counts only if owner
+  const fetchMe = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+      const res = await axios.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  }, [navigate]);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
+      const me = await fetchMe();
+      if (!mounted) return;
+      setCurrentUser(me);
+      if (!me) {
+        toast.error('Non authentifié — connectez-vous');
+        navigate('/login');
+        return;
+      }
+      if (me.role !== 'owner') {
+        toast.error('Vous n\'êtes pas propriétaire — accès restreint');
+        // don't call fetchSubs or counts
+        setLoading(false);
+        return;
+      }
+      await fetchSubs();
       const c = await fetchProfileCounts();
       if (mounted) setCounts(c);
     })();
     return () => { mounted = false; };
-  }, [subs, fetchProfileCounts]);
+  }, [fetchMe, fetchSubs, fetchProfileCounts, navigate]);
 
   return (
     <div className="min-h-screen bg-[#0f1113] text-white px-6 py-8">
