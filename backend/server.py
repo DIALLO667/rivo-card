@@ -140,6 +140,19 @@ def generate_unique_link(name: str) -> str:
     clean_name = "".join(c.lower() if c.isalnum() else "-" for c in name)
     return f"{clean_name}-{secrets.token_hex(3)}"
 
+
+def is_super_admin(user_doc: dict) -> bool:
+    """Return True if the user_doc corresponds to the global super-admin or has admin role."""
+    if not user_doc:
+        return False
+    email = user_doc.get('email', '').lower()
+    role = user_doc.get('role')
+    if role == 'admin':
+        return True
+    if email == 'amadou@rivostudio.com':
+        return True
+    return False
+
 async def get_user_from_token(request: Request) -> Optional[User]:
     auth_header = request.headers.get("Authorization")
     session_token = None
@@ -179,9 +192,9 @@ async def create_subuser(request: Request, email: EmailStr = Form(...), password
     """
     owner = await get_user_from_token(request)
     if not owner: raise HTTPException(status_code=401)
-    # ensure owner role
+    # ensure owner role or super-admin
     owner_doc = await db.users.find_one({"user_id": owner.user_id})
-    if not owner_doc or owner_doc.get("role") != "owner":
+    if not owner_doc or (owner_doc.get("role") != "owner" and not is_super_admin(owner_doc)):
         raise HTTPException(status_code=403, detail="Only owners may create subaccounts")
     # ensure email unique
     existing = await db.users.find_one({"email": email})
@@ -209,7 +222,7 @@ async def list_users(request: Request, scope: Optional[str] = None):
     if not user: raise HTTPException(status_code=401)
     user_doc = await db.users.find_one({"user_id": user.user_id})
     role = user_doc.get("role") if user_doc else None
-    if role == "owner":
+    if role == "owner" or is_super_admin(user_doc):
         # owner's subaccounts
         subs = await db.users.find({"parent_id": user.user_id}, {"_id": 0, "password": 0}).to_list(length=100)
         if scope == 'all':
@@ -400,7 +413,7 @@ async def get_profiles(request: Request, scope: Optional[str] = None):
     # If owner requests scope=all, return owner's profiles plus all subaccounts' profiles
     user_doc = await db.users.find_one({"user_id": user.user_id})
     role = user_doc.get("role") if user_doc else None
-    if scope == 'all' and role == 'owner':
+    if scope == 'all' and (role == 'owner' or is_super_admin(user_doc)):
         subs = await db.users.find({"parent_id": user.user_id}, {"user_id": 1}).to_list(length=100)
         sub_ids = [s["user_id"] for s in subs]
         q = {"user_id": {"$in": [user.user_id] + sub_ids}}
