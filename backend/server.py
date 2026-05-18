@@ -164,10 +164,62 @@ async def register(data: RegisterRequest):
     if existing: raise HTTPException(status_code=400, detail="Email déjà utilisé")
     user_doc = {
         "user_id": f"user_{uuid.uuid4().hex[:12]}", "email": data.email, "name": data.name,
-        "password": hash_password(data.password), "created_at": datetime.now(timezone.utc).isoformat()
+        "password": hash_password(data.password), "created_at": datetime.now(timezone.utc).isoformat(),
+        "role": "owner",
+        "parent_id": None
     }
     await db.users.insert_one(user_doc)
     return {"status": "success"}
+
+
+@api_router.post("/users")
+async def create_subuser(request: Request, email: EmailStr = Form(...), password: str = Form(...), name: str = Form(...)):
+    """Create a subaccount (filiale) under the authenticated owner.
+    Only users with role 'owner' may create subaccounts. The created subuser will have parent_id set to the owner's user_id and role 'subaccount'.
+    """
+    owner = await get_user_from_token(request)
+    if not owner: raise HTTPException(status_code=401)
+    # ensure owner role
+    owner_doc = await db.users.find_one({"user_id": owner.user_id})
+    if not owner_doc or owner_doc.get("role") != "owner":
+        raise HTTPException(status_code=403, detail="Only owners may create subaccounts")
+    # ensure email unique
+    existing = await db.users.find_one({"email": email})
+    if existing: raise HTTPException(status_code=400, detail="Email déjà utilisé")
+    sub_doc = {
+        "user_id": f"user_{uuid.uuid4().hex[:12]}",
+        "email": email,
+        "name": name,
+        "password": hash_password(password),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "role": "subaccount",
+        "parent_id": owner.user_id
+    }
+    await db.users.insert_one(sub_doc)
+    return {"status": "success", "user_id": sub_doc["user_id"]}
+
+
+@api_router.get("/users")
+async def list_users(request: Request, scope: Optional[str] = None):
+    """List subaccounts for the authenticated owner.
+    If scope == 'all' and the caller is an owner, return owner + subaccounts for overview.
+    Otherwise return only the caller's direct subaccounts (if owner) or [] for subaccounts.
+    """
+    user = await get_user_from_token(request)
+    if not user: raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    role = user_doc.get("role") if user_doc else None
+    if role == "owner":
+        # owner's subaccounts
+        subs = await db.users.find({"parent_id": user.user_id}, {"_id": 0, "password": 0}).to_list(length=100)
+        if scope == 'all':
+            # include owner info as well
+            me = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "password": 0})
+            return {"owner": me, "subaccounts": subs}
+        return {"subaccounts": subs}
+    else:
+        # subaccounts cannot list other users
+        return {"subaccounts": []}
 
 @api_router.post("/auth/login")
 async def login(data: LoginRequest, response: Response):
@@ -338,10 +390,19 @@ async def update_profile(
     return {"status": "success"}
 
 @api_router.get("/profiles")
-async def get_profiles(request: Request):
+async def get_profiles(request: Request, scope: Optional[str] = None):
     user = await get_user_from_token(request)
     if not user: raise HTTPException(status_code=401)
-    # Return profiles newest-first by created_at to show recently created profiles at the top
+    # If owner requests scope=all, return owner's profiles plus all subaccounts' profiles
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    role = user_doc.get("role") if user_doc else None
+    if scope == 'all' and role == 'owner':
+        subs = await db.users.find({"parent_id": user.user_id}, {"user_id": 1}).to_list(length=100)
+        sub_ids = [s["user_id"] for s in subs]
+        q = {"user_id": {"$in": [user.user_id] + sub_ids}}
+        cursor = db.profiles.find(q, {"_id": 0}).sort("created_at", -1)
+        return await cursor.to_list(length=1000)
+    # Default: return profiles for the authenticated user only
     cursor = db.profiles.find({"user_id": user.user_id}, {"_id": 0}).sort("created_at", -1)
     return await cursor.to_list(length=100)
 
