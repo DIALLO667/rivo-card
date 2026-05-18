@@ -206,6 +206,7 @@ async def create_subuser(request: Request, email: EmailStr = Form(...), password
         "password": hash_password(password),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "role": "subaccount",
+        "is_active": True,
         "parent_id": owner.user_id
     }
     await db.users.insert_one(sub_doc)
@@ -233,6 +234,58 @@ async def list_users(request: Request, scope: Optional[str] = None):
     else:
         # subaccounts cannot list other users
         return {"subaccounts": []}
+
+
+@api_router.post("/users/assign")
+async def assign_subaccount(request: Request, target_email: EmailStr = Form(...), parent_email: EmailStr = Form(...)):
+    """Assign an existing user (target_email) as a subaccount of parent_email. Only owners or super-admins may perform this."""
+    caller = await get_user_from_token(request)
+    if not caller: raise HTTPException(status_code=401)
+    caller_doc = await db.users.find_one({"user_id": caller.user_id})
+    if not caller_doc or (caller_doc.get("role") != "owner" and not is_super_admin(caller_doc)):
+        raise HTTPException(status_code=403)
+    parent = await db.users.find_one({"email": parent_email})
+    if not parent: raise HTTPException(status_code=404, detail="Parent not found")
+    target = await db.users.find_one({"email": target_email})
+    if not target: raise HTTPException(status_code=404, detail="Target user not found")
+    # update target to be a subaccount of parent
+    await db.users.update_one({"user_id": target["user_id"]}, {"$set": {"parent_id": parent["user_id"], "role": "subaccount", "is_active": True}})
+    return {"status": "success"}
+
+
+@api_router.patch("/users/{user_id}/toggle_active")
+async def toggle_user_active(user_id: str, request: Request):
+    """Toggle activation for a user (owner or super-admin only). Cascades to profiles by setting is_archived accordingly."""
+    caller = await get_user_from_token(request)
+    if not caller: raise HTTPException(status_code=401)
+    caller_doc = await db.users.find_one({"user_id": caller.user_id})
+    if not caller_doc or (caller_doc.get("role") != "owner" and not is_super_admin(caller_doc)):
+        raise HTTPException(status_code=403)
+    target = await db.users.find_one({"user_id": user_id})
+    if not target: raise HTTPException(status_code=404)
+    new_state = not target.get("is_active", True)
+    await db.users.update_one({"user_id": user_id}, {"$set": {"is_active": new_state}})
+    # cascade: mark all profiles for that user as archived when deactivated, and un-archive when activated
+    await db.profiles.update_many({"user_id": user_id}, {"$set": {"is_archived": not new_state}})
+    return {"status": "success", "is_active": new_state}
+
+
+@api_router.put("/users/{user_id}")
+async def update_user(user_id: str, request: Request, name: Optional[str] = Form(None), email: Optional[EmailStr] = Form(None)):
+    """Update basic user fields (name, email). Only owner or super-admin may update subaccounts."""
+    caller = await get_user_from_token(request)
+    if not caller: raise HTTPException(status_code=401)
+    caller_doc = await db.users.find_one({"user_id": caller.user_id})
+    if not caller_doc or (caller_doc.get("role") != "owner" and not is_super_admin(caller_doc)):
+        raise HTTPException(status_code=403)
+    target = await db.users.find_one({"user_id": user_id})
+    if not target: raise HTTPException(status_code=404)
+    update = {}
+    if name is not None: update["name"] = name
+    if email is not None: update["email"] = email
+    if update:
+        await db.users.update_one({"user_id": user_id}, {"$set": update})
+    return {"status": "success"}
 
 @api_router.post("/auth/login")
 async def login(data: LoginRequest, response: Response):
