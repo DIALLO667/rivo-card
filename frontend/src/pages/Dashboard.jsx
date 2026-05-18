@@ -202,20 +202,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {showCreateSub && (
-          <div className="max-w-2xl mx-auto mt-8 p-6 bg-[#161718] rounded-xl border border-white/5">
-            <h3 className="text-lg font-bold mb-4">Créer une filiale</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <Input placeholder="Nom" value={newName} onChange={(e) => setNewName(e.target.value)} className="h-10" />
-              <Input placeholder="Email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="h-10" />
-              <Input placeholder="Mot de passe" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="h-10" />
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={createSubaccount} className="bg-[#D4AF37] text-black">Créer</Button>
-              <Button variant="ghost" onClick={() => setShowCreateSub(false)}>Annuler</Button>
-            </div>
-          </div>
-        )}
+        {/* Subaccount creation moved to dedicated /subaccounts page */}
       </div>
     </div>
   );
