@@ -16,9 +16,17 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [subaccounts, setSubaccounts] = useState([]);
+  const [showCreateSub, setShowCreateSub] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newName, setNewName] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [ownerOverview, setOwnerOverview] = useState(false);
+  const [selectedSub, setSelectedSub] = useState('all');
 
   useEffect(() => {
     fetchProfiles();
+    fetchSubaccounts();
   }, []);
 
   useEffect(() => {
@@ -53,20 +61,57 @@ export default function Dashboard() {
     setFilteredProfiles(result);
   }, [searchQuery, profiles, filterType]);
 
-  const fetchProfiles = async () => {
+  const fetchProfiles = async (opts = {}) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      const params = {};
+      if (ownerOverview) params.scope = 'all';
       const response = await axios.get(`${API}/profiles`, { 
         headers: { Authorization: `Bearer ${token}` },
+        params,
         withCredentials: true 
       });
-      setProfiles(response.data);
+      let data = response.data || [];
+      // If a specific subaccount is selected, filter client-side
+      if (selectedSub && selectedSub !== 'all') {
+        data = data.filter(p => p.user_id === selectedSub);
+      }
+      setProfiles(data);
     } catch (error) {
       console.error(error);
       toast.error('Erreur lors du chargement des profils');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSubaccounts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      const list = res.data?.subaccounts || [];
+      setSubaccounts(list);
+    } catch (e) {
+      // ignore - user may not be owner
+      setSubaccounts([]);
+    }
+  };
+
+  const createSubaccount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const fd = new FormData();
+      fd.append('email', newEmail);
+      fd.append('password', newPassword);
+      fd.append('name', newName);
+      await axios.post(`${API}/users`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      toast.success('Filiale créée');
+      setNewEmail(''); setNewName(''); setNewPassword(''); setShowCreateSub(false);
+      fetchSubaccounts();
+    } catch (err) {
+      console.error(err);
+      toast.error('Erreur lors de la création de la filiale');
     }
   };
 
@@ -128,9 +173,25 @@ export default function Dashboard() {
               className="pl-10 bg-[#1a1c1e] border-white/10 h-12 rounded-xl"
             />
           </div>
-          <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-8 rounded-xl">
-            <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-[#111214] border border-white/10 h-10 px-3 rounded">
+                <option value="all">Tous mes profils</option>
+                <option value="me">Mes profils</option>
+                {subaccounts.map(s => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
+              </select>
+              <label className="flex items-center gap-2 text-sm text-gray-400">
+                <input type="checkbox" checked={ownerOverview} onChange={(e) => { setOwnerOverview(e.target.checked); fetchProfiles(); }} /> Vue d'ensemble
+              </label>
+            </div>
+
+            <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
+              <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
+            </Button>
+            <Button onClick={() => setShowCreateSub(v => !v)} variant="ghost" className="h-12">
+              <Users className="mr-2 h-5 w-5" /> Filiales
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
@@ -199,6 +260,21 @@ export default function Dashboard() {
                 <p>Aucun membre trouvé pour ce filtre</p>
               </div>
             )}
+          </div>
+        )}
+
+        {showCreateSub && (
+          <div className="max-w-2xl mx-auto mt-8 p-6 bg-[#161718] rounded-xl border border-white/5">
+            <h3 className="text-lg font-bold mb-4">Créer une filiale</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <Input placeholder="Nom" value={newName} onChange={(e) => setNewName(e.target.value)} className="h-10" />
+              <Input placeholder="Email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="h-10" />
+              <Input placeholder="Mot de passe" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="h-10" />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={createSubaccount} className="bg-[#D4AF37] text-black">Créer</Button>
+              <Button variant="ghost" onClick={() => setShowCreateSub(false)}>Annuler</Button>
+            </div>
           </div>
         )}
       </div>
