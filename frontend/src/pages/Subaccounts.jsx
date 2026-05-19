@@ -103,21 +103,6 @@ export default function Subaccounts() {
     }
   };
 
-  const assignMohamedToAmadou = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const fd = new FormData();
-      fd.append('target_email', 'mohamed@rivostudio.com');
-      fd.append('parent_email', 'amadou@rivostudio.com');
-      await axios.post(`${API}/users/assign`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
-      toast.success('Mohamed assigné à Amadou');
-      fetchSubs();
-    } catch (e) {
-      console.error('assign error', e?.response || e);
-      toast.error('Impossible d\'assigner Mohamed');
-    }
-  };
-
   // helper: get count of profiles for a given user id (calls /api/profiles?scope=all once and counts matching user_id)
   const fetchProfileCounts = useCallback(async () => {
     try {
@@ -188,17 +173,19 @@ export default function Subaccounts() {
           </div>
         )}
 
-        <div className="mb-6 p-4 bg-[#131314] rounded-lg">
-          <h3 className="font-semibold mb-2">Créer une filiale</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-            <Input placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} />
-            <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <Input placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+        {(currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com')) && (
+          <div className="mb-6 p-4 bg-[#131314] rounded-lg">
+            <h3 className="font-semibold mb-2">Créer une filiale</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <Input placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} />
+              <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+            </div>
+            <div className="mt-3">
+              <Button onClick={createSub} className="bg-[#D4AF37] text-black">Créer</Button>
+            </div>
           </div>
-          <div className="mt-3">
-            <Button onClick={createSub} className="bg-[#D4AF37] text-black">Créer</Button>
-          </div>
-        </div>
+        )}
 
         <div className="bg-[#131314] rounded-lg p-4">
           <h3 className="font-semibold mb-3">Filiales existantes</h3>
@@ -262,7 +249,7 @@ export default function Subaccounts() {
           </div>
         )}
         <div className="mt-4 max-w-4xl mx-auto">
-          <Button onClick={assignMohamedToAmadou} className="bg-[#D4AF37] text-black">Assigner mohamed@rivostudio.com à amadou@rivostudio.com</Button>
+          {/* Creation form is shown only to owners/admins or amadou */}
         </div>
       </div>
     </div>
