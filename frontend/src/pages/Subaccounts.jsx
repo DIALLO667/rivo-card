@@ -160,8 +160,8 @@ export default function Subaccounts() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#083247] text-white flex flex-col justify-between transition-width duration-200`}>
+  {/* Sidebar - near-black for a luxe look */}
+  <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">
             <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
@@ -176,18 +176,22 @@ export default function Subaccounts() {
           </div>
 
           <nav className="mt-6 px-2">
-            <ul className="space-y-1">
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 cursor-pointer flex items-center gap-3">
-                <span className="font-medium">Tableau de Bord</span>
+            <ul className="space-y-3">
+              <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">Tableau de Bord</span>
               </li>
-              <li className="px-3 py-2 rounded-md bg-white text-[#04172a] flex items-center gap-3">
-                <span className="font-medium">Gestion des Membres</span>
+              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-transparent">
+                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
+                <span className="font-medium text-sm tracking-wide">Gestion des Membres</span>
               </li>
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">Gestion des Liens</span>
+              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">Gestion des Liens</span>
               </li>
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">Archivés</span>
+              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">Archivés</span>
               </li>
             </ul>
           </nav>
@@ -238,10 +242,10 @@ export default function Subaccounts() {
               <div>Chargement...</div>
             ) : (
               subs.length === 0 ? <div className="text-sm text-gray-600">Aucune filiale trouvée</div> : subs.map((s) => (
-                <div key={s.user_id} className="bg-white rounded-lg p-4 shadow-sm flex items-center justify-between">
+                <div key={s.user_id} className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow-2xl flex items-center justify-between border border-gray-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#D4AF37] bg-gray-100 flex items-center justify-center">
-                      <div className="text-gray-700">{s.name?.charAt(0) || 'U'}</div>
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500 bg-gray-100 flex items-center justify-center shadow-inner">
+                      <div className="text-gray-700 font-semibold">{s.name?.charAt(0) || 'U'}</div>
                     </div>
                     <div>
                       <div className="font-semibold text-gray-900">{s.name} {s.is_active === false && <span className="text-xs text-red-500 ml-2">(désactivé)</span>}</div>

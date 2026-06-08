@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import defaultCover from '../assets/jamaney-cad.png';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -129,8 +128,8 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar - collapsible, thinner and lighter blue */}
-      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#083247] text-white flex flex-col justify-between transition-width duration-200`}>
+  {/* Sidebar - collapsible, near-black for a luxe look */}
+  <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">
             <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
@@ -145,18 +144,22 @@ export default function Dashboard() {
           </div>
 
           <nav className="mt-6 px-2">
-            <ul className="space-y-1">
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 cursor-pointer flex items-center gap-3">
-                <span className="font-medium">{!sidebarCollapsed && 'Tableau de Bord'}</span>
+            <ul className="space-y-3">
+              <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
               </li>
-              <li className="px-3 py-2 rounded-md bg-white text-[#083247] flex items-center gap-3">
-                <span className="font-medium">{!sidebarCollapsed && 'Gestion des Membres'}</span>
+              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-transparent">
+                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Membres'}</span>
               </li>
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">{!sidebarCollapsed && 'Gestion des Liens'}</span>
+              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Liens'}</span>
               </li>
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">{!sidebarCollapsed && 'Archivés'}</span>
+              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Archivés'}</span>
               </li>
             </ul>
           </nav>
@@ -216,12 +219,9 @@ export default function Dashboard() {
               {filteredProfiles.length > 0 ? filteredProfiles.map((profile) => {
                 const days = getDaysUntilRenewal(profile.created_at);
                 return (
-                  <div key={profile.profile_id} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg border border-gray-100 transition-all">
-            <div className="h-28 w-full bg-gray-100 relative">
-              <img src={profile.cover_url || defaultCover} className="w-full h-full object-cover opacity-45" alt="cover" />
-                      <div className="absolute top-4 right-4">
-                        {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="px-3 py-1 rounded-full bg-[#D4AF37] text-black font-semibold">{days}j restants</Badge> : <Badge className="px-3 py-1 rounded-full bg-emerald-600 text-white font-semibold">Actif</Badge>}
-                      </div>
+                  <div key={profile.profile_id} className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg border border-gray-100 transition-all">
+                    <div className="absolute top-4 right-4 z-10">
+                      {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="px-3 py-1 rounded-full bg-[#D4AF37] text-black font-semibold">{days}j restants</Badge> : <Badge className="px-3 py-1 rounded-full bg-emerald-600 text-white font-semibold">Actif</Badge>}
                     </div>
 
                     <div className="p-6">
