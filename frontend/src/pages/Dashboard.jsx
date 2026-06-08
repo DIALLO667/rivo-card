@@ -237,6 +237,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
+                    <option value="all">Tous</option>
                     <option value="me">Mes profils</option>
                     {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
                   </select>
@@ -278,7 +279,11 @@ export default function Dashboard() {
 
                     <div className="p-6">
                       <div className="flex items-center gap-4 mb-6">
-                        <img src={profile.photo_url} className="w-16 h-16 rounded-full border-4 border-[#D4AF37] object-cover shadow-sm" alt="" />
+                        {profile.photo_url ? (
+                          <img src={profile.photo_url} className="w-16 h-16 rounded-full border-4 border-[#D4AF37] object-cover shadow-sm" alt={profile.name || 'Photo'} onError={(e) => { e.target.style.display = 'none'; }} />
+                        ) : (
+                          <div className="w-16 h-16 rounded-full border-4 border-[#D4AF37] bg-gray-100 flex items-center justify-center font-semibold text-gray-700">{(profile.name || 'U').charAt(0)}</div>
+                        )}
                         <div>
                           <h3 className="font-semibold text-gray-900 text-lg">{profile.name}</h3>
                           <div className="flex items-center text-gray-600 text-[12px] uppercase tracking-wider">
@@ -288,8 +293,8 @@ export default function Dashboard() {
                       </div>
 
                       <div className="flex gap-3 mb-3">
-                        <Button onClick={() => window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Voir</Button>
-                        <Button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm">Copier</Button>
+                        <Button onClick={() => profile.unique_link && window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Voir</Button>
+                        <Button onClick={() => profile.unique_link && navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Copier</Button>
                         <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
                         <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>
