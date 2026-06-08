@@ -28,7 +28,8 @@ export default function Dashboard() {
   const [selectedSub, setSelectedSub] = useState('all');
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
-  const fetchProfiles = useCallback(async () => {
+  // load profiles; intentionally a plain function (not a stable callback) to avoid dependency cycles
+  const fetchProfiles = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -57,19 +58,21 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
+  };
 
-  const fetchSubaccounts = useCallback(async () => {
+  const fetchSubaccounts = async () => {
     try {
       const token = localStorage.getItem('token');
       const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       setSubaccounts(res.data?.subaccounts || []);
+      return res.data?.subaccounts || [];
     } catch (e) {
       setSubaccounts([]);
+      return [];
     }
-  }, []);
+  };
 
-  const fetchMe = useCallback(async () => {
+  const fetchMe = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return null;
@@ -78,27 +81,30 @@ export default function Dashboard() {
     } catch (e) {
       return null;
     }
-  }, []);
+  };
 
   useEffect(() => {
-    // compute the initial sub from the current URL on mount so it doesn't need to be a dependency
-    try {
-      const qs = new URL(window.location.href).searchParams;
-      const param = qs.get('sub') || 'all';
-      if (param && param !== 'all') setSelectedSub(param);
-    } catch (e) {
-      // ignore if URL parsing fails
-    }
+    // mount loader: fetch current user, subaccounts, then profiles. Using local flow avoids dependency cycles.
     (async () => {
-      const me = await fetchMe();
-      setCurrentUser(me);
-      if (!me) {
-        // If not authenticated, let fetchProfiles handle errors/navigation
+      try {
+        // compute the initial sub from the current URL
+        try {
+          const qs = new URL(window.location.href).searchParams;
+          const param = qs.get('sub') || 'all';
+          if (param && param !== 'all') setSelectedSub(param);
+        } catch (e) {
+          // ignore if URL parsing fails
+        }
+
+        const me = await fetchMe();
+        setCurrentUser(me);
+        await fetchSubaccounts();
+        await fetchProfiles();
+      } catch (e) {
+        console.error('initial load error', e);
       }
-      await fetchSubaccounts();
-      await fetchProfiles();
     })();
-  }, [fetchProfiles, fetchSubaccounts, fetchMe]);
+  }, []);
 
   useEffect(() => {
     let result = [...profiles];
