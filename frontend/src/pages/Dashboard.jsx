@@ -101,9 +101,9 @@ export default function Dashboard() {
         }
 
         // inline fetchMe
+        let me = null;
         try {
           const token = localStorage.getItem('token');
-          let me = null;
           if (token) {
             try {
               const res = await axios.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
