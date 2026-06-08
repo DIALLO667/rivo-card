@@ -81,7 +81,7 @@ def transform_and_upload(buf, public_id=None):
     try:
         res = cloudinary.uploader.upload(
             buf,
-            folder='jpm_photos',
+            folder='rivo_photos',
             resource_type='image',
             public_id=public_id,
             overwrite=True,

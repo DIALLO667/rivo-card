@@ -1,4 +1,4 @@
-# 🚀 Guide de déploiement GitHub - JPM Cartes de Visite NFC
+# 🚀 Guide de déploiement GitHub - Rivo-Card Cartes de Visite NFC
 
 ## 📦 Récupération du code
 
@@ -11,8 +11,8 @@
 
 2. **Décompresser le ZIP** :
 ```bash
-unzip jpm-nfc-cards.zip
-cd jpm-nfc-cards
+unzip rivo-card.zip
+cd rivo-card
 ```
 
 ### Option 2 : Via SSH depuis le pod Emergent
@@ -22,11 +22,11 @@ Si vous avez accès SSH au pod :
 ```bash
 # Créer une archive du projet
 cd /app
-tar -czf jpm-project.tar.gz backend/ frontend/ --exclude=node_modules --exclude=.venv --exclude=uploads
+tar -czf rivo-project.tar.gz backend/ frontend/ --exclude=node_modules --exclude=.venv --exclude=uploads
 
 # Télécharger via SCP (depuis votre machine locale)
-scp user@pod-address:/app/jpm-project.tar.gz .
-tar -xzf jpm-project.tar.gz
+scp user@pod-address:/app/rivo-project.tar.gz .
+tar -xzf rivo-project.tar.gz
 ```
 
 ---
@@ -89,7 +89,7 @@ Thumbs.db
 **backend/.env.example** :
 ```env
 MONGO_URL=mongodb://localhost:27017
-DB_NAME=jpm_database
+DB_NAME=rivo_database
 CORS_ORIGINS=*
 ```
 
@@ -103,7 +103,7 @@ ENABLE_HEALTH_CHECK=false
 ### 3. Créer un README.md principal
 
 ```markdown
-# JPM - Plateforme de Cartes de Visite Digitales NFC
+# Rivo-Card - Plateforme de Cartes de Visite Digitales NFC
 
 Plateforme complète de gestion de cartes de visite digitales NFC avec panel administrateur et pages publiques.
 
@@ -142,7 +142,7 @@ Voir [INSTALLATION.md](./INSTALLATION.md)
 
 ## 📄 Licence
 
-Propriétaire - JPM © 2026
+Propriétaire - Rivo-Card © 2026
 ```
 
 ---
@@ -155,14 +155,14 @@ Propriétaire - JPM © 2026
 cd /app
 git init
 git add .
-git commit -m "Initial commit: JPM NFC Cards Platform"
+git commit -m "Initial commit: Rivo-Card NFC Cards Platform"
 ```
 
 ### 2. Créer un dépôt sur GitHub
 
 1. Allez sur https://github.com
 2. Cliquez sur "New repository"
-3. Nommez-le : `jpm-nfc-cards-platform`
+3. Nommez-le : `rivo-card`
 4. **NE PAS** initialiser avec README
 5. Créez le dépôt
 
@@ -170,7 +170,7 @@ git commit -m "Initial commit: JPM NFC Cards Platform"
 
 ```bash
 # Ajouter le remote
-git remote add origin https://github.com/VOTRE-USERNAME/jpm-nfc-cards-platform.git
+git remote add origin https://github.com/VOTRE-USERNAME/rivo-card.git
 
 # Renommer la branche principale en main
 git branch -M main
@@ -219,7 +219,7 @@ git commit -m "Remove sensitive files"
 ## 📦 Structure du projet sur GitHub
 
 ```
-jpm-nfc-cards-platform/
+rivo-card/
 ├── backend/
 │   ├── server.py
 │   ├── requirements.txt
@@ -267,4 +267,4 @@ git merge feature/nouvelle-fonctionnalite
 
 ## 📞 Support
 
-Pour toute question : contact@jpm.com
+Pour toute question : contact@rivo-card.com

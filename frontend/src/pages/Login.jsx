@@ -55,7 +55,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[#0f1113] p-4">
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#F5E0A3]">JPM</h1>
+          <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#F5E0A3]">Rivocard</h1>
           <p className="text-[#D4AF37] text-sm tracking-widest uppercase mt-2">Cartes de visite digitales</p>
         </div>
         <div className="bg-[#1a1c1e]/80 backdrop-blur-xl border border-[#D4AF37]/20 rounded-2xl p-8 shadow-2xl">

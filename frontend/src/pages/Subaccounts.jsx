@@ -158,52 +158,93 @@ export default function Subaccounts() {
   }, [fetchMe, fetchSubs, fetchProfileCounts, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#0f1113] text-white px-6 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Filiales</h2>
-          <Button onClick={() => navigate('/dashboard')} variant="ghost">Retour</Button>
+    <div className="flex min-h-screen">
+      {/* Sidebar */}
+      <aside className="w-64 fixed left-0 top-0 bottom-0 bg-[#04172a] text-white flex flex-col justify-between">
+        <div>
+          <div className="px-6 py-6">
+            <div className="text-white font-extrabold text-lg">RIVO-CARD <span className="text-[#D4AF37]">ADMIN</span></div>
+            <div className="mt-3 text-sm text-white/80">Tableau de bord & gestion</div>
+          </div>
+
+          <nav className="mt-6 px-2">
+            <ul className="space-y-1">
+              <li className="px-3 py-2 rounded-md hover:bg-white/5 cursor-pointer flex items-center gap-3">
+                <span className="font-medium">Tableau de Bord</span>
+              </li>
+              <li className="px-3 py-2 rounded-md bg-white text-[#04172a] flex items-center gap-3">
+                <span className="font-medium">Gestion des Membres</span>
+              </li>
+              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
+                <span className="font-medium">Gestion des Liens</span>
+              </li>
+              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
+                <span className="font-medium">Archivés</span>
+              </li>
+            </ul>
+          </nav>
         </div>
 
-        {/* Debug panel - enable by adding ?debug=1 to the URL */}
-        {new URL(window.location.href).searchParams.get('debug') === '1' && (
-          <div className="mb-4 p-3 bg-[#111] rounded">
-            <div className="font-semibold">Debug</div>
-            <pre className="text-xs mt-2 text-gray-300 whitespace-pre-wrap">{JSON.stringify({ currentUser, lastRequest }, null, 2)}</pre>
+        <div className="px-4 py-6">
+          <div className="border-t border-white/5 pt-4">
+            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
           </div>
-        )}
+        </div>
+      </aside>
 
-        {(currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com')) && (
-          <div className="mb-6 p-4 bg-[#131314] rounded-lg">
-            <h3 className="font-semibold mb-2">Créer une filiale</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              <Input placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} />
-              <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              <Input placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </div>
-            <div className="mt-3">
-              <Button onClick={createSub} className="bg-[#D4AF37] text-black">Créer</Button>
+      {/* Main content area */}
+      <main className="flex-1 ml-64 bg-gray-50 min-h-screen p-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold text-gray-900">Gestion des Filiales</h2>
+            <div className="flex items-center gap-3">
+              <Input placeholder="Rechercher un membre..." className="bg-white border-gray-200" />
+              <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black">+ Nouveau Profil</Button>
             </div>
           </div>
-        )}
 
-        <div className="bg-[#131314] rounded-lg p-4">
-          <h3 className="font-semibold mb-3">Filiales existantes</h3>
-          {loading ? (
-            <div>Chargement...</div>
-          ) : (
-            <div className="space-y-3">
-              {subs.length === 0 ? <div className="text-sm text-gray-400">Aucune filiale trouvée</div> : subs.map((s) => (
-                <div key={s.user_id} className="flex items-center justify-between p-3 bg-[#0f1113] rounded">
-                  <div>
-                    <div className="font-bold">{s.name} {s.is_active === false && <span className="text-xs text-red-400 ml-2">(désactivé)</span>}</div>
-                    <div className="text-xs text-gray-400">{s.email}</div>
-                    <div className="text-xs text-gray-500">Créé le: {new Date(s.created_at).toLocaleString()}</div>
+          {/* Debug panel - enable by adding ?debug=1 to the URL */}
+          {new URL(window.location.href).searchParams.get('debug') === '1' && (
+            <div className="mb-4 p-3 bg-white rounded shadow-sm">
+              <div className="font-semibold">Debug</div>
+              <pre className="text-xs mt-2 text-gray-700 whitespace-pre-wrap">{JSON.stringify({ currentUser, lastRequest }, null, 2)}</pre>
+            </div>
+          )}
+
+          {(currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin' || currentUser.email === 'amadou@rivostudio.com')) && (
+            <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+              <h3 className="font-medium text-gray-800 mb-3">Créer une filiale</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <Input placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} />
+                <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input placeholder="Mot de passe" value={password} onChange={(e) => setPassword(e.target.value)} />
+              </div>
+              <div className="mt-3 text-right">
+                <Button onClick={createSub} className="bg-white border border-gray-200 text-gray-800">Créer</Button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 gap-4">
+            {loading ? (
+              <div>Chargement...</div>
+            ) : (
+              subs.length === 0 ? <div className="text-sm text-gray-600">Aucune filiale trouvée</div> : subs.map((s) => (
+                <div key={s.user_id} className="bg-white rounded-lg p-4 shadow-sm flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#D4AF37] bg-gray-100 flex items-center justify-center">
+                      <div className="text-gray-700">{s.name?.charAt(0) || 'U'}</div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-gray-900">{s.name} {s.is_active === false && <span className="text-xs text-red-500 ml-2">(désactivé)</span>}</div>
+                      <div className="text-sm text-gray-600">{s.email}</div>
+                      <div className="text-xs text-gray-400">Créé le: {new Date(s.created_at).toLocaleString()}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-sm text-gray-300">Profils: {counts[s.user_id] || 0}</div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm text-gray-700">Profils: {counts[s.user_id] || 0}</div>
                     <Button onClick={async () => {
-                      // toggle active
                       try {
                         const token = localStorage.getItem('token');
                         const res = await axios.patch(`${API}/users/${s.user_id}/toggle_active`, null, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
@@ -213,45 +254,43 @@ export default function Subaccounts() {
                         console.error('toggle error', e?.response || e);
                         toast.error('Impossible de changer l\'état');
                       }
-                    }} className="text-sm">{s.is_active === false ? 'Activer' : 'Désactiver'}</Button>
-                    <Button onClick={() => { setEditingId(s.user_id); setEditName(s.name); setEditEmail(s.email); }} className="text-sm">Modifier</Button>
+                    }} className="text-sm bg-white border border-gray-200 text-gray-700">{s.is_active === false ? 'Activer' : 'Désactiver'}</Button>
+                    <Button onClick={() => { setEditingId(s.user_id); setEditName(s.name); setEditEmail(s.email); }} className="text-sm bg-white border border-gray-200 text-gray-700">Modifier</Button>
                   </div>
                 </div>
-              ))}
+              ))
+            )}
+          </div>
+
+          {editingId && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+              <div className="bg-white p-4 rounded max-w-md w-full shadow-lg">
+                <h4 className="font-semibold mb-2 text-gray-800">Modifier filiale</h4>
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom" />
+                <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email" className="mt-2" />
+                <div className="mt-3 flex justify-end space-x-2">
+                  <Button onClick={() => setEditingId(null)} variant="ghost">Annuler</Button>
+                  <Button onClick={async () => {
+                    try {
+                      const token = localStorage.getItem('token');
+                      const fd = new FormData();
+                      fd.append('name', editName);
+                      fd.append('email', editEmail);
+                      await axios.put(`${API}/users/${editingId}`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+                      toast.success('Filiale modifiée');
+                      setEditingId(null);
+                      fetchSubs();
+                    } catch (e) {
+                      console.error('update error', e?.response || e);
+                      toast.error('Impossible de modifier');
+                    }
+                  }} className="bg-[#04172a] text-white">Enregistrer</Button>
+                </div>
+              </div>
             </div>
           )}
         </div>
-        {editingId && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-            <div className="bg-[#111] p-4 rounded max-w-md w-full">
-              <h4 className="font-semibold mb-2">Modifier filiale</h4>
-              <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nom" />
-              <Input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email" className="mt-2" />
-              <div className="mt-3 flex justify-end space-x-2">
-                <Button onClick={() => setEditingId(null)} variant="ghost">Annuler</Button>
-                <Button onClick={async () => {
-                  try {
-                    const token = localStorage.getItem('token');
-                    const fd = new FormData();
-                    fd.append('name', editName);
-                    fd.append('email', editEmail);
-                    await axios.put(`${API}/users/${editingId}`, fd, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
-                    toast.success('Filiale modifiée');
-                    setEditingId(null);
-                    fetchSubs();
-                  } catch (e) {
-                    console.error('update error', e?.response || e);
-                    toast.error('Impossible de modifier');
-                  }
-                }}>Enregistrer</Button>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className="mt-4 max-w-4xl mx-auto">
-          {/* Creation form is shown only to owners/admins or amadou */}
-        </div>
-      </div>
+      </main>
     </div>
   );
 }

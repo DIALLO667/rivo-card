@@ -1,6 +1,6 @@
 {
   "identity": {
-    "brand_name": "JPM Digital",
+  "brand_name": "Rivo-Card",
     "tone": "Luxury, Professional, Modern, Exclusive",
     "themes": {
       "admin": "Dark Luxury (Gold Accents)",
@@ -54,7 +54,7 @@
     },
     "tailwind_extension": {
       "colors": {
-        "jpm": {
+        "rivo": {
           "black": "#050505",
           "gold": "#D4AF37",
           "gold-dim": "#8A7E55",
@@ -87,7 +87,7 @@
   "layout_strategies": {
     "admin_dashboard": {
       "structure": "Sidebar (Left, Fixed, 260px) + Header (Top, Sticky) + Main Content (Fluid)",
-      "sidebar_style": "bg-jpm-surface border-r border-jpm-gold/10",
+  "sidebar_style": "bg-rivo-surface border-r border-rivo-gold/10",
       "grid": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6"
     },
     "public_profile": {
@@ -99,14 +99,14 @@
   "components": {
     "ui_primitives": {
       "button": {
-        "primary": "bg-jpm-gold text-black font-semibold rounded-lg px-6 py-3 hover:bg-jpm-gold-light transition-colors shadow-lg",
+  "primary": "bg-rivo-gold text-black font-semibold rounded-lg px-6 py-3 hover:bg-rivo-gold-light transition-colors shadow-lg",
         "secondary": "bg-white/5 text-white border border-white/10 hover:bg-white/10 backdrop-blur-sm"
       },
       "card": {
-        "admin": "bg-jpm-surface border border-white/5 rounded-xl p-6 shadow-sm hover:border-jpm-gold/20 transition-colors",
+  "admin": "bg-rivo-surface border border-white/5 rounded-xl p-6 shadow-sm hover:border-rivo-gold/20 transition-colors",
         "public": "bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-white"
       },
-      "input": "h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-white focus:border-jpm-gold outline-none transition-colors"
+  "input": "h-12 bg-white/5 border border-white/10 rounded-lg px-4 text-white focus:border-rivo-gold outline-none transition-colors"
     },
     "icons": {
       "library": "lucide-react",
@@ -136,7 +136,7 @@
     "mobile": "Public pages must be strictly mobile-first. Width constrained to max-w-md on desktop with a centered layout."
   },
   "implementation_steps": [
-    "Update tailwind.config.js with the 'jpm' color palette and font families.",
+  "Update tailwind.config.js with the 'rivo' color palette and font families.",
     "Install 'lucide-react', 'framer-motion', 'sonner', 'clsx', 'tailwind-merge' if not present.",
     "Create a reusable 'GlassCard' component for the public profile.",
     "Create a 'DashboardLayout' component with the dark/gold sidebar.",

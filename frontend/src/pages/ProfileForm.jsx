@@ -159,7 +159,7 @@ export default function ProfileForm() {
     <div className="min-h-screen bg-[#0f1113] text-white p-4 md:p-8 flex justify-center items-center">
       <div className="w-full max-w-2xl bg-[#1a1c1e] p-6 md:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
         <h1 className="text-2xl font-bold mb-8 text-[#D4AF37]">
-          {profileId ? "MODIFIER LE PROFIL" : "NOUVEAU PROFIL JPM"}
+          {profileId ? "MODIFIER LE PROFIL" : "NOUVEAU PROFIL Rivo-Card"}
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">

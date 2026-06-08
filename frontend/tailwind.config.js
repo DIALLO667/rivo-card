@@ -13,8 +13,8 @@ module.exports = {
         outfit: ['Outfit', 'system-ui', 'sans-serif'],
       },
       colors: {
-        /* On garde tes couleurs JPM d'origine */
-        jpm: {
+        /* Rivo-Card brand colors */
+        rivo: {
           black: '#050505',
           gold: '#D4AF37',
           'gold-dim': '#8A7E55',

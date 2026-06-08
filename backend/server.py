@@ -22,6 +22,14 @@ import requests
 from PIL import Image
 import logging
 
+# Optional local face detection dependencies (used only if installed)
+try:
+    import cv2
+    import numpy as np
+    HAS_CV2 = True
+except Exception:
+    HAS_CV2 = False
+
 # Max image size allowed for conversion (bytes)
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10 MB
 
@@ -96,6 +104,57 @@ def read_upload_limited(upload: UploadFile, max_size: int) -> io.BytesIO:
         buf.write(chunk)
     buf.seek(0)
     return buf
+
+
+def local_face_crop(buf: io.BytesIO, target_size=(400, 400)) -> Optional[io.BytesIO]:
+    """Attempt to detect a face locally using OpenCV and return a cropped/resized image buffer.
+    Returns None if detection or processing fails or OpenCV is not available.
+    """
+    if not HAS_CV2:
+        return None
+    try:
+        buf.seek(0)
+        data = buf.read()
+        arr = np.frombuffer(data, dtype=np.uint8)
+        img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+        if img is None:
+            return None
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # Use Haar cascade shipped with OpenCV
+        cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+        face_cascade = cv2.CascadeClassifier(cascade_path)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        if len(faces) == 0:
+            return None
+        # choose largest face
+        faces = sorted(faces, key=lambda r: r[2] * r[3], reverse=True)
+        x, y, w, h = faces[0]
+        # expand box to include hair/neck (padding factor)
+        pad = int(max(w, h) * 0.8)
+        cx = x + w // 2
+        cy = y + h // 2
+        # shift center slightly down to include more hair/neck
+        cy = int(cy + 0.15 * h)
+        tw, th = target_size
+        tx = int(max(0, cx - tw // 2))
+        ty = int(max(0, cy - th // 2))
+        img_h, img_w = img.shape[:2]
+        if tx + tw > img_w:
+            tx = max(0, img_w - tw)
+        if ty + th > img_h:
+            ty = max(0, img_h - th)
+        # convert BGR -> RGB and crop via PIL for reliable resizing
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        pil = Image.fromarray(img_rgb)
+        crop_box = (tx, ty, tx + tw, ty + th)
+        cropped = pil.crop(crop_box).resize(target_size, Image.LANCZOS)
+        out = io.BytesIO()
+        # save as webp for better compression; transparency not added here
+        cropped.save(out, format='WEBP', quality=85)
+        out.seek(0)
+        return out
+    except Exception:
+        return None
 
 @app.get("/health")
 async def health_check():
@@ -350,14 +409,17 @@ async def create_profile(
     try:
         # enforce upload size limits before sending to cloudinary
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
+        # Attempt local face crop first (if OpenCV available); this avoids top-cropped heads
+        local_buf = local_face_crop(photo_buf)
+        upload_buf = local_buf if local_buf is not None else photo_buf
         # Upload image to Cloudinary with immediate transformation:
         # - Resize to 400x400
         # - Use smart crop (thumb) with face gravity so the face is centered
         # - Force output format to WebP with transparent background where supported
         # Attempt upload centered on detected face, with slight zoom-out to include hair/neck
         photo_res = cloudinary.uploader.upload(
-            photo_buf,
-            folder="jpm_photos",
+            upload_buf,
+            folder="rivo_photos",
             resource_type='image',
             public_id=None,
             transformation=[
@@ -365,20 +427,58 @@ async def create_profile(
                 {"format": "webp", "background": "transparent"}
             ]
         )
-        # If no face detected, build a fallback URL using gravity:auto on the uploaded public_id
+        # If Cloudinary returned face bbox coordinates, compute an explicit crop box centered a bit below the face center
         photo_public_id = photo_res.get('public_id')
-        if not photo_res.get('faces') and photo_public_id:
+        faces = photo_res.get('faces')
+        img_w = photo_res.get('width')
+        img_h = photo_res.get('height')
+        photo_url_final = photo_res.get('secure_url')
+        if faces and len(faces) > 0 and img_w and img_h and photo_public_id:
             try:
-                alt_url = cloudinary.CloudinaryImage(photo_public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"auto"}, {"format":"webp", "background":"transparent"}], secure=True)
-                photo_url_final = alt_url
+                # faces entries are [x, y, w, h] in pixels
+                fx, fy, fw, fh = faces[0]
+                # face center
+                cx = fx + fw / 2.0
+                cy = fy + fh / 2.0
+                # shift center slightly down to include hair/neck (~15% of face height)
+                cy = cy + 0.15 * fh
+                # target crop size
+                tw, th = 400, 400
+                # top-left coordinates
+                tx = int(max(0, cx - tw / 2.0))
+                ty = int(max(0, cy - th / 2.0))
+                # clamp to image bounds
+                if tx + tw > img_w:
+                    tx = int(max(0, img_w - tw))
+                if ty + th > img_h:
+                    ty = int(max(0, img_h - th))
+                # build a crop URL using absolute coordinates (crop + x/y)
+                crop_url = cloudinary.CloudinaryImage(photo_public_id).build_url(
+                    resource_type='image',
+                    transformation=[
+                        {"crop": "crop", "x": tx, "y": ty, "width": tw, "height": th},
+                        {"format": "webp", "background": "transparent"}
+                    ],
+                    secure=True
+                )
+                photo_url_final = crop_url
             except Exception:
-                photo_url_final = photo_res.get('secure_url')
+                # fallback to gravity auto
+                try:
+                    photo_url_final = cloudinary.CloudinaryImage(photo_public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"auto"}, {"format":"webp", "background":"transparent"}], secure=True)
+                except Exception:
+                    photo_url_final = photo_res.get('secure_url')
         else:
-            photo_url_final = photo_res.get('secure_url')
+            # no faces detected -> fallback to gravity:auto when possible
+            if photo_public_id:
+                try:
+                    photo_url_final = cloudinary.CloudinaryImage(photo_public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"auto"}, {"format":"webp", "background":"transparent"}], secure=True)
+                except Exception:
+                    photo_url_final = photo_res.get('secure_url')
         cover_res = None
         if cover:
             cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
-            cover_res = cloudinary.uploader.upload(cover_buf, folder="jpm_covers")
+            cover_res = cloudinary.uploader.upload(cover_buf, folder="rivo_covers")
         now = datetime.now(timezone.utc).isoformat()
         profile_doc = {
             "profile_id": f"profile_{uuid.uuid4().hex[:12]}", "user_id": user.user_id,
@@ -473,10 +573,12 @@ async def update_profile(
     }
     if photo:
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
+        local_buf = local_face_crop(photo_buf)
+        upload_buf = local_buf if local_buf is not None else photo_buf
         # Attempt upload centered on detected face with slight zoom-out
         res = cloudinary.uploader.upload(
-            photo_buf,
-            folder="jpm_photos",
+            upload_buf,
+            folder="rivo_photos",
             resource_type='image',
             transformation=[
                 {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.75, "y": 20},
@@ -495,7 +597,7 @@ async def update_profile(
             update_data["photo_url"] = res.get('secure_url')
     if cover:
         cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
-        res = cloudinary.uploader.upload(cover_buf, folder="jpm_covers")
+        res = cloudinary.uploader.upload(cover_buf, folder="rivo_covers")
         update_data["cover_url"] = res['secure_url']
 
     await db.profiles.update_one({"profile_id": profile_id, "user_id": user.user_id}, {"$set": update_data})
@@ -606,7 +708,7 @@ async def generate_vcard(profile_id: str):
         out_io.write(vcard.encode('utf-8'))
         out_io.seek(0)
         # Upload vcard as a raw file to Cloudinary. This avoids relying on local filesystem in production.
-        res = cloudinary.uploader.upload(out_io, resource_type='raw', folder='jpm_vcards', public_id=profile_id)
+        res = cloudinary.uploader.upload(out_io, resource_type='raw', folder='rivo_vcards', public_id=profile_id)
         secure_url = res.get('secure_url')
         if secure_url:
             # Return the Cloudinary URL so callers can download the vCard

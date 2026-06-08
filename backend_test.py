@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for JPM NFC Business Cards Platform
+Backend API Testing for Rivo-Card NFC Business Cards Platform
 Tests all authentication, profile management, and file operations
 """
 
@@ -92,7 +92,7 @@ class JPMAPITester:
         # Test login with provided credentials
         success, response = self.make_request(
             "POST", "auth/login",
-            data={"email": "admin@jpm.com", "password": "test123"}
+            data={"email": "admin@rivo-card.com", "password": "test123"}
         )
         
         if success and 'session_token' in response:
@@ -119,11 +119,11 @@ class JPMAPITester:
         print("\n👤 Testing Profile Creation...")
         
         test_profile_data = {
-            "name": "Test Profile JPM",
+            "name": "Test Profile Rivo-Card",
             "job": "Test Engineer NFC", 
             "phone": "+33612345678",
             "whatsapp": "+33612345678",
-            "website": "https://test.jpm.com",
+            "website": "https://test.rivo-card.com",
             "address": "123 Rue de Test, 75001 Paris",
             "instagram": "@testjpm",
             "facebook": "facebook.com/testjpm",
@@ -287,7 +287,7 @@ class JPMAPITester:
 
     def run_all_tests(self):
         """Execute all test suites"""
-        print("🚀 Starting JPM API Testing...")
+    print("🚀 Starting Rivo-Card API Testing...")
         print(f"Backend URL: {self.base_url}")
         
         # Authentication is required for most operations

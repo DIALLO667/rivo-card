@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 // Remplace par le chemin de ton image carte noire
-import jamanetCard from "../assets/jamaney-card.png";
+import rivoCard from "../assets/jamaney-card.png";
 
 const navLinks = [
   { label: "Fonctionnalités", href: "#features" },
@@ -48,8 +48,8 @@ const audiences = [
   { icon: UserCheck, label: "Professionnels" },
 ];
 
-const WHATSAPP_PARTNER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20suis%20interesse%20pour%20devenir%20partenaire%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
-const WHATSAPP_ORDER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20souhaite%20commander%20une%20carte%20JAMANEY%20CARD.&type=phone_number&app_absent=0";
+const WHATSAPP_PARTNER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20suis%20interesse%20pour%20devenir%20partenaire%20RIVO-CARD.&type=phone_number&app_absent=0";
+const WHATSAPP_ORDER = "https://api.whatsapp.com/send/?phone=%2B221785207689&text=Bonjour%2C%20je%20souhaite%20commander%20une%20carte%20RIVO-CARD.&type=phone_number&app_absent=0";
 
 const Accueil = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -133,7 +133,7 @@ const Accueil = () => {
             {/* Card image with gold glow */}
             <div className="flex justify-center">
             <div className="relative w-full max-w-md md:max-w-lg animate-pulse-glow">
-  <img src={jamanetCard} alt="..." className="w-full h-auto object-contain" />
+  <img src={rivoCard} alt="Rivo-Card" className="w-full h-auto object-contain" />
 </div>
 
             </div>
@@ -280,7 +280,7 @@ const Accueil = () => {
               🚀 Opportunité <span className="text-primary">Partenaire</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Tu veux gagner de l'argent avec JAMANEY CARD ? Deviens partenaire officiel et propose la carte aux entreprises, commerçants, entrepreneurs, influenceurs et responsables d'équipes.
+                Tu veux gagner de l'argent avec RIVO-CARD ? Deviens partenaire officiel et propose la carte aux entreprises, commerçants, entrepreneurs, influenceurs et responsables d'équipes.
             </p>
           </div>
 
@@ -387,7 +387,7 @@ const Accueil = () => {
       <footer className="border-t border-border/30 py-12 px-4">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-sm font-bold">
-            <span className="text-primary">JAMANEY</span> CARD
+            <span className="text-primary">RIVO-CARD</span>
           </p>
           <div className="flex gap-6">
             {navLinks.map((l) => (
@@ -397,7 +397,7 @@ const Accueil = () => {
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} JAMANEY CARD. Tous droits réservés.
+            © {new Date().getFullYear()} RIVO-CARD. Tous droits réservés.
           </p>
         </div>
       </footer>

@@ -1,8 +1,8 @@
-# 💼 JPM - Plateforme de Cartes de Visite Digitales NFC
+# 💼 Rivo-Card - Plateforme de Cartes de Visite Digitales NFC
 
 <div align="center">
 
-![JPM Logo](https://img.shields.io/badge/JPM-Cartes%20NFC-D4AF37?style=for-the-badge)
+![Rivo-Card Logo](https://img.shields.io/badge/Rivo-Card-Cartes%20NFC-D4AF37?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)
 
 Plateforme professionnelle de gestion de cartes de visite digitales NFC avec panel administrateur luxueux et pages publiques au design glassmorphism.
@@ -92,8 +92,8 @@ Plateforme professionnelle de gestion de cartes de visite digitales NFC avec pan
 ### 1. Cloner le repository
 
 ```bash
-git clone https://github.com/votre-username/jpm-nfc-cards-platform.git
-cd jpm-nfc-cards-platform
+git clone https://github.com/votre-username/rivo-card.git
+cd rivo-card
 ```
 
 ### 2. Configuration Backend
@@ -116,7 +116,7 @@ cp .env.example .env
 **backend/.env** :
 ```env
 MONGO_URL=mongodb://localhost:27017
-DB_NAME=jpm_database
+DB_NAME=rivo_database
 CORS_ORIGINS=http://localhost:3000,https://card-nfc.vercel.app/
 ```
 
@@ -172,7 +172,7 @@ L'application sera accessible sur **http://localhost:3000**
 ## 📁 Structure du Projet
 
 ```
-jpm-nfc-cards-platform/
+rivo-card/
 ├── backend/
 │   ├── server.py              # Application FastAPI principale
 │   ├── requirements.txt       # Dépendances Python
@@ -208,7 +208,7 @@ jpm-nfc-cards-platform/
 
 ## 🎨 Guide de Style
 
-### Couleurs JPM
+### Couleurs Rivo-Card
 
 - **Or principal** : `#D4AF37`
 - **Or clair** : `#EEDC9A`
@@ -288,7 +288,7 @@ yarn test
 **Backend** :
 ```env
 MONGO_URL=mongodb://prod-server:27017
-DB_NAME=jpm_production
+DB_NAME=rivo_production
 CORS_ORIGINS=https://card-nfc.vercel.app/
 ```
 
@@ -343,21 +343,21 @@ Les contributions sont les bienvenues ! Pour contribuer :
 
 ## 📄 Licence
 
-Propriétaire - JPM © 2026. Tous droits réservés.
+Propriétaire - Rivo-Card © 2026. Tous droits réservés.
 
 ---
 
 ## 📞 Support
 
 Pour toute question ou support :
-- **Email** : contact@jpm.com
-- **Site Web** : https://jpm.com
+-- **Email** : contact@rivo-card.com
+-- **Site Web** : https://rivo-card.com
 
 ---
 
 <div align="center">
 
-**Développé avec ❤️ pour JPM**
+**Développé avec ❤️ pour Rivo-Card**
 
 ![Made with FastAPI](https://img.shields.io/badge/Made%20with-FastAPI-009688?style=flat-square&logo=fastapi)
 ![Made with React](https://img.shields.io/badge/Made%20with-React-61DAFB?style=flat-square&logo=react)

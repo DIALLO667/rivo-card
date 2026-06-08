@@ -44,8 +44,8 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-jpm-black flex items-center justify-center">
-      <div className="text-jpm-gold-light text-lg">Authentification...</div>
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <div className="text-[#EEDC9A] text-lg">Authentification...</div>
     </div>
   );
 }
