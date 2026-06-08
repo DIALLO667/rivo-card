@@ -350,7 +350,19 @@ async def create_profile(
     try:
         # enforce upload size limits before sending to cloudinary
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
-        photo_res = cloudinary.uploader.upload(photo_buf, folder="jpm_photos")
+        # Upload image to Cloudinary with immediate transformation:
+        # - Resize to 400x400
+        # - Use smart crop (thumb) with face gravity so the face is centered
+        # - Force output format to WebP with transparent background where supported
+        photo_res = cloudinary.uploader.upload(
+            photo_buf,
+            folder="jpm_photos",
+            resource_type='image',
+            transformation=[
+                {"width": 400, "height": 400, "crop": "thumb", "gravity": "face"},
+                {"format": "webp", "background": "transparent"}
+            ]
+        )
         cover_res = None
         if cover:
             cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
@@ -449,8 +461,17 @@ async def update_profile(
     }
     if photo:
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
-        res = cloudinary.uploader.upload(photo_buf, folder="jpm_photos")
-        update_data["photo_url"] = res['secure_url']
+        # Upload transformed image as above to ensure stored URL points to optimized centered image
+        res = cloudinary.uploader.upload(
+            photo_buf,
+            folder="jpm_photos",
+            resource_type='image',
+            transformation=[
+                {"width": 400, "height": 400, "crop": "thumb", "gravity": "face"},
+                {"format": "webp", "background": "transparent"}
+            ]
+        )
+        update_data["photo_url"] = res.get('secure_url')
     if cover:
         cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
         res = cloudinary.uploader.upload(cover_buf, folder="jpm_covers")
