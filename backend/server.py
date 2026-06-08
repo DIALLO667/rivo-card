@@ -361,7 +361,7 @@ async def create_profile(
             resource_type='image',
             public_id=None,
             transformation=[
-                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
+                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.75, "y": 20},
                 {"format": "webp", "background": "transparent"}
             ]
         )
@@ -479,7 +479,7 @@ async def update_profile(
             folder="jpm_photos",
             resource_type='image',
             transformation=[
-                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
+                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.75, "y": 20},
                 {"format": "webp", "background": "transparent"}
             ]
         )
