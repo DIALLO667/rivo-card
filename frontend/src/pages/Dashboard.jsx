@@ -69,6 +69,17 @@ export default function Dashboard() {
     }
   }, []);
 
+  const fetchMe = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return null;
+      const res = await axios.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     // compute the initial sub from the current URL on mount so it doesn't need to be a dependency
     try {
@@ -78,8 +89,15 @@ export default function Dashboard() {
     } catch (e) {
       // ignore if URL parsing fails
     }
-    fetchProfiles();
-    fetchSubaccounts();
+    (async () => {
+      const me = await fetchMe();
+      setCurrentUser(me);
+      if (!me) {
+        // If not authenticated, let fetchProfiles handle errors/navigation
+      }
+      await fetchSubaccounts();
+      await fetchProfiles();
+    })();
   }, [fetchProfiles, fetchSubaccounts]);
 
   useEffect(() => {
@@ -103,6 +121,23 @@ export default function Dashboard() {
 
     setFilteredProfiles(result);
   }, [searchQuery, profiles, filterType]);
+
+  // ensure filteredProfiles is recomputed whenever the raw profiles list changes (helpful after fetch)
+  useEffect(() => {
+    // reuse the existing filter logic by triggering same effect dependencies
+    let result = [...profiles];
+    const now = new Date();
+    const cm = now.getMonth();
+    const cy = now.getFullYear();
+    if (filterType === 'all') result = result.filter((p) => !p.is_archived);
+    else if (filterType === 'archived') result = result.filter((p) => p.is_archived);
+    else if (filterType === 'monthly') result = result.filter((p) => { const d = new Date(p.created_at); return d.getMonth() === cm && d.getFullYear() === cy; });
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.job || '').toLowerCase().includes(q));
+    }
+    setFilteredProfiles(result);
+  }, [profiles]);
 
   // subaccounts are managed on the dedicated Subaccounts page
 
@@ -136,9 +171,8 @@ export default function Dashboard() {
   <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">
-            <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
+              <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
               <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
-              {!sidebarCollapsed && <div className="mt-0.5 text-xs text-white/80">Tableau de bord & gestion</div>}
             </div>
             <div>
               <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
@@ -241,7 +275,7 @@ export default function Dashboard() {
 
                       <div className="flex gap-3 mb-3">
                         <Button onClick={() => window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Voir</Button>
-                        <Button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm">Copier le lien</Button>
+                        <Button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm">Copier</Button>
                         <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
                         <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>
