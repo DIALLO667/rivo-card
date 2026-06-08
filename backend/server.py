@@ -163,6 +163,37 @@ async def health_check():
 api_router = APIRouter(prefix="/api")
 
 
+@api_router.post("/activation_tokens/generate")
+async def generate_activation_token(request: Request):
+    """Generate a single-use activation token linked to the calling user (owner or super-admin).
+    Returns the token and a full activation URL constructed from FRONTEND_HOST or a sensible default.
+    """
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not user_doc or (user_doc.get("role") != "owner" and not is_super_admin(user_doc)):
+        raise HTTPException(status_code=403, detail="Only owners may generate activation links")
+    token = uuid.uuid4().hex
+    now = datetime.now(timezone.utc).isoformat()
+    token_doc = {"token": token, "used": False, "created_at": now, "creator_user_id": user.user_id}
+    await db.activation_tokens.insert_one(token_doc)
+    frontend_host = os.environ.get('FRONTEND_HOST', 'http://localhost:3000')
+    activation_url = f"{frontend_host.rstrip('/')}/activation/{token}"
+    return {"token": token, "url": activation_url}
+
+
+@api_router.get("/activation_tokens/{token}/validate")
+async def validate_activation_token(token: str):
+    doc = await db.activation_tokens.find_one({"token": token})
+    if not doc:
+        return {"valid": False, "reason": "not_found"}
+    if doc.get("used"):
+        return {"valid": False, "reason": "used"}
+    return {"valid": True}
+
+
+
 @api_router.get("/health")
 async def api_health():
     # Lightweight health check for load balancers and uptime probes
@@ -721,6 +752,80 @@ async def generate_vcard(profile_id: str):
 
 app.include_router(api_router)
 
+
+@app.post("/api/activation/submit")
+async def activation_submit(
+    request: Request,
+    token: str = Form(...),
+    name: str = Form(...),
+    job: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    company: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    linkedin: Optional[str] = Form(None),
+    photo: UploadFile = File(...)
+):
+    # Validate token
+    token_doc = await db.activation_tokens.find_one({"token": token})
+    if not token_doc:
+        raise HTTPException(status_code=400, detail="Jeton invalide")
+    if token_doc.get('used'):
+        raise HTTPException(status_code=400, detail="Jeton déjà utilisé")
+
+    # Basic validation
+    if not name or not phone:
+        raise HTTPException(status_code=422, detail="Les champs 'name' et 'phone' sont requis")
+
+    try:
+        photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
+        local_buf = local_face_crop(photo_buf)
+        upload_buf = local_buf if local_buf is not None else photo_buf
+
+        photo_res = cloudinary.uploader.upload(
+            upload_buf,
+            folder="rivo_photos",
+            resource_type='image',
+            transformation=[
+                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
+                {"format": "webp"}
+            ]
+        )
+        photo_public_id = photo_res.get('public_id')
+        photo_url = photo_res.get('secure_url')
+        # Try to use crop/face data if available
+        faces = photo_res.get('faces')
+        if faces and photo_public_id:
+            try:
+                photo_url = cloudinary.CloudinaryImage(photo_public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"face", "zoom":0.8}, {"format":"webp"}], secure=True)
+            except Exception:
+                pass
+
+        now = datetime.now(timezone.utc).isoformat()
+        profile_doc = {
+            "profile_id": f"profile_{uuid.uuid4().hex[:12]}",
+            "user_id": token_doc.get('creator_user_id', 'owner_unknown'),
+            "name": name,
+            "job": job,
+            "company": company,
+            "phone": phone,
+            "email": email,
+            "linkedin": linkedin,
+            "photo_url": photo_url,
+            "unique_link": generate_unique_link(name),
+            "is_archived": False,
+            "created_at": now,
+            "updated_at": now
+        }
+        await db.profiles.insert_one(profile_doc)
+        # mark token used
+        await db.activation_tokens.update_one({"token": token}, {"$set": {"used": True, "used_at": now}})
+        return {"status": "success", "profile_id": profile_doc["profile_id"], "unique_link": profile_doc["unique_link"]}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception('Activation submit failed')
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Ensure uploads directory exists (Render ephemeral file systems may not persist uploads — prefer Cloudinary)
 try:
     os.makedirs(UPLOADS_DIR, exist_ok=True)
@@ -742,6 +847,15 @@ app.add_middleware(
 )
 
 app.mount("/api/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
+
+# Serve activation static files under /activation/*
+app.mount("/static/activation", StaticFiles(directory=ROOT_DIR / "static" / "activation"), name="activation_static")
+
+
+@app.get("/activation/{token}")
+async def serve_activation_page(token: str):
+    # Serve the static activation.html which will validate the token via API call
+    return FileResponse(ROOT_DIR / "static" / "activation" / "activation.html")
 
 if __name__ == "__main__":
     # Use PORT from environment (Render sets $PORT). Default to 5100 for local dev.

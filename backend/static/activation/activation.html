@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Activation - Rivo-Card</title>
+  <link rel="stylesheet" href="/static/activation/activation.css">
+</head>
+<body>
+  <div id="app" class="container">
+    <aside class="preview">
+      <div class="card-preview" id="cardPreview">
+        <div class="avatar-wrapper"><img id="previewPhoto" src="" alt="photo" /><div id="previewInitial" class="initial">R</div></div>
+        <div class="card-body">
+          <h3 id="previewName">Nom Prénom</h3>
+          <p id="previewJob">Titre / Poste</p>
+          <p id="previewCompany">Entreprise</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="form-area">
+      <h1>Complétez votre Rivo-Card</h1>
+      <p class="muted">Remplissez les informations ci-dessous pour créer votre profil.</p>
+
+      <form id="activationForm" enctype="multipart/form-data">
+        <input type="hidden" id="token" name="token" />
+
+        <label>Nom complet
+          <input name="name" id="name" required />
+          <small class="help">Ex: Marie Dupont</small>
+        </label>
+
+        <label>Poste
+          <input name="job" id="job" required />
+          <small class="help">Ex: Chef de projet</small>
+        </label>
+
+        <label>Téléphone
+          <input name="phone" id="phone" required />
+          <small class="help">Votre numéro pour les contacts clients</small>
+        </label>
+
+        <label>Email
+          <input name="email" id="email" type="email" />
+          <small class="help">Utilisé pour retrouver votre profil</small>
+        </label>
+
+        <label>LinkedIn
+          <input name="linkedin" id="linkedin" />
+          <small class="help">Copiez le lien de votre profil public</small>
+        </label>
+
+        <label>Photo de profil
+          <input type="file" name="photo" id="photo" accept="image/*" />
+          <small class="help">Format carré recommandé. Vous pourrez recadrer après l'upload.</small>
+        </label>
+
+        <div class="actions">
+          <button type="submit" class="btn primary">Créer ma Rivo-Card</button>
+        </div>
+
+        <div id="formMsg" class="muted"></div>
+      </form>
+    </main>
+  </div>
+
+<script src="/static/activation/activation.js"></script>
+</body>
+</html>
