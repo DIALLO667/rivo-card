@@ -84,7 +84,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    // mount loader: fetch current user, subaccounts, then profiles. Using local flow avoids dependency cycles.
+    // mount loader: inline fetchMe and fetchSubaccounts so the effect only depends on fetchProfiles
     (async () => {
       try {
         // compute the initial sub from the current URL
@@ -96,15 +96,38 @@ export default function Dashboard() {
           // ignore if URL parsing fails
         }
 
-        const me = await fetchMe();
-        setCurrentUser(me);
-        await fetchSubaccounts();
+        // inline fetchMe
+        try {
+          const token = localStorage.getItem('token');
+          let me = null;
+          if (token) {
+            try {
+              const res = await axios.get(`${API}/auth/me`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+              me = res.data;
+            } catch (err) {
+              me = null;
+            }
+          }
+          setCurrentUser(me);
+        } catch (err) {
+          console.error('fetchMe inline error', err);
+        }
+
+        // inline fetchSubaccounts
+        try {
+          const token = localStorage.getItem('token');
+          const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+          setSubaccounts(res.data?.subaccounts || []);
+        } catch (err) {
+          setSubaccounts([]);
+        }
+
         await fetchProfiles();
       } catch (e) {
         console.error('initial load error', e);
       }
     })();
-  }, []);
+  }, [fetchProfiles]);
 
   useEffect(() => {
     let result = [...profiles];
