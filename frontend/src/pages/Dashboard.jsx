@@ -26,8 +26,7 @@ export default function Dashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [ownerOverview, setOwnerOverview] = useState(false);
   const [selectedSub, setSelectedSub] = useState('all');
-  const query = new URL(window.location.href).searchParams;
-  const initialSub = query.get('sub') || 'all';
+  // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -71,8 +70,13 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    if (initialSub && initialSub !== 'all') {
-      setSelectedSub(initialSub);
+    // compute the initial sub from the current URL on mount so it doesn't need to be a dependency
+    try {
+      const qs = new URL(window.location.href).searchParams;
+      const param = qs.get('sub') || 'all';
+      if (param && param !== 'all') setSelectedSub(param);
+    } catch (e) {
+      // ignore if URL parsing fails
     }
     fetchProfiles();
     fetchSubaccounts();
