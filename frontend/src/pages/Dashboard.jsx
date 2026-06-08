@@ -26,6 +26,10 @@ export default function Dashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [ownerOverview, setOwnerOverview] = useState(false);
   const [selectedSub, setSelectedSub] = useState('all');
+  const [showActivationModal, setShowActivationModal] = useState(false);
+  const [generatedActivationUrl, setGeneratedActivationUrl] = useState('');
+  const [activationError, setActivationError] = useState('');
+  const [generatingActivation, setGeneratingActivation] = useState(false);
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
   // load profiles; accepts explicit overrides so callers pass freshly-fetched
@@ -176,6 +180,38 @@ export default function Dashboard() {
     }
   };
 
+  const generateActivationLink = async () => {
+    setActivationError('');
+    setGeneratingActivation(true);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setActivationError("Non authentifié");
+        setGeneratingActivation(false);
+        return;
+      }
+      const res = await axios.post(`${API}/activation_tokens/generate`, {}, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      const url = res.data?.url || '';
+      if (!url) throw new Error('Aucune URL reçue');
+      setGeneratedActivationUrl(url);
+      setShowActivationModal(true);
+    } catch (err) {
+      console.error('generateActivationLink error', err);
+      setActivationError(err?.response?.data?.detail || err.message || 'Erreur lors de la génération du lien');
+    } finally {
+      setGeneratingActivation(false);
+    }
+  };
+
+  const copyActivationLink = async () => {
+    try {
+      await navigator.clipboard.writeText(generatedActivationUrl);
+      toast.success('Lien copié dans le presse-papier');
+    } catch (e) {
+      toast.error('Impossible de copier le lien');
+    }
+  };
+
   const getDaysUntilRenewal = (createdAt) => {
     const start = new Date(createdAt);
     const next = new Date(start); next.setFullYear(next.getFullYear() + 1);
@@ -259,6 +295,9 @@ export default function Dashboard() {
                 <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
                   <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
                 </Button>
+                <Button onClick={generateActivationLink} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-4 rounded-xl ml-2" disabled={generatingActivation}>
+                  {generatingActivation ? 'Génération...' : 'Générer un lien d\'activation'}
+                </Button>
                 <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
@@ -267,6 +306,20 @@ export default function Dashboard() {
                 )}
               </div>
             </div>
+
+            {/* Activation modal */}
+            {showActivationModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="bg-white rounded-xl p-6 w-full max-w-lg">
+                  <h3 className="text-lg font-semibold mb-2">Lien d'activation généré</h3>
+                  <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
+                  <div className="flex gap-2 justify-end">
+                    <Button onClick={copyActivationLink} className="bg-[#D4AF37] text-black">Copier le lien</Button>
+                    <Button onClick={() => setShowActivationModal(false)} variant="ghost">Fermer</Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
