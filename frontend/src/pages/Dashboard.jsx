@@ -98,7 +98,7 @@ export default function Dashboard() {
       await fetchSubaccounts();
       await fetchProfiles();
     })();
-  }, [fetchProfiles, fetchSubaccounts]);
+  }, [fetchProfiles, fetchSubaccounts, fetchMe]);
 
   useEffect(() => {
     let result = [...profiles];
@@ -122,22 +122,7 @@ export default function Dashboard() {
     setFilteredProfiles(result);
   }, [searchQuery, profiles, filterType]);
 
-  // ensure filteredProfiles is recomputed whenever the raw profiles list changes (helpful after fetch)
-  useEffect(() => {
-    // reuse the existing filter logic by triggering same effect dependencies
-    let result = [...profiles];
-    const now = new Date();
-    const cm = now.getMonth();
-    const cy = now.getFullYear();
-    if (filterType === 'all') result = result.filter((p) => !p.is_archived);
-    else if (filterType === 'archived') result = result.filter((p) => p.is_archived);
-    else if (filterType === 'monthly') result = result.filter((p) => { const d = new Date(p.created_at); return d.getMonth() === cm && d.getFullYear() === cy; });
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((p) => (p.name || '').toLowerCase().includes(q) || (p.job || '').toLowerCase().includes(q));
-    }
-    setFilteredProfiles(result);
-  }, [profiles]);
+  // filteredProfiles is computed by the main effect above (depends on [searchQuery, profiles, filterType])
 
   // subaccounts are managed on the dedicated Subaccounts page
 
