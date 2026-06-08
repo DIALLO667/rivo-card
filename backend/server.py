@@ -354,15 +354,27 @@ async def create_profile(
         # - Resize to 400x400
         # - Use smart crop (thumb) with face gravity so the face is centered
         # - Force output format to WebP with transparent background where supported
+        # Attempt upload centered on detected face, with slight zoom-out to include hair/neck
         photo_res = cloudinary.uploader.upload(
             photo_buf,
             folder="jpm_photos",
             resource_type='image',
+            public_id=None,
             transformation=[
-                {"width": 400, "height": 400, "crop": "thumb", "gravity": "face"},
+                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
                 {"format": "webp", "background": "transparent"}
             ]
         )
+        # If no face detected, build a fallback URL using gravity:auto on the uploaded public_id
+        photo_public_id = photo_res.get('public_id')
+        if not photo_res.get('faces') and photo_public_id:
+            try:
+                alt_url = cloudinary.CloudinaryImage(photo_public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"auto"}, {"format":"webp", "background":"transparent"}], secure=True)
+                photo_url_final = alt_url
+            except Exception:
+                photo_url_final = photo_res.get('secure_url')
+        else:
+            photo_url_final = photo_res.get('secure_url')
         cover_res = None
         if cover:
             cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
@@ -382,7 +394,7 @@ async def create_profile(
             "icon_color": icon_color,
             "font_choice": font_choice,
             "icon_style": icon_style,
-            "photo_url": photo_res['secure_url'], "cover_url": (cover_res['secure_url'] if cover_res else None),
+            "photo_url": photo_url_final, "cover_url": (cover_res['secure_url'] if cover_res else None),
             "unique_link": generate_unique_link(name), "is_archived": False,
             "created_at": now, "updated_at": now
         }
@@ -461,17 +473,26 @@ async def update_profile(
     }
     if photo:
         photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
-        # Upload transformed image as above to ensure stored URL points to optimized centered image
+        # Attempt upload centered on detected face with slight zoom-out
         res = cloudinary.uploader.upload(
             photo_buf,
             folder="jpm_photos",
             resource_type='image',
             transformation=[
-                {"width": 400, "height": 400, "crop": "thumb", "gravity": "face"},
+                {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
                 {"format": "webp", "background": "transparent"}
             ]
         )
-        update_data["photo_url"] = res.get('secure_url')
+        # Fallback to gravity:auto if no faces detected
+        public_id = res.get('public_id')
+        if not res.get('faces') and public_id:
+            try:
+                alt = cloudinary.CloudinaryImage(public_id).build_url(resource_type='image', transformation=[{"width":400, "height":400, "crop":"fill", "gravity":"auto"}, {"format":"webp", "background":"transparent"}], secure=True)
+                update_data["photo_url"] = alt
+            except Exception:
+                update_data["photo_url"] = res.get('secure_url')
+        else:
+            update_data["photo_url"] = res.get('secure_url')
     if cover:
         cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
         res = cloudinary.uploader.upload(cover_buf, folder="jpm_covers")
