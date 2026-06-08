@@ -28,27 +28,28 @@ export default function Dashboard() {
   const [selectedSub, setSelectedSub] = useState('all');
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
-  // load profiles; memoized with useCallback so effects can safely depend on it
-  const fetchProfiles = useCallback(async () => {
+  // load profiles; accepts explicit overrides so callers pass freshly-fetched
+  // values instead of relying on React state updates (which are async).
+  async function fetchProfiles({ ownerOv = false, sel = 'all', cur = null, subs = [] } = {}) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const params = {};
-      if (ownerOverview) params.scope = 'all';
+      if (ownerOv) params.scope = 'all';
       const response = await axios.get(`${API}/profiles`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
         withCredentials: true,
       });
       let data = response.data || [];
-      if (selectedSub && selectedSub !== 'all') {
-        if (selectedSub === 'me') {
+      if (sel && sel !== 'all') {
+        if (sel === 'me') {
           const allowed = new Set();
-          if (currentUser && currentUser.user_id) allowed.add(currentUser.user_id);
-          (subaccounts || []).forEach((s) => allowed.add(s.user_id));
+          if (cur && cur.user_id) allowed.add(cur.user_id);
+          (subs || []).forEach((s) => allowed.add(s.user_id));
           data = data.filter((p) => allowed.has(p.user_id));
         } else {
-          data = data.filter((p) => p.user_id === selectedSub);
+          data = data.filter((p) => p.user_id === sel);
         }
       }
       setProfiles(data);
@@ -58,7 +59,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
+  }
 
   const fetchSubaccounts = async () => {
     try {
@@ -83,6 +84,9 @@ export default function Dashboard() {
     }
   };
 
+  // This effect inlines several fetches and then triggers a single profile load.
+  // We include `ownerOverview` and `selectedSub` here so the effect re-runs
+  // when those UI options change (and ESLint won't warn).
   useEffect(() => {
     // mount loader: inline fetchMe and fetchSubaccounts so the effect only depends on fetchProfiles
     (async () => {
@@ -114,20 +118,25 @@ export default function Dashboard() {
         }
 
         // inline fetchSubaccounts
+        let fetchedSubs = [];
         try {
           const token = localStorage.getItem('token');
           const res = await axios.get(`${API}/users`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
-          setSubaccounts(res.data?.subaccounts || []);
+          fetchedSubs = res.data?.subaccounts || [];
+          setSubaccounts(fetchedSubs);
         } catch (err) {
+          fetchedSubs = [];
           setSubaccounts([]);
         }
 
-        await fetchProfiles();
+        // call fetchProfiles with freshly-fetched values so we don't rely on
+        // state updates that haven't been committed yet.
+        await fetchProfiles({ ownerOv: ownerOverview, sel: (new URL(window.location.href).searchParams.get('sub') || selectedSub), cur: me, subs: fetchedSubs });
       } catch (e) {
         console.error('initial load error', e);
       }
     })();
-  }, [fetchProfiles]);
+  }, [ownerOverview, selectedSub]);
 
   useEffect(() => {
     let result = [...profiles];
@@ -160,7 +169,8 @@ export default function Dashboard() {
       const token = localStorage.getItem('token');
       await axios.patch(`${API}/profiles/${profileId}/archive`, {}, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       toast.success(currentStatus ? 'Profil réactivé' : 'Profil archivé');
-      fetchProfiles();
+      // refresh using the latest UI values
+      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
     } catch (err) {
       toast.error("Erreur lors de l'opération");
     }
@@ -236,13 +246,13 @@ export default function Dashboard() {
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
+                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
                     <option value="all">Tous</option>
                     <option value="me">Mes profils</option>
                     {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
                   </select>
                   <label className="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { setOwnerOverview(e.target.checked); fetchProfiles(); }} /> Vue d'ensemble
+                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v }); }} /> Vue d'ensemble
                   </label>
                 </div>
 
@@ -253,7 +263,7 @@ export default function Dashboard() {
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
                 {selectedSub && selectedSub !== 'all' && (
-                  <Button onClick={() => { setSelectedSub('all'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles(); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
+                  <Button onClick={() => { setSelectedSub('all'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ sel: 'all' }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
                 )}
               </div>
             </div>
