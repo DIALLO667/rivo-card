@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import defaultCover from '../assets/jamaney-cad.png';
 
 const API = process.env.REACT_APP_API_URL || '';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [filteredProfiles, setFilteredProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,27 +111,34 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar - same style as Subaccounts for consistency */}
-      <aside className="w-64 fixed left-0 top-0 bottom-0 bg-[#04172a] text-white flex flex-col justify-between">
+      {/* Sidebar - collapsible, thinner and lighter blue */}
+      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#083247] text-white flex flex-col justify-between transition-width duration-200`}>
         <div>
-          <div className="px-6 py-6">
-            <div className="text-white font-extrabold text-lg">RIVO-CARD <span className="text-[#D4AF37]">ADMIN</span></div>
-            <div className="mt-3 text-sm text-white/80">Tableau de bord & gestion</div>
+          <div className="px-4 py-4 flex items-center justify-between">
+            <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
+              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
+              {!sidebarCollapsed && <div className="mt-0.5 text-xs text-white/80">Tableau de bord & gestion</div>}
+            </div>
+            <div>
+              <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
+                <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
           </div>
 
           <nav className="mt-6 px-2">
             <ul className="space-y-1">
               <li className="px-3 py-2 rounded-md hover:bg-white/5 cursor-pointer flex items-center gap-3">
-                <span className="font-medium">Tableau de Bord</span>
+                <span className="font-medium">{!sidebarCollapsed && 'Tableau de Bord'}</span>
               </li>
-              <li className="px-3 py-2 rounded-md bg-white text-[#04172a] flex items-center gap-3">
-                <span className="font-medium">Gestion des Membres</span>
-              </li>
-              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">Gestion des Liens</span>
+              <li className="px-3 py-2 rounded-md bg-white text-[#083247] flex items-center gap-3">
+                <span className="font-medium">{!sidebarCollapsed && 'Gestion des Membres'}</span>
               </li>
               <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
-                <span className="font-medium">Archivés</span>
+                <span className="font-medium">{!sidebarCollapsed && 'Gestion des Liens'}</span>
+              </li>
+              <li className="px-3 py-2 rounded-md hover:bg-white/5 flex items-center gap-3">
+                <span className="font-medium">{!sidebarCollapsed && 'Archivés'}</span>
               </li>
             </ul>
           </nav>
@@ -142,34 +151,37 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      <main className="flex-1 ml-64 bg-gray-50 min-h-screen p-10">
+      <main className={`flex-1 ${sidebarCollapsed ? 'ml-20' : 'ml-56'} bg-gray-50 min-h-screen p-6 md:p-10 transition-margin duration-200`}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-4 mb-8 justify-between items-center">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input placeholder="Rechercher un membre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white border border-gray-200 h-12 rounded-xl" />
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
-                  <option value="me">Mes profils</option>
-                  {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
-                </select>
-                <label className="flex items-center gap-2 text-sm text-gray-600">
-                  <input type="checkbox" checked={ownerOverview} onChange={(e) => { setOwnerOverview(e.target.checked); fetchProfiles(); }} /> Vue d'ensemble
-                </label>
+          {/* Header card */}
+          <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="relative w-full md:max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Rechercher un membre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white border border-gray-200 h-12 rounded-xl" />
               </div>
 
-              <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
-                <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
-              </Button>
-              <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
-                <Users className="mr-2 h-5 w-5" /> Filiales
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <select value={selectedSub} onChange={(e) => { setSelectedSub(e.target.value); fetchProfiles(); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
+                    <option value="me">Mes profils</option>
+                    {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
+                  </select>
+                  <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { setOwnerOverview(e.target.checked); fetchProfiles(); }} /> Vue d'ensemble
+                  </label>
+                </div>
+
+                <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
+                  <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
+                </Button>
+                <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
+                  <Users className="mr-2 h-5 w-5" /> Filiales
+                </Button>
+              </div>
             </div>
           </div>
-
+          
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
             <Button onClick={() => setFilterType('all')} variant={filterType === 'all' ? 'default' : 'outline'} className={filterType === 'all' ? 'bg-white text-black' : 'border border-gray-200 text-gray-600'}>Tous ({profiles.filter((p) => !p.is_archived).length})</Button>
             <Button onClick={() => setFilterType('monthly')} variant={filterType === 'monthly' ? 'default' : 'outline'} className={filterType === 'monthly' ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600'}>Inscrits ce mois ({countNewThisMonth})</Button>
@@ -184,17 +196,17 @@ export default function Dashboard() {
               {filteredProfiles.length > 0 ? filteredProfiles.map((profile) => {
                 const days = getDaysUntilRenewal(profile.created_at);
                 return (
-                  <div key={profile.profile_id} className="bg-white rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition-all">
-                    <div className="h-28 w-full bg-gray-100 relative">
-                      <img src={profile.cover_url} className="w-full h-full object-cover opacity-40" alt="" />
+                  <div key={profile.profile_id} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg border border-gray-100 transition-all">
+            <div className="h-28 w-full bg-gray-100 relative">
+              <img src={profile.cover_url || defaultCover} className="w-full h-full object-cover opacity-45" alt="cover" />
                       <div className="absolute top-4 right-4">
-                        {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="bg-orange-500">{days}j restants</Badge> : <Badge className="bg-green-600">Actif</Badge>}
+                        {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="px-3 py-1 rounded-full bg-[#D4AF37] text-black font-semibold">{days}j restants</Badge> : <Badge className="px-3 py-1 rounded-full bg-emerald-600 text-white font-semibold">Actif</Badge>}
                       </div>
                     </div>
 
                     <div className="p-6">
                       <div className="flex items-center gap-4 mb-6">
-                        <img src={profile.photo_url} className="w-16 h-16 rounded-full border-2 border-[#D4AF37] object-cover" alt="" />
+                        <img src={profile.photo_url} className="w-16 h-16 rounded-full border-4 border-[#D4AF37] object-cover shadow-sm" alt="" />
                         <div>
                           <h3 className="font-semibold text-gray-900 text-lg">{profile.name}</h3>
                           <div className="flex items-center text-gray-600 text-[12px] uppercase tracking-wider">
@@ -203,14 +215,14 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="flex gap-2">
-                        <Button onClick={() => window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-200 text-sm text-gray-700">Voir</Button>
-                        <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-200 text-sm text-gray-700">Éditer</Button>
-                        <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-green-500' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
+                      <div className="flex gap-3 mb-3">
+                        <Button onClick={() => window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Voir</Button>
+                        <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
+                        <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>
 
                       {!profile.is_archived && days <= 30 && (
-                        <Button onClick={() => openWhatsApp(profile.phone, profile.name)} className="w-full mt-3 bg-green-600 hover:bg-green-700 text-xs font-bold"><MessageCircle className="h-4 w-4 mr-2" /> RELANCER WHATSAPP</Button>
+                        <Button onClick={() => openWhatsApp(profile.phone, profile.name)} className="w-full mt-1 bg-emerald-600 hover:bg-emerald-700 text-sm font-semibold text-white flex items-center justify-center"><MessageCircle className="h-4 w-4 mr-2" /> RELANCER</Button>
                       )}
                     </div>
                   </div>

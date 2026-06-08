@@ -9,6 +9,7 @@ const API = process.env.REACT_APP_API_URL || '';
 
 export default function Subaccounts() {
   const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [subs, setSubs] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [lastRequest, setLastRequest] = useState(null);
@@ -160,11 +161,18 @@ export default function Subaccounts() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 fixed left-0 top-0 bottom-0 bg-[#04172a] text-white flex flex-col justify-between">
+      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#083247] text-white flex flex-col justify-between transition-width duration-200`}>
         <div>
-          <div className="px-6 py-6">
-            <div className="text-white font-extrabold text-lg">RIVO-CARD <span className="text-[#D4AF37]">ADMIN</span></div>
-            <div className="mt-3 text-sm text-white/80">Tableau de bord & gestion</div>
+          <div className="px-4 py-4 flex items-center justify-between">
+            <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
+              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
+              {!sidebarCollapsed && <div className="mt-0.5 text-xs text-white/80">Tableau de bord & gestion</div>}
+            </div>
+            <div>
+              <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
+                <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
+              </button>
+            </div>
           </div>
 
           <nav className="mt-6 px-2">
@@ -192,8 +200,8 @@ export default function Subaccounts() {
         </div>
       </aside>
 
-      {/* Main content area */}
-      <main className="flex-1 ml-64 bg-gray-50 min-h-screen p-10">
+  {/* Main content area */}
+  <main className={`flex-1 ${sidebarCollapsed ? 'ml-20' : 'ml-56'} bg-gray-50 min-h-screen p-6 md:p-10 transition-margin duration-200`}>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-gray-900">Gestion des Filiales</h2>
