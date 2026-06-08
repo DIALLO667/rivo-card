@@ -28,8 +28,8 @@ export default function Dashboard() {
   const [selectedSub, setSelectedSub] = useState('all');
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
-  // load profiles; intentionally a plain function (not a stable callback) to avoid dependency cycles
-  const fetchProfiles = async () => {
+  // load profiles; memoized with useCallback so effects can safely depend on it
+  const fetchProfiles = useCallback(async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
@@ -58,7 +58,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
   const fetchSubaccounts = async () => {
     try {
