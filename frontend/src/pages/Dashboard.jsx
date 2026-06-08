@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [subaccounts, setSubaccounts] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
   // Removed inline 'create subaccount' panel; a dedicated Subaccounts page will handle that
   // const [showCreateSub, setShowCreateSub] = useState(false);
   const [newEmail, setNewEmail] = useState('');
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [newPassword, setNewPassword] = useState('');
   const [ownerOverview, setOwnerOverview] = useState(false);
   const [selectedSub, setSelectedSub] = useState('all');
+  const query = new URL(window.location.href).searchParams;
+  const initialSub = query.get('sub') || 'all';
 
   const fetchProfiles = useCallback(async () => {
     setLoading(true);
@@ -39,7 +42,16 @@ export default function Dashboard() {
         withCredentials: true,
       });
       let data = response.data || [];
-      if (selectedSub && selectedSub !== 'all') data = data.filter((p) => p.user_id === selectedSub);
+      if (selectedSub && selectedSub !== 'all') {
+        if (selectedSub === 'me') {
+          const allowed = new Set();
+          if (currentUser && currentUser.user_id) allowed.add(currentUser.user_id);
+          (subaccounts || []).forEach((s) => allowed.add(s.user_id));
+          data = data.filter((p) => allowed.has(p.user_id));
+        } else {
+          data = data.filter((p) => p.user_id === selectedSub);
+        }
+      }
       setProfiles(data);
     } catch (err) {
       console.error(err);
@@ -47,7 +59,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, [ownerOverview, selectedSub]);
+  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
   const fetchSubaccounts = useCallback(async () => {
     try {
@@ -60,6 +72,9 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
+    if (initialSub && initialSub !== 'all') {
+      setSelectedSub(initialSub);
+    }
     fetchProfiles();
     fetchSubaccounts();
   }, [fetchProfiles, fetchSubaccounts]);
@@ -70,10 +85,13 @@ export default function Dashboard() {
     const cm = now.getMonth();
     const cy = now.getFullYear();
 
-    if (filterType === 'all') result = result.filter((p) => !p.is_archived);
-    else if (filterType === 'expiring') result = result.filter((p) => !p.is_archived && getDaysUntilRenewal(p.created_at) <= 30);
-    else if (filterType === 'archived') result = result.filter((p) => p.is_archived);
-    else if (filterType === 'monthly') result = result.filter((p) => { const d = new Date(p.created_at); return d.getMonth() === cm && d.getFullYear() === cy; });
+    if (filterType === 'all') {
+      result = result.filter((p) => !p.is_archived);
+    } else if (filterType === 'archived') {
+      result = result.filter((p) => p.is_archived);
+    } else if (filterType === 'monthly') {
+      result = result.filter((p) => { const d = new Date(p.created_at); return d.getMonth() === cm && d.getFullYear() === cy; });
+    }
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -178,6 +196,9 @@ export default function Dashboard() {
                 <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
+                {selectedSub && selectedSub !== 'all' && (
+                  <Button onClick={() => { setSelectedSub('all'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles(); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
+                )}
               </div>
             </div>
           </div>
@@ -185,7 +206,6 @@ export default function Dashboard() {
           <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
             <Button onClick={() => setFilterType('all')} variant={filterType === 'all' ? 'default' : 'outline'} className={filterType === 'all' ? 'bg-white text-black' : 'border border-gray-200 text-gray-600'}>Tous ({profiles.filter((p) => !p.is_archived).length})</Button>
             <Button onClick={() => setFilterType('monthly')} variant={filterType === 'monthly' ? 'default' : 'outline'} className={filterType === 'monthly' ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600'}>Inscrits ce mois ({countNewThisMonth})</Button>
-            <Button onClick={() => setFilterType('expiring')} variant={filterType === 'expiring' ? 'default' : 'outline'} className={filterType === 'expiring' ? 'bg-orange-500 text-white' : 'border border-gray-200 text-gray-600'}>À renouveler ({profiles.filter((p) => !p.is_archived && getDaysUntilRenewal(p.created_at) <= 30).length})</Button>
             <Button onClick={() => setFilterType('archived')} variant={filterType === 'archived' ? 'default' : 'outline'} className={filterType === 'archived' ? 'bg-gray-700 text-white' : 'border border-gray-200 text-gray-600'}>Archives ({profiles.filter((p) => p.is_archived).length})</Button>
           </div>
 
@@ -217,6 +237,7 @@ export default function Dashboard() {
 
                       <div className="flex gap-3 mb-3">
                         <Button onClick={() => window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Voir</Button>
+                        <Button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm">Copier le lien</Button>
                         <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
                         <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>

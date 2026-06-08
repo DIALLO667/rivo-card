@@ -252,6 +252,7 @@ export default function Subaccounts() {
 
                   <div className="flex items-center gap-3">
                     <div className="text-sm text-gray-700">Profils: {counts[s.user_id] || 0}</div>
+                    <Button onClick={() => navigate(`/dashboard?sub=${s.user_id}`)} className="text-sm bg-white border border-gray-200 text-gray-700">Voir profils</Button>
                     <Button onClick={async () => {
                       try {
                         const token = localStorage.getItem('token');
