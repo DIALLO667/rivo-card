@@ -12,6 +12,7 @@ const API = process.env.REACT_APP_API_URL || '';
 export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarVisible, setMobileSidebarVisible] = useState(false);
   const [profiles, setProfiles] = useState([]);
   const [filteredProfiles, setFilteredProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -228,8 +229,9 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen">
   {/* Sidebar - collapsible, near-black for a luxe look */}
-  <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
-        <div>
+  {/* Desktop sidebar (hidden on small screens) */}
+  <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
+  <div>
           <div className="px-4 py-4 flex items-center justify-between">
               <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
               <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
@@ -270,17 +272,51 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      <main className={`flex-1 ${sidebarCollapsed ? 'ml-20' : 'ml-56'} bg-gray-50 min-h-screen p-6 md:p-10 transition-margin duration-200`}>
+      {/* Mobile sidebar (overlay) */}
+      {mobileSidebarVisible && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarVisible(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#050608] text-white flex flex-col justify-between shadow-xl p-4">
+            <div>
+              <div className="px-2 py-4 flex items-center justify-between">
+                <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-[#D4AF37]">ADMIN</span></div>
+                <button onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
+              </div>
+              <nav className="mt-6 px-2">
+                <ul className="space-y-3">
+                  <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">Tableau de Bord</li>
+                  <li className="px-3 py-3 rounded-lg flex items-center gap-3">Gestion des Membres</li>
+                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">Gestion des Liens</li>
+                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">Archivés</li>
+                </ul>
+              </nav>
+            </div>
+            <div className="px-4 py-6">
+              <div className="border-t border-white/5 pt-4">
+                <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10 transition-margin duration-200`}>
         <div className="max-w-7xl mx-auto">
           {/* Header card */}
           <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
             <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+              <div className="flex items-center gap-2 w-full md:w-auto">
+                {/* Mobile menu toggle */}
+                <button className="md:hidden p-2 rounded hover:bg-gray-100 mr-2" onClick={() => setMobileSidebarVisible(true)} aria-label="Ouvrir le menu">
+                  <svg className="h-5 w-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+              </div>
               <div className="relative w-full md:max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input placeholder="Rechercher un membre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white border border-gray-200 h-12 rounded-xl" />
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2">
                   <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
                     <option value="all">Tous</option>
