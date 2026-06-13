@@ -328,12 +328,14 @@ export default function Dashboard() {
                   </label>
                 </div>
 
-                <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-6 rounded-xl">
-                  <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
-                </Button>
-                <Button onClick={generateActivationLink} className="bg-[#D4AF37] text-black font-black w-full md:w-auto h-12 px-4 rounded-xl ml-2" disabled={generatingActivation}>
-                  {generatingActivation ? 'Génération...' : 'Générer un lien d\'activation'}
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full sm:w-auto h-12 px-6 rounded-xl">
+                    <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
+                  </Button>
+                  <Button onClick={generateActivationLink} className="bg-[#D4AF37] text-black font-black w-full sm:w-auto h-12 px-4 rounded-xl" disabled={generatingActivation}>
+                    {generatingActivation ? 'Génération...' : 'Générer un lien d\'activation'}
+                  </Button>
+                </div>
                 <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
@@ -345,16 +347,16 @@ export default function Dashboard() {
 
             {/* Activation modal */}
             {showActivationModal && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                <div className="bg-white rounded-xl p-6 w-full max-w-lg">
-                  <h3 className="text-lg font-semibold mb-2">Lien d'activation généré</h3>
-                  <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
-                  <div className="flex gap-2 justify-end">
-                    <Button onClick={copyActivationLink} className="bg-[#D4AF37] text-black">Copier le lien</Button>
-                    <Button onClick={() => setShowActivationModal(false)} variant="ghost">Fermer</Button>
+              <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-4">
+                  <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-lg">
+                    <h3 className="text-lg font-semibold mb-2">Lien d'activation généré</h3>
+                    <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
+                    <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                      <Button onClick={copyActivationLink} className="bg-[#D4AF37] text-black">Copier le lien</Button>
+                      <Button onClick={() => setShowActivationModal(false)} variant="ghost">Fermer</Button>
+                    </div>
                   </div>
                 </div>
-              </div>
             )}
           </div>
           

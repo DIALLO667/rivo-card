@@ -183,14 +183,19 @@ async def generate_activation_token(request: Request):
     frontend_host = os.environ.get('FRONTEND_HOST')
     if not frontend_host:
         try:
-            scheme = request.headers.get('x-forwarded-proto') or request.url.scheme
-            host = request.headers.get('x-forwarded-host') or request.headers.get('host')
-            if not host:
-                # best-effort fallback to request.url
-                host = request.url.hostname
-                if request.url.port:
-                    host = f"{host}:{request.url.port}"
-            frontend_host = f"{scheme}://{host}"
+            # allow the frontend to explicitly provide the public host
+            explicit = request.headers.get('x-frontend-host')
+            if explicit:
+                frontend_host = explicit
+            else:
+                scheme = request.headers.get('x-forwarded-proto') or request.url.scheme
+                host = request.headers.get('x-forwarded-host') or request.headers.get('host')
+                if not host:
+                    # best-effort fallback to request.url
+                    host = request.url.hostname
+                    if request.url.port:
+                        host = f"{host}:{request.url.port}"
+                frontend_host = f"{scheme}://{host}"
         except Exception:
             frontend_host = 'http://localhost:3000'
     activation_url = f"{frontend_host.rstrip('/')}/activation/{token}"
