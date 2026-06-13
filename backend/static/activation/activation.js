@@ -2,7 +2,7 @@
   const tokenEl = document.getElementById('token');
   const path = window.location.pathname.split('/');
   const token = path[path.length-1];
-  tokenEl.value = token;
+  if (tokenEl) tokenEl.value = token;
 
   const previewPhoto = document.getElementById('previewPhoto');
   const previewInitial = document.getElementById('previewInitial');
@@ -32,43 +32,46 @@
   }
 
   function updatePreview(){
-    previewName.textContent = nameInput.value || 'Nom Prénom';
-    previewJob.textContent = jobInput.value || 'Titre / Poste';
-    previewCompany.textContent = companyInput.value || '';
-    if(photoInput.files && photoInput.files[0]){
+    if (previewName && nameInput) previewName.textContent = (nameInput.value || 'Nom Prénom');
+    if (previewJob && jobInput) previewJob.textContent = (jobInput.value || 'Titre / Poste');
+    if (previewCompany && companyInput) previewCompany.textContent = (companyInput.value || '');
+    if (photoInput && photoInput.files && photoInput.files[0]){
       const f = photoInput.files[0];
       const url = URL.createObjectURL(f);
-      previewPhoto.src = url; previewPhoto.style.display='block'; previewInitial.style.display='none';
+      if (previewPhoto) { previewPhoto.src = url; previewPhoto.style.display='block'; }
+      if (previewInitial) previewInitial.style.display='none';
     } else {
-      previewPhoto.src=''; previewPhoto.style.display='none'; previewInitial.style.display='block'; previewInitial.textContent = (nameInput.value||'U').charAt(0).toUpperCase();
+      if (previewPhoto) { previewPhoto.src=''; previewPhoto.style.display='none'; }
+      if (previewInitial) { previewInitial.style.display='block'; previewInitial.textContent = ((nameInput && nameInput.value) || 'U').charAt(0).toUpperCase(); }
     }
   }
 
-  nameInput.addEventListener('input', updatePreview);
-  jobInput.addEventListener('input', updatePreview);
-  companyInput && companyInput.addEventListener('input', updatePreview);
-  photoInput.addEventListener('change', updatePreview);
+  if (nameInput) nameInput.addEventListener('input', updatePreview);
+  if (jobInput) jobInput.addEventListener('input', updatePreview);
+  if (companyInput) companyInput.addEventListener('input', updatePreview);
+  if (photoInput) photoInput.addEventListener('change', updatePreview);
 
-  document.getElementById('activationForm').addEventListener('submit', async function(e){
+  const formEl = document.getElementById('activationForm');
+  if (formEl) formEl.addEventListener('submit', async function(e){
     e.preventDefault();
     const form = e.target;
     const fd = new FormData(form);
     // append other fields
     fd.set('token', token);
-    const msg = document.getElementById('formMsg');
-    msg.textContent = 'Envoi en cours...';
+  const msg = document.getElementById('formMsg');
+  if (msg) msg.textContent = 'Envoi en cours...';
     try{
       const res = await fetch('/api/activation/submit', {method:'POST', body: fd});
       const j = await res.json();
       if(res.ok){
-        msg.textContent = 'Profil créé — vous pouvez fermer cette fenêtre.';
+        if (msg) msg.textContent = 'Profil créé — vous pouvez fermer cette fenêtre.';
         form.reset(); updatePreview();
       } else {
-        msg.textContent = j.detail || 'Erreur lors de la création du profil';
+        if (msg) msg.textContent = j.detail || 'Erreur lors de la création du profil';
       }
     }catch(err){
       console.error(err);
-      msg.textContent = 'Erreur réseau lors de la soumission';
+      if (msg) msg.textContent = 'Erreur réseau lors de la soumission';
     }
   });
 
