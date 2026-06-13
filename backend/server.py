@@ -178,7 +178,21 @@ async def generate_activation_token(request: Request):
     now = datetime.now(timezone.utc).isoformat()
     token_doc = {"token": token, "used": False, "created_at": now, "creator_user_id": user.user_id}
     await db.activation_tokens.insert_one(token_doc)
-    frontend_host = os.environ.get('FRONTEND_HOST', 'http://localhost:3000')
+    # Determine frontend host:
+    # Priority: FRONTEND_HOST env var -> derive from incoming request headers (x-forwarded-proto/host) -> fallback localhost
+    frontend_host = os.environ.get('FRONTEND_HOST')
+    if not frontend_host:
+        try:
+            scheme = request.headers.get('x-forwarded-proto') or request.url.scheme
+            host = request.headers.get('x-forwarded-host') or request.headers.get('host')
+            if not host:
+                # best-effort fallback to request.url
+                host = request.url.hostname
+                if request.url.port:
+                    host = f"{host}:{request.url.port}"
+            frontend_host = f"{scheme}://{host}"
+        except Exception:
+            frontend_host = 'http://localhost:3000'
     activation_url = f"{frontend_host.rstrip('/')}/activation/{token}"
     return {"token": token, "url": activation_url}
 
