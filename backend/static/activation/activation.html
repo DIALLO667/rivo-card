@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Activation - Rivo-Card</title>
   <link rel="stylesheet" href="/static/activation/activation.css">
+  <link rel="icon" href="/static/activation/favicon.svg" />
+  <!-- Cropper.js CSS -->
+  <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 </head>
 <body>
   <div id="app" class="container">
@@ -25,6 +28,7 @@
 
       <form id="activationForm" enctype="multipart/form-data">
         <input type="hidden" id="token" name="token" />
+        <input type="hidden" id="croppedBlob" name="cropped_blob" />
 
         <label>Nom complet
           <input name="name" id="name" required />
@@ -56,10 +60,30 @@
           <small class="help">Copiez le lien de votre profil public</small>
         </label>
 
+        <label>Instagram
+          <input name="instagram" id="instagram" />
+          <small class="help">Nom de compte sans @</small>
+        </label>
+
+        <label>Twitter
+          <input name="twitter" id="twitter" />
+          <small class="help">Lien ou handle</small>
+        </label>
+
         <label>Photo de profil
           <input type="file" name="photo" id="photo" accept="image/*" />
-          <small class="help">Format carré recommandé. Vous pourrez recadrer après l'upload.</small>
+          <small class="help">Format carré recommandé. Vous pourrez recadrer ici (mobile-first).</small>
         </label>
+
+        <div id="cropperContainer" style="display:none;margin-bottom:12px;">
+          <div style="width:100%;max-height:400px;overflow:hidden;">
+            <img id="cropperImage" src="" alt="Prévisualisation à recadrer" style="max-width:100%;display:block;" />
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end;">
+            <button id="applyCrop" type="button" class="btn primary">Appliquer</button>
+            <button id="cancelCrop" type="button" class="btn" style="background:#eee;">Annuler</button>
+          </div>
+        </div>
 
         <div class="actions">
           <button type="submit" class="btn primary">Créer ma Rivo-Card</button>
@@ -70,6 +94,8 @@
     </main>
   </div>
 
+<!-- Cropper.js script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="/static/activation/activation.js"></script>
 </body>
 </html>

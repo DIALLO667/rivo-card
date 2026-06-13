@@ -213,6 +213,14 @@ export default function Dashboard() {
     }
   };
 
+  // close modal on Escape key when shown
+  useEffect(() => {
+    if (!showActivationModal) return;
+    const onKey = (e) => { if (e.key === 'Escape') setShowActivationModal(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showActivationModal]);
+
   const getDaysUntilRenewal = (createdAt) => {
     const start = new Date(createdAt);
     const next = new Date(start); next.setFullYear(next.getFullYear() + 1);
@@ -347,9 +355,12 @@ export default function Dashboard() {
 
             {/* Activation modal */}
             {showActivationModal && (
-              <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-4">
-                  <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-lg">
-                    <h3 className="text-lg font-semibold mb-2">Lien d'activation généré</h3>
+              <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/40 p-4" onClick={() => setShowActivationModal(false)} role="dialog" aria-modal="true">
+                  <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-semibold">Lien d'activation généré</h3>
+                      <button aria-label="Fermer" onClick={() => setShowActivationModal(false)} className="ml-2 p-2 rounded hover:bg-gray-100">✕</button>
+                    </div>
                     <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
                     <div className="flex flex-col sm:flex-row gap-2 justify-end">
                       <Button onClick={copyActivationLink} className="bg-[#D4AF37] text-black">Copier le lien</Button>

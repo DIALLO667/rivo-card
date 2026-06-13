@@ -14,6 +14,11 @@
   const jobInput = document.getElementById('job');
   const companyInput = document.getElementById('company');
   const photoInput = document.getElementById('photo');
+  const cropperContainer = document.getElementById('cropperContainer');
+  const cropperImage = document.getElementById('cropperImage');
+  const applyCropBtn = document.getElementById('applyCrop');
+  const cancelCropBtn = document.getElementById('cancelCrop');
+  let cropper = null;
   const linkedinInput = document.getElementById('linkedin');
   const emailInput = document.getElementById('email');
   const phoneInput = document.getElementById('phone');
@@ -38,7 +43,20 @@
     if (photoInput && photoInput.files && photoInput.files[0]){
       const f = photoInput.files[0];
       const url = URL.createObjectURL(f);
-      if (previewPhoto) { previewPhoto.src = url; previewPhoto.style.display='block'; }
+      // initialize cropper for client-side circular crop
+      if (cropperImage && cropperContainer) {
+        cropperImage.src = url;
+        try{ cropperContainer.style.display = 'block'; }catch(e){}
+        if (cropper) try{ cropper.destroy(); }catch(e){}
+        if (typeof Cropper !== 'undefined') {
+          cropper = new Cropper(cropperImage, { aspectRatio:1, viewMode:1, dragMode:'move', autoCropArea:1, responsive:true });
+        } else {
+          // fallback: show the raw image in preview
+          if (previewPhoto) { previewPhoto.src = url; previewPhoto.style.display='block'; }
+        }
+      } else {
+        if (previewPhoto) { previewPhoto.src = url; previewPhoto.style.display='block'; }
+      }
       if (previewInitial) previewInitial.style.display='none';
     } else {
       if (previewPhoto) { previewPhoto.src=''; previewPhoto.style.display='none'; }
@@ -51,11 +69,39 @@
   if (companyInput) companyInput.addEventListener('input', updatePreview);
   if (photoInput) photoInput.addEventListener('change', updatePreview);
 
+  // Cropper actions
+  if (applyCropBtn) applyCropBtn.addEventListener('click', async function(){
+    if (!cropper || typeof Cropper === 'undefined') return;
+    const canvas = cropper.getCroppedCanvas({ width: 400, height: 400, imageSmoothingQuality: 'high' });
+    canvas.toBlob(function(blob){
+      // set preview to cropped image
+      const url = URL.createObjectURL(blob);
+      if (previewPhoto) { previewPhoto.src = url; previewPhoto.style.display='block'; }
+      if (previewInitial) previewInitial.style.display='none';
+      // store blob in a temporary global to be appended on submit
+      window.__rivo_cropped_blob = blob;
+      // hide cropper
+      if (cropper) { try{ cropper.destroy(); }catch(e){} cropper = null; }
+      if (cropperContainer) try{ cropperContainer.style.display='none'; }catch(e){}
+    }, 'image/webp', 0.9);
+  });
+
+  if (cancelCropBtn) cancelCropBtn.addEventListener('click', function(){
+    if (cropper) { try{ cropper.destroy(); }catch(e){} cropper = null; }
+    if (cropperContainer) cropperContainer.style.display='none';
+    if (photoInput) photoInput.value = '';
+    updatePreview();
+  });
+
   const formEl = document.getElementById('activationForm');
   if (formEl) formEl.addEventListener('submit', async function(e){
     e.preventDefault();
     const form = e.target;
     const fd = new FormData(form);
+    // if a cropped blob exists, append it as 'photo' (overrides original file)
+    if (window.__rivo_cropped_blob) {
+      fd.set('photo', window.__rivo_cropped_blob, 'photo.webp');
+    }
     // append other fields
     fd.set('token', token);
   const msg = document.getElementById('formMsg');
