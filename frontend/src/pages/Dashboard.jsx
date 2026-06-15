@@ -418,11 +418,19 @@ export default function Dashboard() {
                         </div>
                       </div>
 
-                      <div className="flex gap-3 mb-3">
-                        <Button onClick={() => profile.unique_link && window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Voir</Button>
-                        <Button onClick={() => profile.unique_link && navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Copier</Button>
-                        <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
-                        <Button onClick={() => deleteProfile(profile.profile_id)} className="bg-red-50 text-red-600 border border-red-100 p-2 text-sm hover:shadow-sm">Supprimer</Button>
+                      <div className="flex gap-2 mb-3 items-center">
+                        <button title="Voir" onClick={() => profile.unique_link && window.open(`/p/${profile.unique_link}`, '_blank')} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
+                          <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                        <button title="Copier" onClick={() => profile.unique_link && navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
+                          <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><rect x="3" y="3" width="13" height="13" rx="2" ry="2"/></svg>
+                        </button>
+                        <button title="Éditer" onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
+                          <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 4h7a1 1 0 011 1v7"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 3l-12 12H3v-6L15 3z"/></svg>
+                        </button>
+                        <button title="Supprimer" onClick={() => deleteProfile(profile.profile_id)} className="p-2 bg-red-50 text-red-600 border border-red-100 rounded-md hover:shadow-sm">
+                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/></svg>
+                        </button>
                         <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>
 

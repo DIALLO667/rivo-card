@@ -18,6 +18,17 @@
           <h3 id="previewName">Nom Prénom</h3>
           <p id="previewJob">Titre / Poste</p>
           <p id="previewCompany">Entreprise</p>
+          <div id="previewContact" class="contact">
+            <span id="previewPhone" class="phone"></span>
+            <span id="previewLocation" class="location"></span>
+          </div>
+          <div id="previewSocials" class="socials">
+            <a id="previewLinkedin" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">in</a>
+            <a id="previewInstagram" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">ig</a>
+            <a id="previewTwitter" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">tw</a>
+            <a id="previewFacebook" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">fb</a>
+            <a id="previewSnapchat" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">sc</a>
+          </div>
         </div>
       </div>
     </aside>
@@ -56,19 +67,39 @@
         </label>
 
         <label>LinkedIn
-          <input name="linkedin" id="linkedin" />
+          <input name="linkedin" id="linkedin" placeholder="https://www.linkedin.com/in/nom" />
           <small class="help">Copiez le lien de votre profil public</small>
         </label>
 
         <label>Instagram
-          <input name="instagram" id="instagram" />
+          <input name="instagram" id="instagram" placeholder="nom_utilisateur" />
           <small class="help">Nom de compte sans @</small>
         </label>
 
         <label>Twitter
-          <input name="twitter" id="twitter" />
+          <input name="twitter" id="twitter" placeholder="@handle ou lien" />
           <small class="help">Lien ou handle</small>
         </label>
+
+        <label>Facebook
+          <input name="facebook" id="facebook" placeholder="Lien Facebook" />
+          <small class="help">Lien ou nom public</small>
+        </label>
+
+        <label>Snapchat
+          <input name="snapchat" id="snapchat" placeholder="nom_snap" />
+          <small class="help">Nom d'utilisateur Snapchat (facultatif)</small>
+        </label>
+
+        <label>Adresse / Maps
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input name="address" id="address" placeholder="Entrez une adresse ou un lieu" style="flex:1" />
+            <button id="addressSearch" type="button" class="btn">Chercher</button>
+          </div>
+          <small class="help">Vous pouvez chercher votre adresse pour l'afficher sur la carte</small>
+        </label>
+        <input type="hidden" id="lat" name="lat" />
+        <input type="hidden" id="lng" name="lng" />
 
         <label>Photo de profil
           <input type="file" name="photo" id="photo" accept="image/*" />

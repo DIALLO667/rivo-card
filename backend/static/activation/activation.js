@@ -9,6 +9,13 @@
   const previewName = document.getElementById('previewName');
   const previewJob = document.getElementById('previewJob');
   const previewCompany = document.getElementById('previewCompany');
+  const previewPhone = document.getElementById('previewPhone');
+  const previewLocation = document.getElementById('previewLocation');
+  const previewLinkedin = document.getElementById('previewLinkedin');
+  const previewInstagram = document.getElementById('previewInstagram');
+  const previewTwitter = document.getElementById('previewTwitter');
+  const previewFacebook = document.getElementById('previewFacebook');
+  const previewSnapchat = document.getElementById('previewSnapchat');
 
   const nameInput = document.getElementById('name');
   const jobInput = document.getElementById('job');
@@ -22,6 +29,14 @@
   const linkedinInput = document.getElementById('linkedin');
   const emailInput = document.getElementById('email');
   const phoneInput = document.getElementById('phone');
+  const instagramInput = document.getElementById('instagram');
+  const twitterInput = document.getElementById('twitter');
+  const facebookInput = document.getElementById('facebook');
+  const snapchatInput = document.getElementById('snapchat');
+  const addressInput = document.getElementById('address');
+  const addressSearchBtn = document.getElementById('addressSearch');
+  const latInput = document.getElementById('lat');
+  const lngInput = document.getElementById('lng');
 
   async function checkToken(){
     try{
@@ -40,6 +55,14 @@
     if (previewName && nameInput) previewName.textContent = (nameInput.value || 'Nom Prénom');
     if (previewJob && jobInput) previewJob.textContent = (jobInput.value || 'Titre / Poste');
     if (previewCompany && companyInput) previewCompany.textContent = (companyInput.value || '');
+    if (previewPhone && phoneInput) previewPhone.textContent = phoneInput.value || '';
+    if (previewLocation && addressInput) previewLocation.textContent = addressInput.value || '';
+    // socials
+    if (previewLinkedin && linkedinInput) { if (linkedinInput.value) { previewLinkedin.style.display='inline-flex'; previewLinkedin.href = linkedinInput.value; } else previewLinkedin.style.display='none'; }
+    if (previewInstagram && instagramInput) { if (instagramInput.value) { previewInstagram.style.display='inline-flex'; previewInstagram.href = `https://instagram.com/${instagramInput.value.replace(/^@/, '')}`; } else previewInstagram.style.display='none'; }
+    if (previewTwitter && twitterInput) { if (twitterInput.value) { previewTwitter.style.display='inline-flex'; previewTwitter.href = twitterInput.value.startsWith('http') ? twitterInput.value : `https://twitter.com/${twitterInput.value.replace(/^@/, '')}`; } else previewTwitter.style.display='none'; }
+    if (previewFacebook && facebookInput) { if (facebookInput.value) { previewFacebook.style.display='inline-flex'; previewFacebook.href = facebookInput.value; } else previewFacebook.style.display='none'; }
+    if (previewSnapchat && snapchatInput) { if (snapchatInput.value) { previewSnapchat.style.display='inline-flex'; previewSnapchat.href = `https://www.snapchat.com/add/${snapchatInput.value}`; } else previewSnapchat.style.display='none'; }
     if (photoInput && photoInput.files && photoInput.files[0]){
       const f = photoInput.files[0];
       const url = URL.createObjectURL(f);
@@ -67,6 +90,13 @@
   if (nameInput) nameInput.addEventListener('input', updatePreview);
   if (jobInput) jobInput.addEventListener('input', updatePreview);
   if (companyInput) companyInput.addEventListener('input', updatePreview);
+  if (phoneInput) phoneInput.addEventListener('input', updatePreview);
+  if (addressInput) addressInput.addEventListener('input', updatePreview);
+  if (linkedinInput) linkedinInput.addEventListener('input', updatePreview);
+  if (instagramInput) instagramInput.addEventListener('input', updatePreview);
+  if (twitterInput) twitterInput.addEventListener('input', updatePreview);
+  if (facebookInput) facebookInput.addEventListener('input', updatePreview);
+  if (snapchatInput) snapchatInput.addEventListener('input', updatePreview);
   if (photoInput) photoInput.addEventListener('change', updatePreview);
 
   // Cropper actions
@@ -91,6 +121,25 @@
     if (cropperContainer) cropperContainer.style.display='none';
     if (photoInput) photoInput.value = '';
     updatePreview();
+  });
+
+  // address search via Nominatim
+  if (addressSearchBtn) addressSearchBtn.addEventListener('click', async function(){
+    const q = (addressInput && addressInput.value) || '';
+    if (!q) return alert('Entrez une adresse à rechercher');
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+      const j = await res.json();
+      if (j && j[0]){
+        if (latInput) latInput.value = j[0].lat;
+        if (lngInput) lngInput.value = j[0].lon;
+        if (addressInput) addressInput.value = j[0].display_name;
+        updatePreview();
+        alert('Adresse trouvée');
+      } else {
+        alert('Adresse introuvable');
+      }
+    } catch (e) { console.error(e); alert('Erreur géocodage'); }
   });
 
   const formEl = document.getElementById('activationForm');
