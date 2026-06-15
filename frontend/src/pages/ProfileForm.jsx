@@ -15,7 +15,7 @@ export default function ProfileForm() {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: '', job: '', company: '', phone: '', email: '', location: '',
+    name: '', job: '', company: '', phone: '', email: '', location: '', address: '', lat:'', lng:'',
     website: '', instagram: '', facebook: '', linkedin: '', tiktok: '',
     snapchat: '', telegram: '', youtube: '', twitter: '', design_type: 'classic'
   });
@@ -77,9 +77,40 @@ export default function ProfileForm() {
     }
   }, [profileId]);
 
+  // cropper state (client-side) - will use CDN Cropper if present
+  const [cropper, setCropper] = useState(null);
+  const [croppedBlob, setCroppedBlob] = useState(null);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // photo file change -> init cropper if cropper lib available
+  const onPhotoChange = (e) => {
+    const f = e.target.files && e.target.files[0];
+    setPhotoFile(f);
+    if (!f) return;
+    const url = URL.createObjectURL(f);
+    const img = document.getElementById('adminCropImage');
+    if (img) img.src = url;
+    if (window.Cropper && img) {
+      try { if (cropper) cropper.destroy(); } catch (e) {}
+      const c = new window.Cropper(img, { aspectRatio: 1, viewMode: 1 });
+      setCropper(c);
+    }
+  };
+
+  const applyCrop = async () => {
+    if (!cropper) return;
+    const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+    const blob = await new Promise(res => canvas.toBlob(res, 'image/webp', 0.92));
+    setCroppedBlob(blob);
+    // preview assign
+    const preview = document.getElementById('photoPreview');
+    if (preview) preview.src = URL.createObjectURL(blob);
+    try { cropper.destroy(); } catch (e) {}
+    setCropper(null);
   };
 
   const handleSubmit = async (e) => {
@@ -225,12 +256,12 @@ export default function ProfileForm() {
 
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Nom Complet *</label>
-            <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
+            <Input name="name" value={formData.name} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12 rounded-lg" placeholder="Nom Prénom" />
           </div>
 
           <div className="space-y-1">
             <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Profession </label>
-            <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" placeholder="Ex: Développeur" />
+            <Input name="job" value={formData.job} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12 rounded-lg" placeholder="Ex: Développeur" />
           </div>
 
           {cardType === 'profile' && (
@@ -238,17 +269,31 @@ export default function ProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Entreprise</label>
-                  <Input name="company" value={formData.company} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12" />
+                  <Input name="company" value={formData.company} onChange={handleInputChange} className="bg-white/5 border-white/10 h-12 rounded-lg" placeholder="Société" />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-500 ml-1 uppercase">Téléphone *</label>
-                  <Input name="phone" value={formData.phone} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12" />
+                  <Input name="phone" value={formData.phone} onChange={handleInputChange} required className="bg-white/5 border-white/10 h-12 rounded-lg" placeholder="+33 6 12 34 56 78" />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-[#D4AF37] ml-1 uppercase tracking-widest">Lien Localisation (Google Maps)</label>
-                <Input name="location" value={formData.location} onChange={handleInputChange} className="bg-white/5 h-12 border-[#D4AF37]/20" placeholder="Collez le lien Maps ici" />
+                <label className="text-[10px] font-bold text-[#D4AF37] ml-1 uppercase tracking-widest">Adresse / Localisation</label>
+                <div className="flex gap-2">
+                  <Input name="address" value={formData.address} onChange={handleInputChange} className="bg-white/5 h-12 border-[#D4AF37]/20 rounded-lg" placeholder="Entrez une adresse ou collez un lien Maps" />
+                  <button type="button" onClick={async () => {
+                    const q = formData.address || formData.location || '';
+                    if (!q) return toast.error('Adresse vide');
+                    try {
+                      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
+                      const j = await res.json();
+                      if (j && j[0]) {
+                        setFormData(prev => ({ ...prev, address: j[0].display_name, lat: j[0].lat, lng: j[0].lon }));
+                        toast.success('Localisation trouvée');
+                      } else { toast.error('Adresse introuvable'); }
+                    } catch (e) { toast.error('Erreur géocodage'); }
+                  }} className="bg-[#D4AF37] px-4 rounded-lg text-black">Chercher</button>
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -274,7 +319,13 @@ export default function ProfileForm() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#D4AF37]">Photo de Profil {profileId && "(Optionnel)"}</label>
-                  <input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files[0])} className="text-[10px] text-gray-400" />
+                  <input id="photoInputAdmin" type="file" accept="image/*" onChange={onPhotoChange} className="text-[10px] text-gray-400" />
+                  <img id="adminCropImage" alt="to crop" style={{ display: 'block', maxWidth: '220px', marginTop: '8px' }} />
+                  <div className="flex gap-2 mt-2">
+                    <button type="button" onClick={applyCrop} className="bg-[#D4AF37] px-3 rounded-lg text-black">Appliquer</button>
+                    <button type="button" onClick={() => { try { if (cropper) cropper.destroy(); } catch(e){} setCropper(null); setPhotoFile(null); }} className="bg-white/5 px-3 rounded-lg">Annuler</button>
+                  </div>
+                  <img id="photoPreview" alt="preview" style={{ display: 'block', maxWidth: '100px', marginTop: '8px', borderRadius: '999px' }} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#D4AF37]">Couverture</label>

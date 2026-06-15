@@ -181,6 +181,20 @@ export default function Dashboard() {
     }
   };
 
+  // delete profile
+  const deleteProfile = async (profileId) => {
+    if (!window.confirm('Supprimer ce profil ? Cette action est irréversible.')) return;
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API}/profiles/${profileId}`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      toast.success('Profil supprimé');
+      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+    } catch (err) {
+      console.error('deleteProfile error', err);
+      toast.error('Impossible de supprimer le profil');
+    }
+  };
+
   const generateActivationLink = async () => {
     setActivationError('');
     setGeneratingActivation(true);
@@ -408,6 +422,7 @@ export default function Dashboard() {
                         <Button onClick={() => profile.unique_link && window.open(`/p/${profile.unique_link}`, '_blank')} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Voir</Button>
                         <Button onClick={() => profile.unique_link && navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} className="bg-white border border-gray-100 p-2 text-sm text-gray-700 hover:shadow-sm" disabled={!profile.unique_link}>Copier</Button>
                         <Button onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="flex-1 bg-white border border-gray-100 text-sm text-gray-700 hover:shadow-sm">Éditer</Button>
+                        <Button onClick={() => deleteProfile(profile.profile_id)} className="bg-red-50 text-red-600 border border-red-100 p-2 text-sm hover:shadow-sm">Supprimer</Button>
                         <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
                       </div>
 
