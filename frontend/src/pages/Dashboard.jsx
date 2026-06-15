@@ -428,6 +428,13 @@ export default function Dashboard() {
                           <div className="flex items-center text-gray-600 text-[12px] uppercase tracking-wider">
                             <Calendar className="h-3 w-3 mr-1" /> Créé le {new Date(profile.created_at).toLocaleDateString()}
                           </div>
+                          <div className="flex items-center gap-2 mt-2">
+                            {profile.instagram && (<a href={`https://instagram.com/${profile.instagram.replace(/^@/,'')}`} target="_blank" rel="noreferrer" className="text-pink-500 text-sm">IG</a>)}
+                            {profile.linkedin && (<a href={profile.linkedin} target="_blank" rel="noreferrer" className="text-blue-600 text-sm">IN</a>)}
+                            {profile.facebook && (<a href={profile.facebook} target="_blank" rel="noreferrer" className="text-blue-800 text-sm">FB</a>)}
+                            {profile.snapchat && (<a href={`https://www.snapchat.com/add/${profile.snapchat}`} target="_blank" rel="noreferrer" className="text-yellow-500 text-sm">SC</a>)}
+                            {profile.twitter && (<a href={profile.twitter.startsWith('http')?profile.twitter:`https://twitter.com/${profile.twitter.replace(/^@/,'')}`} target="_blank" rel="noreferrer" className="text-sky-500 text-sm">TW</a>)}
+                          </div>
                         </div>
                       </div>
 
