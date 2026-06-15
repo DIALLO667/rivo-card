@@ -688,6 +688,23 @@ async def archive_profile(profile_id: str, request: Request):
     await db.profiles.update_one({"profile_id": profile_id}, {"$set": {"is_archived": new_status}})
     return {"status": "success", "is_archived": new_status}
 
+
+@api_router.delete("/profiles/{profile_id}")
+async def delete_profile(profile_id: str, request: Request):
+    """Delete a profile. Allowed for the owner of the profile or an owner/super-admin."""
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    profile = await db.profiles.find_one({"profile_id": profile_id})
+    if not profile:
+        raise HTTPException(status_code=404)
+    # permission: profile owner or owner/super-admin
+    caller_doc = await db.users.find_one({"user_id": user.user_id})
+    if profile.get("user_id") != user.user_id and not (caller_doc and (caller_doc.get("role") == "owner" or is_super_admin(caller_doc))):
+        raise HTTPException(status_code=403)
+    await db.profiles.delete_one({"profile_id": profile_id})
+    return {"status": "success"}
+
 @api_router.get("/profiles/public/{unique_link}")
 async def get_public_profile(unique_link: str):
     p = await db.profiles.find_one({"unique_link": unique_link}, {"_id": 0})

@@ -183,7 +183,6 @@ export default function Dashboard() {
 
   // delete profile
   const deleteProfile = async (profileId) => {
-    if (!window.confirm('Supprimer ce profil ? Cette action est irréversible.')) return;
     try {
       const token = localStorage.getItem('token');
       await axios.delete(`${API}/profiles/${profileId}`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
@@ -194,6 +193,20 @@ export default function Dashboard() {
       toast.error('Impossible de supprimer le profil');
     }
   };
+
+  // Listen for activation-created events from the activation popup (localStorage key)
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (!e) return;
+      if (e.key === 'rivo_last_created_profile') {
+        // refresh profiles silently
+        fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+        toast.success('Nouveau profil créé');
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
   const generateActivationLink = async () => {
     setActivationError('');

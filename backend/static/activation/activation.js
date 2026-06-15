@@ -159,8 +159,19 @@
       const res = await fetch('/api/activation/submit', {method:'POST', body: fd});
       const j = await res.json();
       if(res.ok){
-        if (msg) msg.textContent = 'Profil créé — vous pouvez fermer cette fenêtre.';
+        if (msg) msg.textContent = 'Profil créé — fermeture automatique en cours...';
+        // broadcast to other tabs (dashboard) that a new profile was created
+        try { localStorage.setItem('rivo_last_created_profile', JSON.stringify({ profile_id: j.profile_id, ts: Date.now() })); } catch (e) {}
+        // show a small success overlay
+        try {
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed'; overlay.style.left = 0; overlay.style.top = 0; overlay.style.right = 0; overlay.style.bottom = 0; overlay.style.background = 'rgba(0,0,0,0.4)'; overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center'; overlay.style.zIndex=9999;
+          const box = document.createElement('div'); box.style.background='#fff'; box.style.padding='20px'; box.style.borderRadius='12px'; box.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)'; box.innerText = 'Profil créé avec succès — cette fenêtre va se fermer.';
+          overlay.appendChild(box); document.body.appendChild(overlay);
+        } catch (e) {}
+        // reset form and close after a short delay
         form.reset(); updatePreview();
+        setTimeout(() => { try { window.close(); } catch(e) { /* ignore */ } }, 1400);
       } else {
         if (msg) msg.textContent = j.detail || 'Erreur lors de la création du profil';
       }
