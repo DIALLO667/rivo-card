@@ -287,7 +287,7 @@ class JPMAPITester:
 
     def run_all_tests(self):
         """Execute all test suites"""
-    print("🚀 Starting Rivo-Card API Testing...")
+        print("🚀 Starting Rivo-Card API Testing...")
         print(f"Backend URL: {self.base_url}")
         
         # Authentication is required for most operations
