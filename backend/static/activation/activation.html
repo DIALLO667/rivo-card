@@ -12,126 +12,120 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2x0p9s1gqz3H8Tn2xqGgE7h1Qj3+9o1pQ+0mY+M=" crossorigin=""/>
 </head>
 <body>
-  <div id="app" class="container">
-    <aside class="preview">
-      <div class="card-preview" id="cardPreview">
-        <div class="avatar-wrapper"><img id="previewPhoto" src="" alt="photo" /><div id="previewInitial" class="initial">R</div></div>
-        <div class="card-body">
-          <h3 id="previewName">Nom Prénom</h3>
-          <p id="previewJob">Titre / Poste</p>
-          <p id="previewCompany">Entreprise</p>
-          <div id="previewContact" class="contact">
-            <span id="previewPhone" class="phone"></span>
-            <span id="previewLocation" class="location"></span>
-          </div>
-          <div id="previewSocials" class="socials">
-            <a id="previewLinkedin" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">in</a>
-            <a id="previewInstagram" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">ig</a>
-            <a id="previewTwitter" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">tw</a>
-            <a id="previewFacebook" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">fb</a>
-            <a id="previewSnapchat" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">sc</a>
-          </div>
-        </div>
-      </div>
-    </aside>
+  <div id="app" class="activation-root">
+    <div class="activation-panel">
+      <h1 class="panel-title">Complétez votre Rivo-Card</h1>
+      <p class="panel-sub">Remplissez les informations ci-dessous pour créer votre profil.</p>
 
-    <main class="form-area">
-      <h1>Complétez votre Rivo-Card</h1>
-      <p class="muted">Remplissez les informations ci-dessous pour créer votre profil.</p>
-
-      <form id="activationForm" enctype="multipart/form-data">
+      <form id="activationForm" enctype="multipart/form-data" class="activation-form">
         <input type="hidden" id="token" name="token" />
         <input type="hidden" id="croppedBlob" name="cropped_blob" />
 
-        <label>Nom complet
-          <input name="name" id="name" required />
-          <small class="help">Ex: Marie Dupont</small>
-        </label>
+        <div class="form-grid">
+          <div class="col">
+            <label class="field">Nom Complet *
+              <input name="name" id="name" required />
+            </label>
 
-        <label>Poste
-          <input name="job" id="job" required />
-          <small class="help">Ex: Chef de projet</small>
-        </label>
+            <label class="field">Profession
+              <input name="job" id="job" required />
+            </label>
 
-        <label>Entreprise
-          <input name="company" id="company" />
-          <small class="help">Nom de votre société (facultatif)</small>
-        </label>
+            <label class="field">Entreprise
+              <input name="company" id="company" />
+            </label>
 
-        <label>Téléphone
-          <input name="phone" id="phone" required />
-          <small class="help">Votre numéro pour les contacts clients</small>
-        </label>
+            <label class="field">Téléphone *
+              <input name="phone" id="phone" required />
+            </label>
 
-        <label>Email
-          <input name="email" id="email" type="email" />
-          <small class="help">Utilisé pour retrouver votre profil</small>
-        </label>
+            <label class="field">Email
+              <input name="email" id="email" type="email" />
+            </label>
 
-        <label>LinkedIn
-          <input name="linkedin" id="linkedin" placeholder="https://www.linkedin.com/in/nom" />
-          <small class="help">Copiez le lien de votre profil public</small>
-        </label>
-
-        <label>Instagram
-          <input name="instagram" id="instagram" placeholder="nom_utilisateur" />
-          <small class="help">Nom de compte sans @</small>
-        </label>
-
-        <label>Twitter
-          <input name="twitter" id="twitter" placeholder="@handle ou lien" />
-          <small class="help">Lien ou handle</small>
-        </label>
-
-        <label>Facebook
-          <input name="facebook" id="facebook" placeholder="Lien Facebook" />
-          <small class="help">Lien ou nom public</small>
-        </label>
-
-        <label>Snapchat
-          <input name="snapchat" id="snapchat" placeholder="nom_snap" />
-          <small class="help">Nom d'utilisateur Snapchat (facultatif)</small>
-        </label>
-
-        <label>Adresse / Maps
-          <div style="display:flex;gap:8px;align-items:center;">
-            <input name="address" id="address" placeholder="Entrez une adresse ou un lieu" style="flex:1" />
-            <button id="addressSearch" type="button" class="btn">Chercher</button>
+            <div class="socials-block">
+              <p class="section-title">Réseaux Sociaux</p>
+              <label class="small">Instagram
+                <input name="instagram" id="instagram" placeholder="Instagram" />
+              </label>
+              <label class="small">LinkedIn
+                <input name="linkedin" id="linkedin" placeholder="LinkedIn" />
+              </label>
+              <label class="small">Facebook
+                <input name="facebook" id="facebook" placeholder="Facebook" />
+              </label>
+              <label class="small">Snapchat
+                <input name="snapchat" id="snapchat" placeholder="Snapchat" />
+              </label>
+              <label class="small">Twitter
+                <input name="twitter" id="twitter" placeholder="Twitter" />
+              </label>
+              <label class="small">Site Web
+                <input name="website" id="website" placeholder="https://..." />
+              </label>
+            </div>
           </div>
-          <small class="help">Vous pouvez chercher votre adresse pour l'afficher sur la carte</small>
-        </label>
-        <input type="hidden" id="lat" name="lat" />
-        <input type="hidden" id="lng" name="lng" />
-        <div style="margin-bottom:12px;">
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-            <button id="useMyLocation" type="button" class="btn">Utiliser ma position</button>
-            <small class="muted">Ou cliquez sur la carte pour positionner</small>
+
+          <div class="col">
+            <label class="field">Adresse / Localisation
+              <div class="address-row">
+                <input name="address" id="address" placeholder="Entrez une adresse ou collez un lien Maps" />
+                <button id="addressSearch" type="button" class="btn small">Chercher</button>
+              </div>
+            </label>
+            <input type="hidden" id="lat" name="lat" />
+            <input type="hidden" id="lng" name="lng" />
+
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                <button id="useMyLocation" type="button" class="btn small">Utiliser ma position</button>
+                <small class="muted">Ou cliquez sur la carte pour positionner</small>
+              </div>
+              <div id="map" style="width:100%;height:200px;border-radius:8px;overflow:hidden;border:1px solid #e6e7eb"></div>
+            </div>
+
+            <label class="field">Photo de Profil
+              <input type="file" name="photo" id="photo" accept="image/*" />
+            </label>
+
+            <div id="cropperContainer" style="display:none;margin-bottom:12px;">
+              <div style="width:100%;max-height:360px;overflow:hidden;">
+                <img id="cropperImage" src="" alt="Prévisualisation à recadrer" style="max-width:100%;display:block;" />
+              </div>
+              <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end;">
+                <button id="applyCrop" type="button" class="btn primary">Appliquer</button>
+                <button id="cancelCrop" type="button" class="btn" style="background:#eee;">Annuler</button>
+              </div>
+            </div>
+
+            <div class="photo-preview-row">
+              <img id="previewPhoto" src="" alt="photo" style="display:none;width:96px;height:96px;border-radius:999px;border:4px solid #D4AF37;object-fit:cover" />
+              <div id="previewInitial" class="initial">R</div>
+              <div class="preview-info">
+                <h3 id="previewName">Nom Prénom</h3>
+                <p id="previewJob">Titre / Poste</p>
+                <p id="previewCompany">Entreprise</p>
+                <div id="previewContact" class="contact"><span id="previewPhone"></span><span id="previewLocation"></span></div>
+                <div id="previewSocials" class="socials">
+                  <a id="previewLinkedin" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">in</a>
+                  <a id="previewInstagram" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">ig</a>
+                  <a id="previewTwitter" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">tw</a>
+                  <a id="previewFacebook" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">fb</a>
+                  <a id="previewSnapchat" href="#" target="_blank" rel="noreferrer" class="social" style="display:none">sc</a>
+                </div>
+              </div>
+            </div>
+
           </div>
-          <div id="map" style="width:100%;height:240px;border-radius:8px;overflow:hidden;border:1px solid #e6e7eb"></div>
         </div>
 
-        <label>Photo de profil
-          <input type="file" name="photo" id="photo" accept="image/*" />
-          <small class="help">Format carré recommandé. Vous pourrez recadrer ici (mobile-first).</small>
-        </label>
-
-        <div id="cropperContainer" style="display:none;margin-bottom:12px;">
-          <div style="width:100%;max-height:400px;overflow:hidden;">
-            <img id="cropperImage" src="" alt="Prévisualisation à recadrer" style="max-width:100%;display:block;" />
-          </div>
-          <div style="margin-top:8px;display:flex;gap:8px;justify-content:flex-end;">
-            <button id="applyCrop" type="button" class="btn primary">Appliquer</button>
-            <button id="cancelCrop" type="button" class="btn" style="background:#eee;">Annuler</button>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="submit" class="btn primary">Créer ma Rivo-Card</button>
+        <div class="actions" style="margin-top:16px">
+          <button type="submit" class="btn primary large">Créer ma Rivo-Card</button>
         </div>
 
         <div id="formMsg" class="muted"></div>
       </form>
-    </main>
+    </div>
   </div>
 
 <!-- Cropper.js script -->
