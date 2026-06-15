@@ -8,6 +8,8 @@
   <link rel="icon" href="/static/activation/favicon.svg" />
   <!-- Cropper.js CSS -->
   <link  href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-sA+e2x0p9s1gqz3H8Tn2xqGgE7h1Qj3+9o1pQ+0mY+M=" crossorigin=""/>
 </head>
 <body>
   <div id="app" class="container">
@@ -100,6 +102,13 @@
         </label>
         <input type="hidden" id="lat" name="lat" />
         <input type="hidden" id="lng" name="lng" />
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <button id="useMyLocation" type="button" class="btn">Utiliser ma position</button>
+            <small class="muted">Ou cliquez sur la carte pour positionner</small>
+          </div>
+          <div id="map" style="width:100%;height:240px;border-radius:8px;overflow:hidden;border:1px solid #e6e7eb"></div>
+        </div>
 
         <label>Photo de profil
           <input type="file" name="photo" id="photo" accept="image/*" />
@@ -127,6 +136,8 @@
 
 <!-- Cropper.js script -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-o9N1j7k8GQ2Qv7s5yKkQk2aQYvYf8jv+7vT2bQVX0mM=" crossorigin=""></script>
 <script src="/static/activation/activation.js"></script>
 </body>
 </html>

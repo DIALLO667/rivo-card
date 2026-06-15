@@ -37,6 +37,45 @@
   const addressSearchBtn = document.getElementById('addressSearch');
   const latInput = document.getElementById('lat');
   const lngInput = document.getElementById('lng');
+  const useMyLocationBtn = document.getElementById('useMyLocation');
+  const mapEl = document.getElementById('map');
+  let map = null;
+  let mapMarker = null;
+
+  // initialize leaflet map if available
+  function initMap(){
+    if (!mapEl || typeof L === 'undefined') return;
+    try{
+      map = L.map(mapEl).setView([0,0], 2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+      map.on('click', async function(e){
+        const {lat, lng} = e.latlng;
+        if (mapMarker) map.removeLayer(mapMarker);
+        mapMarker = L.marker([lat,lng]).addTo(map);
+        if (latInput) latInput.value = lat;
+        if (lngInput) lngInput.value = lng;
+        // reverse geocode
+        try{
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+          const j = await res.json();
+          if (j && j.display_name) { if (addressInput) addressInput.value = j.display_name; updatePreview(); }
+        }catch(e){ console.error('reverse geocode failed', e); }
+      });
+    }catch(e){ console.error('initMap error', e); }
+  }
+
+  if (useMyLocationBtn) useMyLocationBtn.addEventListener('click', function(){
+    if (!navigator.geolocation) return alert('Géolocalisation non supportée');
+    navigator.geolocation.getCurrentPosition(function(pos){
+      const lat = pos.coords.latitude; const lng = pos.coords.longitude;
+      if (map) map.setView([lat,lng], 14);
+      if (mapMarker) map.removeLayer(mapMarker);
+      mapMarker = L.marker([lat,lng]).addTo(map);
+      if (latInput) latInput.value = lat; if (lngInput) lngInput.value = lng;
+      // reverse geocode
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(j => { if (j && j.display_name) { if (addressInput) addressInput.value = j.display_name; updatePreview(); }}).catch(e=>console.error(e));
+    }, function(err){ alert('Permission refusée ou erreur géolocalisation'); });
+  });
 
   async function checkToken(){
     try{
@@ -183,4 +222,6 @@
 
   checkToken();
   updatePreview();
+  // init map (if leaflet loaded)
+  try{ initMap(); }catch(e){}
 })();
