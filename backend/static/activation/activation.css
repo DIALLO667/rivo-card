@@ -65,4 +65,35 @@ input[type=email]{max-width:none}
 .form-grid{display:grid;grid-template-columns:1fr;gap:18px}
 @media(min-width:900px){ .form-grid{grid-template-columns:1fr 420px} }
 
+/* Consistent input styling for activation form */
+.activation-form label.field{display:block;margin-bottom:8px;font-weight:600;color:#111827}
+.activation-form label.small{display:block;margin-bottom:6px;font-weight:600;color:#111827}
+.activation-form input[type=text],
+.activation-form input[type=email],
+.activation-form input[type=tel],
+.activation-form input[type=file],
+.activation-form textarea,
+.activation-form input[type=url] {
+	width:100%;
+	padding:12px 14px;
+	border-radius:10px;
+	border:1px solid #e6e7eb;
+	background:#fff;
+	color:#000;
+	font-family: Inter, Arial, sans-serif;
+	font-size:14px;
+	box-sizing:border-box;
+	transition: border-color .12s ease, box-shadow .12s ease;
+}
+.activation-form input::placeholder { color: #9ca3af; }
+.activation-form input:focus, .activation-form textarea:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 4px 18px rgba(212,175,55,0.08);
+}
+
+/* Make sure file inputs keep small visible label */
+.activation-form input[type=file] { padding:8px; }
+
+
 
