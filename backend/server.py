@@ -862,6 +862,7 @@ async def activation_submit(
             "facebook": facebook,
             "snapchat": snapchat,
             "address": address,
+            "location": address,
             "lat": lat,
             "lng": lng,
             "website": website,

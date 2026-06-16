@@ -33,6 +33,7 @@ body{background:var(--bg);color:#fff}
 .activation-panel{background:var(--panel);border:1px solid rgba(212,175,55,0.06)}
 .activation-form input[type=text], .activation-form input[type=email], .activation-form input[type=file], .activation-form input[type=tel]{background:transparent;border:1px solid rgba(255,255,255,0.04);color:#fff}
 .activation-form input::placeholder{color:rgba(0,0,0,0.45)}
+.activation-form input, .activation-form textarea { color: #000; }
 .btn.small{background:transparent;color:var(--accent);border:1px solid rgba(212,175,55,0.12)}
 .btn.primary.large{background:var(--accent);color:#000}
 .photo-preview-row .initial{background:#0f1720;border:4px solid var(--accent)}
@@ -53,8 +54,8 @@ body{background:linear-gradient(180deg,#FCEAA6 0%, #F7D36C 100%);}
 /* Hide preview area (temporary) */
 .photo-preview-row, .preview, .card-preview { display:none !important; }
 
-/* Email field narrower */
-input[type=email]{max-width:320px}
+/* Email styled like other inputs */
+input[type=email]{max-width:none}
 
 /* Social inputs: placeholders and optional label */
 .socials-block label.small::before { content: "Facultatif - "; color: #9ca3af; margin-right:6px; font-size:12px }

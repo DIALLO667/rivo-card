@@ -208,6 +208,14 @@ export default function Dashboard() {
     return () => window.removeEventListener('storage', onStorage);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
+  // Auto-refresh polling to keep dashboard in sync (every 10 seconds)
+  useEffect(() => {
+    const iv = setInterval(() => {
+      fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+    }, 10000);
+    return () => clearInterval(iv);
+  }, [ownerOverview, selectedSub, currentUser, subaccounts]);
+
   const generateActivationLink = async () => {
     setActivationError('');
     setGeneratingActivation(true);
