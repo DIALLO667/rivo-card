@@ -40,42 +40,7 @@ body{background:var(--bg);color:#fff}
 .leaflet-container{border-radius:10px}
 .section-title{color:var(--accent)}
 .socials a.social{background:#111827}
-:root{--bg:#f8fafc;--panel:#fff;--muted:#6b7280;--accent:#D4AF37}
-body{font-family:Inter,Arial,sans-serif;background:var(--bg);margin:0}
-/* Mobile-first styles: preview on top */
-.container{max-width:1100px;margin:18px auto;display:flex;flex-direction:column;gap:18px;padding:16px}
-.preview{width:100%}
-.card-preview{background:linear-gradient(180deg,#fff 0%,#fbfaf9 100%);border-radius:14px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,.08);display:flex;gap:16px;align-items:center}
-.avatar-wrapper{position:relative;width:88px;height:88px;border-radius:999px;overflow:hidden;border:6px solid var(--accent);background:#f3f4f6;display:flex;align-items:center;justify-content:center}
-.avatar-wrapper img{width:100%;height:100%;object-fit:cover;display:none}
-.initial{font-weight:800;color:#111827;font-size:28px}
-.card-body h3{margin:0;font-size:18px;color:#0f172a}
-.card-body p{margin:4px 0;color:var(--muted);font-size:13px}
-.card-body .contact{margin-top:8px;display:flex;flex-direction:column;gap:4px}
-.card-body .socials{margin-top:8px;display:flex;gap:8px}
-.card-body .social{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:#111827;color:#fff;font-weight:700;text-decoration:none}
-.form-area{width:100%;background:var(--panel);padding:20px;border-radius:14px;box-shadow:0 8px 24px rgba(2,6,23,.05)}
-label{display:block;margin-bottom:12px;font-size:14px}
-input[type=text],input[type=email],input[type=file],input[type=tel],textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #e6e7eb}
-.help{display:block;color:var(--muted);font-size:12px;margin-top:6px}
-.actions{margin-top:14px}
-.btn{padding:10px 14px;border-radius:10px;border:none}
-.btn.primary{background:var(--accent);color:#000;font-weight:700}
-.muted{color:var(--muted);margin-top:12px}
+/* Ensure labels and muted/helper text are visible in dark theme */
+.activation-form label, .activation-panel .panel-sub, .section-title { color: #fff; }
+.activation-form .muted, .muted { color: rgba(255,255,255,0.65); }
 
-.form-area h1{font-size:20px;margin:0 0 6px}
-.form-area .muted{margin-bottom:12px}
-
-.address-row{display:flex;gap:8px;align-items:center}
-.address-row input{flex:1}
-
-/* Larger screens: side-by-side layout */
-
-/* Larger screens: side-by-side layout */
-@media(min-width:800px){
- 	.container{flex-direction:row;gap:28px;padding:20px}
- 	.preview{flex:0 0 380px}
- 	.card-preview{padding:26px}
- 	.avatar-wrapper{width:110px;height:110px}
- 	.form-area{padding:26px}
-}
