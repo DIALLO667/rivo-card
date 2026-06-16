@@ -137,24 +137,7 @@
     updatePreview();
   });
 
-  // address search via Nominatim
-  if (addressSearchBtn) addressSearchBtn.addEventListener('click', async function(){
-    const q = (addressInput && addressInput.value) || '';
-    if (!q) return alert('Entrez une adresse à rechercher');
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
-      const j = await res.json();
-      if (j && j[0]){
-        if (latInput) latInput.value = j[0].lat;
-        if (lngInput) lngInput.value = j[0].lon;
-        if (addressInput) addressInput.value = j[0].display_name;
-        updatePreview();
-        alert('Adresse trouvée');
-      } else {
-        alert('Adresse introuvable');
-      }
-    } catch (e) { console.error(e); alert('Erreur géocodage'); }
-  });
+  // address search button removed — address field is free-text or a maps URL
 
   const formEl = document.getElementById('activationForm');
   if (formEl) formEl.addEventListener('submit', async function(e){
