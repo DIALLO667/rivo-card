@@ -38,55 +38,16 @@
   const latInput = document.getElementById('lat');
   const lngInput = document.getElementById('lng');
   const useMyLocationBtn = document.getElementById('useMyLocation');
-  const mapEl = document.getElementById('map');
-  let map = null;
-  let mapMarker = null;
+  // map removed: no DOM element expected for map
 
-  // initialize leaflet map if available
-  function initMap(){
-    if (!mapEl || typeof L === 'undefined') return;
-    try{
-      map = L.map(mapEl).setView([0,0], 2);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
-      // fix common visual bug when map container size isn't calculated yet
-      setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 250);
-      // ensure map invalidates on window resize as well
-      window.addEventListener && window.addEventListener('resize', function(){ try{ map.invalidateSize(); }catch(e){} });
-      map.on('click', async function(e){
-        const {lat, lng} = e.latlng;
-        if (mapMarker) map.removeLayer(mapMarker);
-        mapMarker = L.marker([lat,lng]).addTo(map);
-        if (latInput) latInput.value = lat;
-        if (lngInput) lngInput.value = lng;
-        // reverse geocode
-        try{
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-          const j = await res.json();
-          if (j && j.display_name) { if (addressInput) addressInput.value = j.display_name; updatePreview(); }
-        }catch(e){ console.error('reverse geocode failed', e); }
-      });
-      // if lat/lng are already present (e.g. prefilled by form), show marker
-      try{
-        const latVal = latInput && latInput.value;
-        const lngVal = lngInput && lngInput.value;
-        if (latVal && lngVal && !isNaN(parseFloat(latVal)) && !isNaN(parseFloat(lngVal))){
-          const la = parseFloat(latVal), ln = parseFloat(lngVal);
-          map.setView([la, ln], 14);
-          mapMarker = L.marker([la, ln]).addTo(map);
-        }
-      }catch(e){}
-    }catch(e){ console.error('initMap error', e); }
-  }
+  // map removed: no initialization
 
   if (useMyLocationBtn) useMyLocationBtn.addEventListener('click', function(){
     if (!navigator.geolocation) return alert('Géolocalisation non supportée');
     navigator.geolocation.getCurrentPosition(function(pos){
       const lat = pos.coords.latitude; const lng = pos.coords.longitude;
-      if (map) map.setView([lat,lng], 14);
-      if (mapMarker) map.removeLayer(mapMarker);
-      mapMarker = L.marker([lat,lng]).addTo(map);
       if (latInput) latInput.value = lat; if (lngInput) lngInput.value = lng;
-      // reverse geocode
+      // reverse geocode to fill address
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(r => r.json()).then(j => { if (j && j.display_name) { if (addressInput) addressInput.value = j.display_name; updatePreview(); }}).catch(e=>console.error(e));
     }, function(err){ alert('Permission refusée ou erreur géolocalisation'); });
   });
@@ -188,12 +149,7 @@
         if (lngInput) lngInput.value = j[0].lon;
         if (addressInput) addressInput.value = j[0].display_name;
         updatePreview();
-          // center map and add marker if map exists
-          try{
-            const la = parseFloat(j[0].lat), ln = parseFloat(j[0].lon);
-            if (map){ map.setView([la, ln], 14); if (mapMarker) map.removeLayer(mapMarker); mapMarker = L.marker([la, ln]).addTo(map); try{ map.invalidateSize(); }catch(e){} }
-          }catch(e){}
-          alert('Adresse trouvée');
+        alert('Adresse trouvée');
       } else {
         alert('Adresse introuvable');
       }
@@ -241,6 +197,5 @@
 
   checkToken();
   updatePreview();
-  // init map (if leaflet loaded)
-  try{ initMap(); }catch(e){}
+  // no map to initialize
 })();
