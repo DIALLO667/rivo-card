@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [ownerOverview, setOwnerOverview] = useState(false);
-  const [selectedSub, setSelectedSub] = useState('all');
+  const [selectedSub, setSelectedSub] = useState('me');
   const [showActivationModal, setShowActivationModal] = useState(false);
   const [generatedActivationUrl, setGeneratedActivationUrl] = useState('');
   const [activationError, setActivationError] = useState('');
@@ -35,27 +35,32 @@ export default function Dashboard() {
 
   // load profiles; accepts explicit overrides so callers pass freshly-fetched
   // values instead of relying on React state updates (which are async).
-  async function fetchProfiles({ ownerOv = false, sel = 'all', cur = null, subs = [] } = {}) {
+  function shouldUseScopeAll({ ownerOv, sel, cur }) {
+    if (ownerOv) return true;
+    const role = cur?.role;
+    if (role === 'owner' || role === 'admin') {
+      return sel === 'all' || (sel && sel !== 'me');
+    }
+    return false;
+  }
+
+  async function fetchProfiles({ ownerOv = false, sel = 'me', cur = null, subs = [] } = {}) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const params = {};
-      if (ownerOv) params.scope = 'all';
+      if (shouldUseScopeAll({ ownerOv, sel, cur })) params.scope = 'all';
       const response = await axios.get(`${API}/profiles`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
         withCredentials: true,
       });
       let data = response.data || [];
-      if (sel && sel !== 'all') {
-        if (sel === 'me') {
-          const allowed = new Set();
-          if (cur && cur.user_id) allowed.add(cur.user_id);
-          (subs || []).forEach((s) => allowed.add(s.user_id));
-          data = data.filter((p) => allowed.has(p.user_id));
-        } else {
-          data = data.filter((p) => p.user_id === sel);
-        }
+      if (sel === 'me') {
+        const uid = cur?.user_id;
+        if (uid) data = data.filter((p) => p.user_id === uid);
+      } else if (sel && sel !== 'all') {
+        data = data.filter((p) => p.user_id === sel);
       }
       setProfiles(data);
     } catch (err) {
@@ -99,8 +104,9 @@ export default function Dashboard() {
         // compute the initial sub from the current URL
         try {
           const qs = new URL(window.location.href).searchParams;
-          const param = qs.get('sub') || 'all';
+          const param = qs.get('sub');
           if (param && param !== 'all') setSelectedSub(param);
+          else setSelectedSub('me');
         } catch (e) {
           // ignore if URL parsing fails
         }
@@ -136,7 +142,15 @@ export default function Dashboard() {
 
         // call fetchProfiles with freshly-fetched values so we don't rely on
         // state updates that haven't been committed yet.
-        await fetchProfiles({ ownerOv: ownerOverview, sel: (new URL(window.location.href).searchParams.get('sub') || selectedSub), cur: me, subs: fetchedSubs });
+        const initialSub = (() => {
+          try {
+            const p = new URL(window.location.href).searchParams.get('sub');
+            return p && p !== 'all' ? p : 'me';
+          } catch (e) {
+            return 'me';
+          }
+        })();
+        await fetchProfiles({ ownerOv: ownerOverview, sel: initialSub, cur: me, subs: fetchedSubs });
       } catch (e) {
         console.error('initial load error', e);
       }
@@ -288,19 +302,19 @@ export default function Dashboard() {
 
           <nav className="mt-6 px-2">
             <ul className="space-y-3">
-              <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
+              <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5 bg-white/5">
+                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
               </li>
-              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-transparent">
-                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Membres'}</span>
+              <li onClick={() => navigate('/subaccounts')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Filiales'}</span>
               </li>
-              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+              <li onClick={() => navigate('/links')} className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Liens'}</span>
               </li>
-              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+              <li onClick={() => { setFilterType('archived'); navigate('/dashboard'); }} className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Archivés'}</span>
               </li>
@@ -327,10 +341,10 @@ export default function Dashboard() {
               </div>
               <nav className="mt-6 px-2">
                 <ul className="space-y-3">
-                  <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">Tableau de Bord</li>
-                  <li className="px-3 py-3 rounded-lg flex items-center gap-3">Gestion des Membres</li>
-                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">Gestion des Liens</li>
-                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">Archivés</li>
+                  <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/dashboard'); }}>Tableau de Bord</li>
+                  <li className="px-3 py-3 rounded-lg flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/subaccounts'); }}>Gestion des Filiales</li>
+                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/links'); }}>Gestion des Liens</li>
+                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); setFilterType('archived'); }}>Archivés</li>
                 </ul>
               </nav>
             </div>
@@ -360,16 +374,18 @@ export default function Dashboard() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
+                {(currentUser?.role === 'owner' || currentUser?.role === 'admin' || subaccounts.length > 0) && (
                 <div className="flex items-center gap-2">
-                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
-                    <option value="all">Tous</option>
+                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v, cur: currentUser, subs: subaccounts }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
                     <option value="me">Mes profils</option>
-                    {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name} ({s.user_id})</option>)}
+                    <option value="all">Tous</option>
+                    {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
                   </select>
                   <label className="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v }); }} /> Vue d'ensemble
+                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v, sel: selectedSub, cur: currentUser, subs: subaccounts }); }} /> Vue d'ensemble
                   </label>
                 </div>
+                )}
 
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full sm:w-auto h-12 px-6 rounded-xl">
@@ -382,8 +398,8 @@ export default function Dashboard() {
                 <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
-                {selectedSub && selectedSub !== 'all' && (
-                  <Button onClick={() => { setSelectedSub('all'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ sel: 'all' }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
+                {selectedSub && selectedSub !== 'me' && selectedSub !== 'all' && (
+                  <Button onClick={() => { setSelectedSub('me'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ ownerOv: ownerOverview, sel: 'me', cur: currentUser, subs: subaccounts }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
                 )}
               </div>
             </div>

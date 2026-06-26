@@ -176,15 +176,15 @@ export default function Subaccounts() {
 
           <nav className="mt-6 px-2">
             <ul className="space-y-3">
-              <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
+              <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">Tableau de Bord</span>
               </li>
-              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-transparent">
+              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-white/5">
                 <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
-                <span className="font-medium text-sm tracking-wide">Gestion des Membres</span>
+                <span className="font-medium text-sm tracking-wide">Gestion des Filiales</span>
               </li>
-              <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3">
+              <li onClick={() => navigate('/links')} className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">Gestion des Liens</span>
               </li>

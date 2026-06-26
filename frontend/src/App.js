@@ -8,6 +8,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ProfileForm = lazy(() => import('./pages/ProfileForm'));
 const Subaccounts = lazy(() => import('./pages/Subaccounts'));
+const LinkManagement = lazy(() => import('./pages/LinkManagement'));
 const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const SuspendedService = lazy(() => import('./pages/SuspendedService'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
@@ -30,6 +31,7 @@ function AppRouter() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/subaccounts" element={<ProtectedRoute><Subaccounts /></ProtectedRoute>} />
+          <Route path="/links" element={<ProtectedRoute><LinkManagement /></ProtectedRoute>} />
           <Route path="/profiles/new" element={<ProtectedRoute><ProfileForm /></ProtectedRoute>} />
           <Route path="/profiles/edit/:profileId" element={<ProtectedRoute><ProfileForm /></ProtectedRoute>} />
           <Route path="/suspended" element={<SuspendedService />} />
