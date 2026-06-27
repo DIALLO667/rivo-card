@@ -6,7 +6,7 @@ import {
   Smartphone, UserPlus, Settings, Check,
 } from "lucide-react";
 
-import rivoCard from "../assets/jamaney-card.png";
+import rivoCardBanner from "../assets/rivo-card-banner.png";
 import mediumImg from "../assets/offres/medium-10k.png";
 import premiumImg from "../assets/offres/premium-15k.png";
 import pmeStarterImg from "../assets/offres/pme-starter.png";
@@ -95,53 +95,25 @@ const packsEntreprise = [
     id: "starter",
     name: "PME PACK STARTER",
     accent: "text-cyan-400",
-    accentBg: "bg-cyan-500/10 border-cyan-500/30",
+    accentBg: "border-cyan-500/30",
     image: pmeStarterImg,
-    features: [
-      "10 cartes NFC personnalisées",
-      "Dashboard administrateur inclus",
-      "Gestion simplifiée des collaborateurs",
-      "Cartes aux couleurs et au logo de votre entreprise",
-      "Mise à jour illimitée",
-    ],
-    year1: "390 000 FCFA",
-    renewal: "240 000 FCFA / an",
-    whatsappText: "Bonjour, je suis intéressé par le PME PACK STARTER RIVO-CARD.",
+    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
   },
   {
     id: "business",
     name: "PME PACK BUSINESS",
-    accent: "text-amber-400",
-    accentBg: "bg-amber-500/10 border-amber-500/30",
+    accent: "text-primary",
+    accentBg: "border-primary/30",
     image: pmeBusinessImg,
-    features: [
-      "25 cartes NFC personnalisées",
-      "Dashboard administrateur inclus",
-      "Gestion simplifiée des collaborateurs",
-      "Cartes aux couleurs et au logo de votre entreprise",
-      "Mise à jour illimitée",
-    ],
-    year1: "610 000 FCFA",
-    renewal: "360 000 FCFA / an",
-    whatsappText: "Bonjour, je suis intéressé par le PME PACK BUSINESS RIVO-CARD.",
+    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
   },
   {
     id: "premium-pme",
     name: "PME PACK PREMIUM",
     accent: "text-emerald-400",
-    accentBg: "bg-emerald-500/10 border-emerald-500/30",
+    accentBg: "border-emerald-500/30",
     image: pmePremiumImg,
-    features: [
-      "50 cartes NFC personnalisées",
-      "Dashboard administrateur inclus",
-      "Gestion simplifiée des collaborateurs",
-      "Cartes aux couleurs et au logo de votre entreprise",
-      "Mise à jour illimitée",
-      "Gestion avancée des équipes",
-    ],
-    year1: "990 000 FCFA",
-    renewal: "500 000 FCFA / an",
-    whatsappText: "Bonjour, je suis intéressé par le PME PACK PREMIUM RIVO-CARD.",
+    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
   },
 ];
 
@@ -234,9 +206,9 @@ const Accueil = () => {
                 </a>
               </div>
             </div>
-            <div className="flex justify-center">
-              <div className="relative w-full max-w-md md:max-w-lg landing-pulse-glow rounded-2xl">
-                <img src={rivoCard} alt="Rivo-Card NFC" className="w-full h-auto object-contain" />
+            <div className="flex justify-center md:justify-end">
+              <div className="relative w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
+                <img src={rivoCardBanner} alt="Rivo Card" className="w-full h-auto object-cover" />
               </div>
             </div>
           </div>
@@ -330,7 +302,7 @@ const Accueil = () => {
           </div>
 
           {/* Offres individuelles */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {offresIndividuelles.map((offre) => (
               <div
                 key={offre.id}
@@ -338,10 +310,14 @@ const Accueil = () => {
                   offre.popular ? "border-primary/50 ring-1 ring-primary/20" : "border-border/50"
                 }`}
               >
-                <div className="relative h-44 overflow-hidden bg-[#0F2744]">
-                  <img src={offre.image} alt={offre.title} className="w-full h-full object-cover object-top opacity-90" />
+                <div className="relative min-h-[280px] md:min-h-[340px] bg-[#0a1628] flex items-center justify-center p-2">
+                  <img
+                    src={offre.image}
+                    alt={offre.title}
+                    className="w-full h-full max-h-[320px] md:max-h-[380px] object-contain"
+                  />
                   {offre.popular && (
-                    <span className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
+                    <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
                       Populaire
                     </span>
                   )}
@@ -384,33 +360,17 @@ const Accueil = () => {
               </h3>
               <p className="text-muted-foreground">Digitalisez votre entreprise dès aujourd&apos;hui</p>
             </div>
-            <div className="grid lg:grid-cols-3 gap-6">
+            <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {packsEntreprise.map((pack) => (
                 <div key={pack.id} className={`rounded-2xl border bg-card overflow-hidden flex flex-col hover:blue-glow transition-all duration-300 ${pack.accentBg}`}>
-                  <div className="h-36 overflow-hidden">
-                    <img src={pack.image} alt={pack.name} className="w-full h-full object-cover object-center" />
+                  <div className="min-h-[220px] md:min-h-[260px] bg-[#0a1628] flex items-center justify-center p-2">
+                    <img src={pack.image} alt={pack.name} className="w-full h-full max-h-[240px] md:max-h-[280px] object-contain" />
                   </div>
-                  <div className="p-6 space-y-5 flex-1 flex flex-col">
+                  <div className="p-6 space-y-4 flex-1 flex flex-col text-center">
                     <h4 className={`text-lg font-bold ${pack.accent}`}>{pack.name}</h4>
-                    <ul className="space-y-2 flex-1">
-                      {pack.features.map((f) => (
-                        <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <Check className={`h-4 w-4 shrink-0 mt-0.5 ${pack.accent}`} />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="rounded-xl bg-[#0F2744]/80 border border-white/10 p-4 space-y-2">
-                      <div>
-                        <p className="text-xs text-muted-foreground uppercase tracking-wide">Total année 1</p>
-                        <p className="text-xl font-bold text-white">{pack.year1}</p>
-                        <p className="text-xs text-muted-foreground">à la signature</p>
-                      </div>
-                      <div className="border-t border-white/10 pt-2">
-                        <p className="text-xs text-muted-foreground">Années suivantes</p>
-                        <p className={`text-lg font-bold ${pack.accent}`}>{pack.renewal}</p>
-                      </div>
-                    </div>
+                    <p className="text-2xl md:text-3xl font-bold text-primary flex-1 flex items-center justify-center py-4">
+                      Sur demande
+                    </p>
                     <a href={whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, pack.whatsappText)} target="_blank" rel="noopener noreferrer">
                       <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-md font-medium transition-colors">
                         Contactez-nous
