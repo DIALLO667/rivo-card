@@ -52,7 +52,28 @@
 }
 
 @layer utilities {
-  /* Fusion de tes classes Glass et des effets Gold */
+  /* Effets landing page (bleu) */
+  .landing-page {
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+    --ring: 217 91% 60%;
+  }
+  .blue-glow {
+    box-shadow: 0 0 60px hsl(217 91% 60% / 0.15), 0 0 120px hsl(217 91% 60% / 0.05);
+  }
+  .blue-text-glow {
+    text-shadow: 0 0 40px hsl(217 91% 60% / 0.3);
+  }
+  .landing-pulse-glow {
+    animation: landing-pulse-glow 3s ease-in-out infinite;
+  }
+  @keyframes landing-pulse-glow {
+    0%, 100% { box-shadow: 0 0 40px hsl(217 91% 60% / 0.15); }
+    50% { box-shadow: 0 0 80px hsl(217 91% 60% / 0.3); }
+  }
+  /* Legacy gold (admin / autres pages) */
   .gold-glow {
     box-shadow: 0 0 60px hsl(40 52% 58% / 0.15), 0 0 120px hsl(40 52% 58% / 0.05);
   }
