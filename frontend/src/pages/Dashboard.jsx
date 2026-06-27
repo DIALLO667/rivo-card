@@ -35,34 +35,22 @@ export default function Dashboard() {
 
   // load profiles; accepts explicit overrides so callers pass freshly-fetched
   // values instead of relying on React state updates (which are async).
-  function shouldUseScopeAll({ ownerOv, sel, cur }) {
-    if (ownerOv) return true;
-    const role = cur?.role;
-    if (role === 'owner' || role === 'admin') {
-      return sel === 'all' || (sel && sel !== 'me');
-    }
-    return false;
-  }
-
-  async function fetchProfiles({ ownerOv = false, sel = 'me', cur = null, subs = [] } = {}) {
+  async function fetchProfiles({ ownerOv = false, sel = 'me' } = {}) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
       const params = {};
-      if (shouldUseScopeAll({ ownerOv, sel, cur })) params.scope = 'all';
+      if (sel && sel !== 'me' && sel !== 'all') {
+        params.filter_user_id = sel;
+      } else if (sel === 'all' || ownerOv) {
+        params.scope = 'all';
+      }
       const response = await axios.get(`${API}/profiles`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
         withCredentials: true,
       });
-      let data = response.data || [];
-      if (sel === 'me') {
-        const uid = cur?.user_id;
-        if (uid) data = data.filter((p) => p.user_id === uid);
-      } else if (sel && sel !== 'all') {
-        data = data.filter((p) => p.user_id === sel);
-      }
-      setProfiles(data);
+      setProfiles(response.data || []);
     } catch (err) {
       console.error(err);
       toast.error('Erreur lors du chargement des profils');
@@ -150,7 +138,7 @@ export default function Dashboard() {
             return 'me';
           }
         })();
-        await fetchProfiles({ ownerOv: ownerOverview, sel: initialSub, cur: me, subs: fetchedSubs });
+        await fetchProfiles({ ownerOv: ownerOverview, sel: initialSub });
       } catch (e) {
         console.error('initial load error', e);
       }
@@ -189,7 +177,7 @@ export default function Dashboard() {
       await axios.patch(`${API}/profiles/${profileId}/archive`, {}, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       toast.success(currentStatus ? 'Profil réactivé' : 'Profil archivé');
       // refresh using the latest UI values
-      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub });
     } catch (err) {
       toast.error("Erreur lors de l'opération");
     }
@@ -201,7 +189,7 @@ export default function Dashboard() {
       const token = localStorage.getItem('token');
       await axios.delete(`${API}/profiles/${profileId}`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       toast.success('Profil supprimé');
-      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+      await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub });
     } catch (err) {
       console.error('deleteProfile error', err);
       toast.error('Impossible de supprimer le profil');
@@ -214,7 +202,7 @@ export default function Dashboard() {
       if (!e) return;
       if (e.key === 'rivo_last_created_profile') {
         // refresh profiles silently
-        fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
+        fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub });
         toast.success('Nouveau profil créé');
       }
     };
@@ -376,13 +364,13 @@ export default function Dashboard() {
               <div className="flex flex-wrap items-center gap-3">
                 {(currentUser?.role === 'owner' || currentUser?.role === 'admin' || subaccounts.length > 0) && (
                 <div className="flex items-center gap-2">
-                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v, cur: currentUser, subs: subaccounts }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
+                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
                     <option value="me">Mes profils</option>
                     <option value="all">Tous</option>
                     {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
                   </select>
                   <label className="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v, sel: selectedSub, cur: currentUser, subs: subaccounts }); }} /> Vue d'ensemble
+                    <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v, sel: selectedSub }); }} /> Vue d'ensemble
                   </label>
                 </div>
                 )}
@@ -399,7 +387,7 @@ export default function Dashboard() {
                   <Users className="mr-2 h-5 w-5" /> Filiales
                 </Button>
                 {selectedSub && selectedSub !== 'me' && selectedSub !== 'all' && (
-                  <Button onClick={() => { setSelectedSub('me'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ ownerOv: ownerOverview, sel: 'me', cur: currentUser, subs: subaccounts }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
+                  <Button onClick={() => { setSelectedSub('me'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ ownerOv: ownerOverview, sel: 'me' }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
                 )}
               </div>
             </div>

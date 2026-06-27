@@ -22,20 +22,31 @@ export default function LinkManagement() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
       const params = scopeAll ? { scope: 'all' } : {};
       const res = await axios.get(`${API}/activation_tokens`, {
         headers: { Authorization: `Bearer ${token}` },
         params,
         withCredentials: true,
       });
-      setLinks(res.data || []);
+      setLinks(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
-      toast.error('Impossible de charger les liens');
+      const detail = err?.response?.data?.detail;
+      const status = err?.response?.status;
+      if (status === 404) {
+        toast.error('Endpoint non disponible — redéployez le backend');
+      } else {
+        toast.error(detail || 'Impossible de charger les liens');
+      }
+      setLinks([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     (async () => {
@@ -63,9 +74,11 @@ export default function LinkManagement() {
             setSubaccounts([]);
           }
         }
-        const isOwner = meRes.data?.role === 'owner' || meRes.data?.role === 'admin';
-        await fetchLinks(isOwner);
-        if (isOwner) setShowAll(true);
+        const isManager = meRes.data?.role === 'owner'
+          || meRes.data?.role === 'admin'
+          || subs.length > 0;
+        await fetchLinks(isManager);
+        if (isManager) setShowAll(true);
       } catch (e) {
         navigate('/login');
       }
@@ -114,7 +127,9 @@ export default function LinkManagement() {
     });
   };
 
-  const isOwner = currentUser?.role === 'owner' || currentUser?.role === 'admin';
+  const isManager = currentUser?.role === 'owner'
+    || currentUser?.role === 'admin'
+    || subaccounts.length > 0;
 
   return (
     <div className="flex min-h-screen">
@@ -157,6 +172,10 @@ export default function LinkManagement() {
 
       <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10`}>
         <div className="max-w-5xl mx-auto">
+          <div className="md:hidden mb-4 flex items-center gap-3">
+            <button onClick={() => navigate('/dashboard')} className="p-2 rounded-lg bg-white border border-gray-200 text-sm text-gray-700">← Retour</button>
+            <span className="font-semibold text-gray-900">Gestion des Liens</span>
+          </div>
           <div className="bg-white rounded-xl p-6 shadow-sm mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -166,7 +185,7 @@ export default function LinkManagement() {
                 <p className="text-sm text-gray-500 mt-1">Liens d'activation générés — usage unique pour créer un profil</p>
               </div>
               <div className="flex items-center gap-3">
-                {isOwner && (
+                {isManager && (
                   <label className="flex items-center gap-2 text-sm text-gray-600">
                     <input
                       type="checkbox"
@@ -203,7 +222,7 @@ export default function LinkManagement() {
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Lien</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Créé le</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Statut</th>
-                      {isOwner && showAll && (
+                      {isManager && showAll && (
                         <th className="text-left px-4 py-3 font-semibold text-gray-600">Créé par</th>
                       )}
                       <th className="text-right px-4 py-3 font-semibold text-gray-600">Action</th>
@@ -227,7 +246,7 @@ export default function LinkManagement() {
                             <Badge className="bg-emerald-100 text-emerald-700">Disponible</Badge>
                           )}
                         </td>
-                        {isOwner && showAll && (
+                        {isManager && showAll && (
                           <td className="px-4 py-3 text-gray-600">{creatorName(link.creator_user_id)}</td>
                         )}
                         <td className="px-4 py-3 text-right">

@@ -216,10 +216,8 @@ async def list_activation_tokens(request: Request, scope: Optional[str] = None):
     user_doc = await db.users.find_one({"user_id": user.user_id})
     if not user_doc:
         raise HTTPException(status_code=401)
-    role = user_doc.get("role")
-    if scope == 'all' and (role == 'owner' or is_super_admin(user_doc)):
-        subs = await db.users.find({"parent_id": user.user_id}, {"user_id": 1}).to_list(length=100)
-        sub_ids = [s["user_id"] for s in subs]
+    sub_ids = await get_subaccount_ids(user.user_id)
+    if scope == 'all' and is_account_manager(user_doc, len(sub_ids)):
         q = {"creator_user_id": {"$in": [user.user_id] + sub_ids}}
     else:
         q = {"creator_user_id": user.user_id}
@@ -290,6 +288,27 @@ def is_super_admin(user_doc: dict) -> bool:
     if email == 'amadou@rivostudio.com':
         return True
     return False
+
+
+async def get_subaccount_ids(owner_user_id: str) -> list:
+    subs = await db.users.find({"parent_id": owner_user_id}, {"user_id": 1}).to_list(length=100)
+    return [s["user_id"] for s in subs]
+
+
+async def get_manageable_user_ids(user_id: str) -> list:
+    sub_ids = await get_subaccount_ids(user_id)
+    return list(dict.fromkeys([user_id] + sub_ids))
+
+
+def is_account_manager(user_doc: dict, sub_count: int = 0) -> bool:
+    if not user_doc:
+        return False
+    role = user_doc.get("role")
+    if role == "subaccount":
+        return False
+    if role in ("owner", "admin") or is_super_admin(user_doc):
+        return True
+    return sub_count > 0
 
 async def get_user_from_token(request: Request) -> Optional[User]:
     auth_header = request.headers.get("Authorization")
@@ -683,21 +702,29 @@ async def update_profile(
     return {"status": "success"}
 
 @api_router.get("/profiles")
-async def get_profiles(request: Request, scope: Optional[str] = None):
+async def get_profiles(request: Request, scope: Optional[str] = None, filter_user_id: Optional[str] = None):
     user = await get_user_from_token(request)
-    if not user: raise HTTPException(status_code=401)
-    # If owner requests scope=all, return owner's profiles plus all subaccounts' profiles
+    if not user:
+        raise HTTPException(status_code=401)
     user_doc = await db.users.find_one({"user_id": user.user_id})
-    role = user_doc.get("role") if user_doc else None
-    if scope == 'all' and (role == 'owner' or is_super_admin(user_doc)):
-        subs = await db.users.find({"parent_id": user.user_id}, {"user_id": 1}).to_list(length=100)
-        sub_ids = [s["user_id"] for s in subs]
-        q = {"user_id": {"$in": [user.user_id] + sub_ids}}
-        cursor = db.profiles.find(q, {"_id": 0}).sort("created_at", -1)
-        return await cursor.to_list(length=1000)
-    # Default: return profiles for the authenticated user only
-    cursor = db.profiles.find({"user_id": user.user_id}, {"_id": 0}).sort("created_at", -1)
-    return await cursor.to_list(length=100)
+    if not user_doc:
+        raise HTTPException(status_code=401)
+
+    manageable = await get_manageable_user_ids(user.user_id)
+    sub_ids = manageable[1:] if len(manageable) > 1 else []
+    is_manager = is_account_manager(user_doc, len(sub_ids))
+
+    if filter_user_id:
+        if filter_user_id not in manageable:
+            raise HTTPException(status_code=403, detail="Accès refusé pour cette filiale")
+        query = {"user_id": filter_user_id}
+    elif scope == "all" and is_manager:
+        query = {"user_id": {"$in": manageable}}
+    else:
+        query = {"user_id": user.user_id}
+
+    cursor = db.profiles.find(query, {"_id": 0}).sort("created_at", -1)
+    return await cursor.to_list(length=1000)
 
 @api_router.get("/profiles/{profile_id}")
 async def get_single_profile(profile_id: str, request: Request):
