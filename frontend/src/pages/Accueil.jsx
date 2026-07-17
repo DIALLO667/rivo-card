@@ -3,18 +3,12 @@ import {
   Phone, MessageCircle, Share2, Globe, MapPin, Briefcase,
   ShoppingBag, Building2, Users, Star, Megaphone, UserCheck,
   Menu, TrendingUp, Calculator, HandCoins, ChevronDown, ShoppingCart,
-  Smartphone, UserPlus, Settings, Check,
+  Smartphone, UserPlus, Settings, Check, PlayCircle, X,
 } from "lucide-react";
-
-import rivoCardBanner from "../assets/rivo-card-banner.png";
-import mediumImg from "../assets/offres/medium-10k.png";
-import premiumImg from "../assets/offres/premium-15k.png";
-import pmeStarterImg from "../assets/offres/pme-starter.png";
-import pmeBusinessImg from "../assets/offres/pme-business.png";
-import pmePremiumImg from "../assets/offres/pme-premium.png";
 
 const navLinks = [
   { label: "Fonctionnalités", href: "#features" },
+  { label: "Démo", href: "#demo" },
   { label: "Avantages", href: "#avantages" },
   { label: "Tarifs", href: "#tarifs" },
   { label: "Partenaire", href: "#partenaire" },
@@ -52,6 +46,12 @@ const audiences = [
   { icon: UserCheck, label: "Professionnels" },
 ];
 
+const trustBadges = [
+  { icon: Smartphone, label: "Compatible iOS & Android" },
+  { icon: Settings, label: "Configuration incluse" },
+  { icon: MessageCircle, label: "Support WhatsApp réactif" },
+];
+
 const offresIndividuelles = [
   {
     id: "medium",
@@ -60,7 +60,6 @@ const offresIndividuelles = [
     oldPrice: "13 000 F",
     price: "10 000 F",
     note: "Compatible iOS et Android",
-    image: mediumImg,
     popular: false,
     features: [
       "Photo de profil personnalisée",
@@ -77,7 +76,6 @@ const offresIndividuelles = [
     oldPrice: "20 000 F",
     price: "15 000 F",
     note: "Profil complet + enregistrement contact",
-    image: premiumImg,
     popular: true,
     features: [
       "Tout Medium inclus",
@@ -93,27 +91,43 @@ const offresIndividuelles = [
 const packsEntreprise = [
   {
     id: "starter",
-    name: "PME PACK STARTER",
-    accent: "text-cyan-400",
-    accentBg: "border-cyan-500/30",
-    image: pmeStarterImg,
-    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
+    name: "PME Pack Starter",
+    popular: false,
+    features: [
+      "10 cartes NFC personnalisées",
+      "Dashboard Administrateur inclus",
+      "Gestion simplifiée des collaborateurs",
+      "Cartes aux couleurs et au logo de l'entreprise",
+      "Mise à jour illimitée",
+    ],
+    whatsappText: "Bonjour, je suis intéressé par le PME Pack Starter RIVO-CARD.",
   },
   {
     id: "business",
-    name: "PME PACK BUSINESS",
-    accent: "text-primary",
-    accentBg: "border-primary/30",
-    image: pmeBusinessImg,
-    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
+    name: "PME Pack Business",
+    popular: true,
+    features: [
+      "25 cartes NFC personnalisées",
+      "Dashboard Administrateur inclus",
+      "Gestion simplifiée des collaborateurs",
+      "Cartes aux couleurs et au logo de l'entreprise",
+      "Mise à jour illimitée",
+    ],
+    whatsappText: "Bonjour, je suis intéressé par le PME Pack Business RIVO-CARD.",
   },
   {
     id: "premium-pme",
-    name: "PME PACK PREMIUM",
-    accent: "text-emerald-400",
-    accentBg: "border-emerald-500/30",
-    image: pmePremiumImg,
-    whatsappText: "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.",
+    name: "PME Pack Premium",
+    popular: false,
+    features: [
+      "50 cartes NFC personnalisées",
+      "Dashboard Administrateur inclus",
+      "Gestion simplifiée des collaborateurs",
+      "Cartes aux couleurs et au logo de l'entreprise",
+      "Mise à jour illimitée",
+      "Gestion avancée des équipes",
+    ],
+    whatsappText: "Bonjour, je suis intéressé par le PME Pack Premium RIVO-CARD.",
   },
 ];
 
@@ -129,6 +143,27 @@ const WHATSAPP_PARTNER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je suis intéress
 const WHATSAPP_ORDER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je souhaite commander une carte RIVO-CARD.");
 const WHATSAPP_ENTREPRISE = whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.");
 
+function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = "max-w-[280px]" }) {
+  return (
+    <div className={`relative w-full ${sizeClass} mx-auto`}>
+      <div className="relative aspect-[9/16] rounded-[2.25rem] border-[6px] border-foreground bg-foreground overflow-hidden shadow-[0_25px_60px_-15px_rgba(15,23,42,0.35)]">
+        <video
+          src={src}
+          poster={poster}
+          autoPlay={autoPlay}
+          loop={loop}
+          muted={muted}
+          controls={controls}
+          playsInline
+          preload="metadata"
+          className="w-full h-full object-cover"
+        />
+        <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-20 h-4 bg-foreground rounded-b-xl" />
+      </div>
+    </div>
+  );
+}
+
 const Accueil = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
@@ -136,26 +171,31 @@ const Accueil = () => {
   return (
     <div className="landing-page min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <a href="#" className="text-xl font-bold tracking-tight">
             <span className="text-primary">Rivo</span>{" "}
             <span className="text-foreground">CARD</span>
           </a>
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             {navLinks.map((l) => (
               <a key={l.href} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {l.label}
               </a>
             ))}
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer">
-              <button className="border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <button className="text-sm font-medium text-primary hover:underline transition-colors">
                 Devenir partenaire
+              </button>
+            </a>
+            <a href="#tarifs">
+              <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors">
+                Commander
               </button>
             </a>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
-            <Menu className="h-5 w-5" />
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
         {mobileOpen && (
@@ -165,8 +205,13 @@ const Accueil = () => {
                 {l.label}
               </a>
             ))}
+            <a href="#tarifs" onClick={() => setMobileOpen(false)}>
+              <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors">
+                Commander
+              </button>
+            </a>
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
-              <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-colors">
+              <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-full text-sm font-medium transition-colors">
                 Devenir partenaire
               </button>
             </a>
@@ -175,14 +220,14 @@ const Accueil = () => {
       </nav>
 
       {/* HERO */}
-      <section className="relative pt-32 pb-20 md:pt-44 md:pb-32 px-4">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/10 blur-[120px]" />
-        </div>
-        <div className="container mx-auto relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="relative pt-32 pb-20 md:pt-44 md:pb-28 px-4">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-2 gap-14 items-center">
             <div className="space-y-8">
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight blue-text-glow">
+              <span className="inline-block text-xs font-bold tracking-widest text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                LA CARTE DE VISITE NOUVELLE GÉNÉRATION
+              </span>
+              <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 La carte NFC qui transforme votre{" "}
                 <span className="text-primary">image</span>.
               </h1>
@@ -195,28 +240,48 @@ const Accueil = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a href="#tarifs">
-                  <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-md text-base font-medium w-full sm:w-auto transition-colors">
+                  <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold w-full sm:w-auto transition-colors">
                     Commander ma carte
                   </button>
                 </a>
-                <a href="#partenaire">
-                  <button className="border border-primary text-primary hover:bg-primary/10 px-8 py-3 rounded-md text-base font-medium w-full sm:w-auto transition-colors">
-                    Devenir partenaire
+                <a href="#demo">
+                  <button className="border border-border text-foreground hover:border-primary hover:text-primary px-8 py-3 rounded-full text-base font-medium w-full sm:w-auto transition-colors inline-flex items-center justify-center gap-2">
+                    <PlayCircle className="h-5 w-5" />
+                    Voir la démo
                   </button>
                 </a>
               </div>
-            </div>
-            <div className="flex justify-center md:justify-end">
-              <div className="relative w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
-                <img src={rivoCardBanner} alt="Rivo Card" className="w-full h-auto object-cover" />
+              <div className="flex flex-wrap gap-x-6 gap-y-3 pt-2">
+                {trustBadges.map((t) => (
+                  <div key={t.label} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <t.icon className="h-4 w-4 text-primary" />
+                    {t.label}
+                  </div>
+                ))}
               </div>
+            </div>
+            <div className="relative flex justify-center md:justify-end">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full bg-primary/10 blur-[80px]" />
+              <a href="#demo" className="relative block group">
+                <PhoneFrame
+                  src="/videos/rivo-teaser.mp4"
+                  poster="/videos/rivo-teaser-poster.jpg"
+                  autoPlay
+                  loop
+                  muted
+                  sizeClass="max-w-[300px] md:max-w-[320px]"
+                />
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-foreground text-background text-xs font-semibold px-4 py-2 rounded-full shadow-lg whitespace-nowrap group-hover:bg-primary transition-colors">
+                  Voir la démo complète
+                </span>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
       {/* C'est quoi une carte NFC */}
-      <section id="features" className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section id="features" className="py-20 md:py-28 px-4 border-t border-border bg-card">
         <div className="container mx-auto text-center space-y-12">
           <div className="space-y-4 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold">
@@ -228,7 +293,7 @@ const Accueil = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
             {features.map((f) => (
-              <div key={f.label} className="group p-6 rounded-xl bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 hover:blue-glow">
+              <div key={f.label} className="group p-6 rounded-xl bg-background border border-border hover:border-primary/40 transition-all duration-300 blue-glow">
                 <f.icon className="h-8 w-8 text-primary mx-auto mb-3 group-hover:scale-110 transition-transform" />
                 <p className="text-sm font-medium text-foreground">{f.label}</p>
               </div>
@@ -240,8 +305,53 @@ const Accueil = () => {
         </div>
       </section>
 
+      {/* Voyez-la en action */}
+      <section id="demo" className="py-20 md:py-28 px-4 border-t border-border">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-2 gap-14 items-center">
+            <div className="order-2 md:order-1">
+              <PhoneFrame
+                src="/videos/rivo-demo.mp4"
+                poster="/videos/rivo-demo-poster.jpg"
+                controls
+                sizeClass="max-w-[300px] md:max-w-[340px]"
+              />
+            </div>
+            <div className="order-1 md:order-2 space-y-6">
+              <span className="inline-block text-xs font-bold tracking-widest text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                PREUVE PAR L&apos;IMAGE
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold">
+                Voyez-la <span className="text-primary">en action</span>
+              </h2>
+              <p className="text-muted-foreground text-lg">
+                Un simple contact entre la carte et un téléphone suffit : le profil digital s&apos;affiche
+                instantanément, avec tous les liens et coordonnées configurés pour vous.
+              </p>
+              <ul className="space-y-3">
+                {[
+                  "Aucune application à installer côté client",
+                  "Fonctionne avec la majorité des smartphones récents",
+                  "Votre profil est configuré par notre équipe avant réception",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-foreground">
+                    <Check className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <a href="#tarifs" className="inline-block pt-2">
+                <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold transition-colors">
+                  Commander ma carte
+                </button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pourquoi c'est puissant */}
-      <section id="avantages" className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section id="avantages" className="py-20 md:py-28 px-4 border-t border-border bg-card">
         <div className="container mx-auto space-y-12">
           <h2 className="text-3xl md:text-4xl font-bold text-center">
             Pourquoi c&apos;est <span className="text-primary">puissant</span> ?
@@ -251,7 +361,7 @@ const Accueil = () => {
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {advantages.map((a) => (
-              <div key={a.title} className="p-6 rounded-xl bg-card border border-border/50 space-y-4 hover:border-primary/40 transition-all duration-300">
+              <div key={a.title} className="p-6 rounded-xl bg-background border border-border space-y-4 hover:border-primary/40 transition-all duration-300">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                   <a.icon className="h-6 w-6 text-primary" />
                 </div>
@@ -264,18 +374,18 @@ const Accueil = () => {
       </section>
 
       {/* Comment ça fonctionne */}
-      <section className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section className="py-20 md:py-28 px-4 border-t border-border">
         <div className="container mx-auto space-y-12">
           <h2 className="text-3xl md:text-4xl font-bold text-center">
             Comment ça <span className="text-primary">fonctionne</span> ?
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {steps.map((s, i) => (
-              <div key={s.num} className="relative text-center space-y-4 p-6 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all duration-300">
+              <div key={s.num} className="relative text-center space-y-4 p-6 rounded-xl bg-card border border-border hover:border-primary/30 transition-all duration-300">
                 <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
                   <s.icon className="h-6 w-6 text-primary" />
                 </div>
-                <span className="text-3xl font-black text-primary/30">{s.num}</span>
+                <span className="text-3xl font-black text-primary/25">{s.num}</span>
                 <p className="text-foreground font-medium text-sm">{s.text}</p>
                 {i < steps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 w-8 border-t border-dashed border-primary/30" />
@@ -290,7 +400,7 @@ const Accueil = () => {
       </section>
 
       {/* Tarifs */}
-      <section id="tarifs" className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section id="tarifs" className="py-20 md:py-28 px-4 border-t border-border bg-card">
         <div className="container mx-auto space-y-16">
           <div className="text-center space-y-3">
             <h2 className="text-3xl md:text-4xl font-bold">
@@ -302,32 +412,32 @@ const Accueil = () => {
           </div>
 
           {/* Offres individuelles */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {offresIndividuelles.map((offre) => (
               <div
                 key={offre.id}
-                className={`rounded-2xl border bg-card overflow-hidden flex flex-col transition-all duration-300 hover:blue-glow ${
-                  offre.popular ? "border-primary/50 ring-1 ring-primary/20" : "border-border/50"
+                className={`relative rounded-2xl border bg-background p-8 flex flex-col transition-all duration-300 blue-glow ${
+                  offre.popular ? "border-primary ring-1 ring-primary/30" : "border-border"
                 }`}
               >
-                <div className="relative min-h-[280px] md:min-h-[340px] bg-[#0a1628] flex items-center justify-center p-2">
-                  <img
-                    src={offre.image}
-                    alt={offre.title}
-                    className="w-full h-full max-h-[320px] md:max-h-[380px] object-contain"
-                  />
-                  {offre.popular && (
-                    <span className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
-                      Populaire
-                    </span>
-                  )}
-                </div>
-                <div className="p-6 space-y-5 flex-1 flex flex-col">
+                {offre.popular && (
+                  <span className="absolute -top-3 right-8 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
+                    Populaire
+                  </span>
+                )}
+                <div className="space-y-5 flex-1 flex flex-col">
                   <div>
-                    <span className="inline-block text-xs font-bold tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-2">
+                    <span className="inline-block text-xs font-bold tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-3">
                       CARTE NFC {offre.badge}
                     </span>
                     <h3 className="text-xl font-bold">{offre.title}</h3>
+                  </div>
+                  <div className="pb-2 border-b border-border">
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-3xl font-bold text-primary">{offre.price}</p>
+                      <p className="text-sm text-muted-foreground line-through">{offre.oldPrice}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{offre.note}</p>
                   </div>
                   <ul className="space-y-2 flex-1">
                     {offre.features.map((f) => (
@@ -337,13 +447,8 @@ const Accueil = () => {
                       </li>
                     ))}
                   </ul>
-                  <div className="pt-2 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground line-through">{offre.oldPrice}</p>
-                    <p className="text-3xl font-bold text-primary">{offre.price}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{offre.note}</p>
-                  </div>
                   <a href={whatsappUrl(WHATSAPP_PHONE, offre.whatsappText)} target="_blank" rel="noopener noreferrer">
-                    <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-md font-medium transition-colors">
+                    <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-semibold transition-colors">
                       Commander
                     </button>
                   </a>
@@ -360,19 +465,34 @@ const Accueil = () => {
               </h3>
               <p className="text-muted-foreground">Digitalisez votre entreprise dès aujourd&apos;hui</p>
             </div>
-            <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
               {packsEntreprise.map((pack) => (
-                <div key={pack.id} className={`rounded-2xl border bg-card overflow-hidden flex flex-col hover:blue-glow transition-all duration-300 ${pack.accentBg}`}>
-                  <div className="min-h-[220px] md:min-h-[260px] bg-[#0a1628] flex items-center justify-center p-2">
-                    <img src={pack.image} alt={pack.name} className="w-full h-full max-h-[240px] md:max-h-[280px] object-contain" />
-                  </div>
-                  <div className="p-6 space-y-4 flex-1 flex flex-col text-center">
-                    <h4 className={`text-lg font-bold ${pack.accent}`}>{pack.name}</h4>
-                    <p className="text-2xl md:text-3xl font-bold text-primary flex-1 flex items-center justify-center py-4">
+                <div
+                  key={pack.id}
+                  className={`relative rounded-2xl border bg-background p-8 flex flex-col transition-all duration-300 blue-glow ${
+                    pack.popular ? "border-primary ring-1 ring-primary/30" : "border-border"
+                  }`}
+                >
+                  {pack.popular && (
+                    <span className="absolute -top-3 right-8 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">
+                      Recommandé
+                    </span>
+                  )}
+                  <div className="space-y-5 flex-1 flex flex-col">
+                    <h4 className="text-lg font-bold">{pack.name}</h4>
+                    <ul className="space-y-2 flex-1">
+                      {pack.features.map((f) => (
+                        <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-2xl font-bold text-primary pt-2 border-t border-border">
                       Sur demande
                     </p>
                     <a href={whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, pack.whatsappText)} target="_blank" rel="noopener noreferrer">
-                      <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-md font-medium transition-colors">
+                      <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-full font-semibold transition-colors">
                         Contactez-nous
                       </button>
                     </a>
@@ -380,11 +500,11 @@ const Accueil = () => {
                 </div>
               ))}
             </div>
-            <div className="max-w-4xl mx-auto rounded-xl bg-[#0F2744] border border-primary/20 px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="max-w-4xl mx-auto rounded-xl bg-[hsl(222,47%,11%)] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
               <p className="text-white font-medium italic">
                 La dernière carte de visite que vous achèterez.
               </p>
-              <a href={WHATSAPP_ENTREPRISE} target="_blank" rel="noopener noreferrer" className="text-primary font-bold whitespace-nowrap hover:underline">
+              <a href={WHATSAPP_ENTREPRISE} target="_blank" rel="noopener noreferrer" className="text-primary-foreground bg-primary px-4 py-2 rounded-full font-bold whitespace-nowrap hover:bg-primary/90 transition-colors">
                 +221 78 734 24 43
               </a>
             </div>
@@ -393,14 +513,14 @@ const Accueil = () => {
       </section>
 
       {/* Pour qui */}
-      <section className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section className="py-20 md:py-28 px-4 border-t border-border">
         <div className="container mx-auto space-y-12">
           <h2 className="text-3xl md:text-4xl font-bold text-center">
             Pour <span className="text-primary">qui</span> ?
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
             {audiences.map((a) => (
-              <div key={a.label} className="p-6 rounded-xl bg-card border border-border/50 text-center space-y-3 hover:border-primary/40 transition-all duration-300">
+              <div key={a.label} className="p-6 rounded-xl bg-card border border-border text-center space-y-3 hover:border-primary/40 transition-all duration-300">
                 <a.icon className="h-8 w-8 text-primary mx-auto" />
                 <p className="font-medium text-sm">{a.label}</p>
               </div>
@@ -410,7 +530,7 @@ const Accueil = () => {
       </section>
 
       {/* Programme Partenaire */}
-      <section id="partenaire" className="py-20 md:py-28 px-4 border-t border-border/30">
+      <section id="partenaire" className="py-20 md:py-28 px-4 border-t border-border bg-card">
         <div className="container mx-auto max-w-4xl space-y-8">
           <div className="text-center space-y-4">
             <Star className="h-12 w-12 text-primary mx-auto" />
@@ -425,7 +545,7 @@ const Accueil = () => {
           <div className="flex flex-col items-center gap-4">
             <button
               onClick={() => setPartnerOpen(!partnerOpen)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-md text-base font-medium flex items-center gap-2 transition-colors"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold flex items-center gap-2 transition-colors"
             >
               Voir les détails du programme
               <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${partnerOpen ? "rotate-180" : ""}`} />
@@ -435,7 +555,7 @@ const Accueil = () => {
           {partnerOpen && (
             <div className="mt-8 space-y-8 animate-fade-in-up">
               <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <div className="rounded-xl border border-primary/30 bg-card p-6 space-y-4 blue-glow">
+                <div className="rounded-xl border border-border bg-background p-6 space-y-4 blue-glow">
                   <div className="flex items-center gap-3">
                     <HandCoins className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-bold">Par client</h3>
@@ -455,7 +575,7 @@ const Accueil = () => {
                     </div>
                   </div>
                 </div>
-                <div className="rounded-xl border border-primary/30 bg-card p-6 space-y-4 blue-glow">
+                <div className="rounded-xl border border-border bg-background p-6 space-y-4 blue-glow">
                   <div className="flex items-center gap-3">
                     <TrendingUp className="h-6 w-6 text-primary" />
                     <h3 className="text-lg font-bold">Renouvellement</h3>
@@ -470,17 +590,17 @@ const Accueil = () => {
                 </div>
               </div>
 
-              <div className="max-w-lg mx-auto rounded-2xl border border-primary/30 bg-card p-8 space-y-6 blue-glow">
+              <div className="max-w-lg mx-auto rounded-2xl border border-border bg-background p-8 space-y-6 blue-glow">
                 <div className="flex items-center justify-center gap-3">
                   <Calculator className="h-7 w-7 text-primary" />
                   <h3 className="text-xl font-bold">Exemple avec 10 clients</h3>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-muted-foreground">Gain immédiat</span>
                     <span className="font-bold text-lg">10 × 3 000 = <span className="text-primary">30 000 F</span></span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-border/50">
+                  <div className="flex justify-between items-center py-2 border-b border-border">
                     <span className="text-muted-foreground">Revenu annuel récurrent</span>
                     <span className="font-bold text-lg">10 × 2 000 = <span className="text-primary">20 000 F</span></span>
                   </div>
@@ -494,7 +614,7 @@ const Accueil = () => {
 
           <div className="text-center pt-4">
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer">
-              <button className="bg-[hsl(142,70%,45%)] text-white hover:bg-[hsl(142,70%,40%)] px-8 py-3 rounded-md text-base font-medium inline-flex items-center gap-2 transition-colors">
+              <button className="bg-[hsl(142,70%,45%)] text-white hover:bg-[hsl(142,70%,40%)] px-8 py-3 rounded-full text-base font-medium inline-flex items-center gap-2 transition-colors">
                 <MessageCircle className="h-5 w-5" />
                 Devenir partenaire via WhatsApp
               </button>
@@ -504,13 +624,13 @@ const Accueil = () => {
       </section>
 
       {/* CTA FINAL */}
-      <section id="cta-final" className="py-20 md:py-28 px-4 border-t border-border/30 bg-card">
+      <section id="cta-final" className="py-20 md:py-28 px-4 bg-[hsl(222,47%,11%)] text-white">
         <div className="container mx-auto text-center space-y-8">
-          <h2 className="text-3xl md:text-5xl font-bold blue-text-glow">
+          <h2 className="text-3xl md:text-5xl font-bold">
             Modernisez votre image <span className="text-primary">dès aujourd&apos;hui</span>.
           </h2>
           <a href={WHATSAPP_ORDER} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block">
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-md font-medium transition-colors">
+            <button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-full font-semibold transition-colors">
               Commander ma carte maintenant
             </button>
           </a>
@@ -518,21 +638,44 @@ const Accueil = () => {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-border/30 py-12 px-4">
-        <div className="container mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-sm font-bold">
-            <span className="text-primary">RIVO-CARD</span>
-          </p>
-          <div className="flex flex-wrap justify-center gap-6">
-            {navLinks.map((l) => (
-              <a key={l.href} href={l.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                {l.label}
-              </a>
-            ))}
+      <footer className="bg-[hsl(222,47%,11%)] text-white/80 px-4 pt-16 pb-8 border-t border-white/10">
+        <div className="container mx-auto">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="space-y-3 md:col-span-2">
+              <p className="text-xl font-bold text-white">
+                <span className="text-primary">Rivo</span> CARD
+              </p>
+              <p className="text-sm max-w-xs">
+                La carte de visite digitale qui transforme votre image professionnelle. Approchez, partagez, impressionnez.
+              </p>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-white">Navigation</p>
+              <div className="flex flex-col gap-2">
+                {navLinks.map((l) => (
+                  <a key={l.href} href={l.href} className="text-sm hover:text-white transition-colors">
+                    {l.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-white">Contact</p>
+              <div className="flex flex-col gap-2 text-sm">
+                <a href={whatsappUrl(WHATSAPP_PHONE, "Bonjour, j'ai une question sur RIVO-CARD.")} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  Particuliers — +221 78 520 76 89
+                </a>
+                <a href={whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, "Bonjour, j'ai une question sur les packs entreprise RIVO-CARD.")} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  Entreprises — +221 78 734 24 43
+                </a>
+              </div>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} RIVO-CARD. Tous droits réservés.
-          </p>
+          <div className="mt-12 pt-6 border-t border-white/10 text-center">
+            <p className="text-xs text-white/60">
+              © {new Date().getFullYear()} RIVO-CARD. Tous droits réservés.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

@@ -52,26 +52,37 @@
 }
 
 @layer utilities {
-  /* Effets landing page (bleu) */
+  /* Landing page — thème blanc / bleu premium */
   .landing-page {
-    --primary: 217 91% 60%;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 210 33% 97%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --muted: 210 30% 95%;
+    --muted-foreground: 215 16% 40%;
+    --border: 214 24% 88%;
+    --input: 214 24% 88%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
     --accent: 217 91% 60%;
     --accent-foreground: 0 0% 100%;
-    --ring: 217 91% 60%;
+    --ring: 221 83% 53%;
   }
+  /* Ombre nette et sobre — remplace les halos flous génériques */
   .blue-glow {
-    box-shadow: 0 0 60px hsl(217 91% 60% / 0.15), 0 0 120px hsl(217 91% 60% / 0.05);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
   }
   .blue-text-glow {
-    text-shadow: 0 0 40px hsl(217 91% 60% / 0.3);
+    text-shadow: none;
   }
   .landing-pulse-glow {
     animation: landing-pulse-glow 3s ease-in-out infinite;
   }
   @keyframes landing-pulse-glow {
-    0%, 100% { box-shadow: 0 0 40px hsl(217 91% 60% / 0.15); }
-    50% { box-shadow: 0 0 80px hsl(217 91% 60% / 0.3); }
+    0%, 100% { box-shadow: 0 0 30px hsl(221 83% 53% / 0.12); }
+    50% { box-shadow: 0 0 50px hsl(221 83% 53% / 0.2); }
   }
   /* Legacy gold (admin / autres pages) */
   .gold-glow {
