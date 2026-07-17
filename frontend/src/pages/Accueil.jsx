@@ -143,6 +143,13 @@ const WHATSAPP_PARTNER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je suis intéress
 const WHATSAPP_ORDER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je souhaite commander une carte RIVO-CARD.");
 const WHATSAPP_ENTREPRISE = whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.");
 
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dwe9byiww/video/upload";
+const CLOUDINARY_VERSION = "v1784264377/video-nfc_rcyvuq";
+const DEMO_VIDEO = `${CLOUDINARY_BASE}/w_720,q_auto/${CLOUDINARY_VERSION}.mp4`;
+const DEMO_POSTER = `${CLOUDINARY_BASE}/w_720,so_1/${CLOUDINARY_VERSION}.jpg`;
+const TEASER_VIDEO = `${CLOUDINARY_BASE}/so_0,eo_8,w_480,q_auto/${CLOUDINARY_VERSION}.mp4`;
+const TEASER_POSTER = `${CLOUDINARY_BASE}/so_1,w_480/${CLOUDINARY_VERSION}.jpg`;
+
 function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = "max-w-[280px]" }) {
   return (
     <div className={`relative w-full ${sizeClass} mx-auto`}>
@@ -264,8 +271,8 @@ const Accueil = () => {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] rounded-full bg-primary/10 blur-[80px]" />
               <a href="#demo" className="relative block group">
                 <PhoneFrame
-                  src="/videos/rivo-teaser.mp4"
-                  poster="/videos/rivo-teaser-poster.jpg"
+                  src={TEASER_VIDEO}
+                  poster={TEASER_POSTER}
                   autoPlay
                   loop
                   muted
@@ -311,8 +318,8 @@ const Accueil = () => {
           <div className="grid md:grid-cols-2 gap-14 items-center">
             <div className="order-2 md:order-1">
               <PhoneFrame
-                src="/videos/rivo-demo.mp4"
-                poster="/videos/rivo-demo-poster.jpg"
+                src={DEMO_VIDEO}
+                poster={DEMO_POSTER}
                 controls
                 sizeClass="max-w-[300px] md:max-w-[340px]"
               />
