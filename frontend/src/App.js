@@ -13,7 +13,9 @@ const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 const SuspendedService = lazy(() => import('./pages/SuspendedService'));
 const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 // 1. AJOUTE L'IMPORT ICI
-const Accueil = lazy(() => import('./pages/Accueil')); 
+const Accueil = lazy(() => import('./pages/Accueil'));
+const CommanderForm = lazy(() => import('./pages/CommanderForm'));
+const Orders = lazy(() => import('./pages/Orders'));
 
 function AppRouter() {
   const location = useLocation();
@@ -27,9 +29,11 @@ function AppRouter() {
       <Routes>
           {/* 2. TA NOUVELLE PAGE D'ACCUEIL */}
           <Route path="/" element={<Accueil />} />
-          
+          <Route path="/commander" element={<CommanderForm />} />
+
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/subaccounts" element={<ProtectedRoute><Subaccounts /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><LinkManagement /></ProtectedRoute>} />
           <Route path="/profiles/new" element={<ProtectedRoute><ProfileForm /></ProtectedRoute>} />

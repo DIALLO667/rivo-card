@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users } from 'lucide-react';
+import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const API = process.env.REACT_APP_API_URL || '';
@@ -275,11 +275,11 @@ export default function Dashboard() {
     <div className="flex min-h-screen">
   {/* Sidebar - collapsible, near-black for a luxe look */}
   {/* Desktop sidebar (hidden on small screens) */}
-  <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
+  <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
   <div>
           <div className="px-4 py-4 flex items-center justify-between">
               <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
-              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
+              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span></div>
             </div>
             <div>
               <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
@@ -293,6 +293,10 @@ export default function Dashboard() {
               <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5 bg-white/5">
                 <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
+              </li>
+              <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Commandes'}</span>
               </li>
               <li onClick={() => navigate('/subaccounts')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
@@ -311,8 +315,8 @@ export default function Dashboard() {
         </div>
 
         <div className="px-4 py-6">
-          <div className="border-t border-white/5 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
+          <div className="border-t border-white/10 pt-4">
+            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
           </div>
         </div>
       </aside>
@@ -321,15 +325,16 @@ export default function Dashboard() {
       {mobileSidebarVisible && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarVisible(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#050608] text-white flex flex-col justify-between shadow-xl p-4">
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B1220] text-white flex flex-col justify-between shadow-xl p-4">
             <div>
               <div className="px-2 py-4 flex items-center justify-between">
-                <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-[#D4AF37]">ADMIN</span></div>
+                <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-blue-500">ADMIN</span></div>
                 <button onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
               </div>
               <nav className="mt-6 px-2">
                 <ul className="space-y-3">
                   <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/dashboard'); }}>Tableau de Bord</li>
+                  <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/orders'); }}>Commandes</li>
                   <li className="px-3 py-3 rounded-lg flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/subaccounts'); }}>Gestion des Filiales</li>
                   <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/links'); }}>Gestion des Liens</li>
                   <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); setFilterType('archived'); }}>Archivés</li>
@@ -337,8 +342,8 @@ export default function Dashboard() {
               </nav>
             </div>
             <div className="px-4 py-6">
-              <div className="border-t border-white/5 pt-4">
-                <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
+              <div className="border-t border-white/10 pt-4">
+                <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
               </div>
             </div>
           </div>
@@ -376,10 +381,10 @@ export default function Dashboard() {
                 )}
 
                 <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black font-black w-full sm:w-auto h-12 px-6 rounded-xl">
+                  <Button onClick={() => navigate('/profiles/new')} className="bg-blue-600 text-white font-black w-full sm:w-auto h-12 px-6 rounded-xl">
                     <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
                   </Button>
-                  <Button onClick={generateActivationLink} className="bg-[#D4AF37] text-black font-black w-full sm:w-auto h-12 px-4 rounded-xl" disabled={generatingActivation}>
+                  <Button onClick={generateActivationLink} className="bg-blue-600 text-white font-black w-full sm:w-auto h-12 px-4 rounded-xl" disabled={generatingActivation}>
                     {generatingActivation ? 'Génération...' : 'Générer un lien d\'activation'}
                   </Button>
                 </div>
@@ -402,7 +407,7 @@ export default function Dashboard() {
                     </div>
                     <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
                     <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                      <Button onClick={copyActivationLink} className="bg-[#D4AF37] text-black">Copier le lien</Button>
+                      <Button onClick={copyActivationLink} className="bg-blue-600 text-white">Copier le lien</Button>
                       <Button onClick={() => setShowActivationModal(false)} variant="ghost">Fermer</Button>
                     </div>
                   </div>
@@ -417,7 +422,7 @@ export default function Dashboard() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37]"></div></div>
+            <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProfiles.length > 0 ? filteredProfiles.map((profile) => {
@@ -425,15 +430,15 @@ export default function Dashboard() {
                 return (
                   <div key={profile.profile_id} className="relative bg-gradient-to-br from-white to-gray-50 rounded-2xl overflow-hidden shadow-lg border border-gray-100 transition-all">
                     <div className="absolute top-4 right-4 z-10">
-                      {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="px-3 py-1 rounded-full bg-[#D4AF37] text-black font-semibold">{days}j restants</Badge> : <Badge className="px-3 py-1 rounded-full bg-emerald-600 text-white font-semibold">Actif</Badge>}
+                      {profile.is_archived ? <Badge variant="destructive">Archivé</Badge> : days <= 30 ? <Badge className="px-3 py-1 rounded-full bg-blue-600 text-white font-semibold">{days}j restants</Badge> : <Badge className="px-3 py-1 rounded-full bg-emerald-600 text-white font-semibold">Actif</Badge>}
                     </div>
 
                     <div className="p-6">
                       <div className="flex items-center gap-4 mb-6">
                         {profile.photo_url ? (
-                          <img src={profile.photo_url} className="w-16 h-16 rounded-full border-4 border-[#D4AF37] object-cover shadow-sm" alt={profile.name || 'Photo'} onError={(e) => { e.target.style.display = 'none'; }} />
+                          <img src={profile.photo_url} className="w-16 h-16 rounded-full border-4 border-blue-600 object-cover shadow-sm" alt={profile.name || 'Photo'} onError={(e) => { e.target.style.display = 'none'; }} />
                         ) : (
-                          <div className="w-16 h-16 rounded-full border-4 border-[#D4AF37] bg-gray-100 flex items-center justify-center font-semibold text-gray-700">{(profile.name || 'U').charAt(0)}</div>
+                          <div className="w-16 h-16 rounded-full border-4 border-blue-600 bg-gray-100 flex items-center justify-center font-semibold text-gray-700">{(profile.name || 'U').charAt(0)}</div>
                         )}
                         <div>
                           <h3 className="font-semibold text-gray-900 text-lg">{profile.name}</h3>
@@ -463,7 +468,7 @@ export default function Dashboard() {
                         <button title="Supprimer" onClick={() => deleteProfile(profile.profile_id)} className="p-2 bg-red-50 text-red-600 border border-red-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/></svg>
                         </button>
-                        <Button onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`px-3 ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></Button>
+                        <button title={profile.is_archived ? 'Réactiver' : 'Archiver'} onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></button>
                       </div>
 
                       {!profile.is_archived && days <= 30 && (

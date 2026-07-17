@@ -133,13 +133,13 @@ export default function LinkManagement() {
 
   return (
     <div className="flex min-h-screen">
-      <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
+      <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">
             <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
               <div className="text-white font-extrabold text-sm">
                 {sidebarCollapsed ? 'RC' : 'RIVO-CARD'}
-                <span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span>
+                <span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span>
               </div>
             </div>
             <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
@@ -151,6 +151,10 @@ export default function LinkManagement() {
               <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
+              </li>
+              <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Commandes'}</span>
               </li>
               <li onClick={() => navigate('/subaccounts')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
@@ -164,8 +168,8 @@ export default function LinkManagement() {
           </nav>
         </div>
         <div className="px-4 py-6">
-          <div className="border-t border-white/5 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
+          <div className="border-t border-white/10 pt-4">
+            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
           </div>
         </div>
       </aside>
@@ -180,7 +184,7 @@ export default function LinkManagement() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-                  <Link2 className="h-6 w-6 text-[#D4AF37]" /> Gestion des Liens
+                  <Link2 className="h-6 w-6 text-blue-600" /> Gestion des Liens
                 </h1>
                 <p className="text-sm text-gray-500 mt-1">Liens d'activation générés — usage unique pour créer un profil</p>
               </div>
@@ -195,7 +199,7 @@ export default function LinkManagement() {
                     Inclure les filiales
                   </label>
                 )}
-                <Button onClick={generateLink} disabled={generating} className="bg-[#D4AF37] text-black font-bold">
+                <Button onClick={generateLink} disabled={generating} className="bg-blue-600 text-white font-bold">
                   <Plus className="mr-2 h-4 w-4" />
                   {generating ? 'Génération...' : 'Générer un lien'}
                 </Button>
@@ -205,13 +209,13 @@ export default function LinkManagement() {
 
           {loading ? (
             <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37]" />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
             </div>
           ) : links.length === 0 ? (
             <div className="bg-white rounded-xl p-12 text-center text-gray-500 shadow-sm">
               <Link2 className="h-12 w-12 mx-auto mb-4 opacity-20" />
               <p>Aucun lien généré pour le moment</p>
-              <Button onClick={generateLink} className="mt-4 bg-[#D4AF37] text-black">Générer votre premier lien</Button>
+              <Button onClick={generateLink} className="mt-4 bg-blue-600 text-white">Générer votre premier lien</Button>
             </div>
           ) : (
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">

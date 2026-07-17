@@ -842,6 +842,111 @@ async def generate_vcard(profile_id: str):
         logger.exception('Failed to generate/upload vCard')
         raise HTTPException(status_code=500, detail=str(e))
 
+
+# --- ORDER (COMMANDE) ROUTES ---
+# A "commande" is a lead captured from the public homepage order form, before payment.
+# Once payment is confirmed (offline, e.g. via WhatsApp/mobile money), an admin marks it
+# "validee" from the dashboard, which creates a real profile from the order's data so it
+# shows up in the normal profiles list.
+
+@api_router.post("/orders")
+async def create_order(
+    name: str = Form(...),
+    phone: str = Form(...),
+    email: Optional[str] = Form(None),
+    company: Optional[str] = Form(None),
+    offer: Optional[str] = Form(None),
+    message: Optional[str] = Form(None),
+):
+    """Public endpoint (no auth): capture a lead from the homepage order form."""
+    now = datetime.now(timezone.utc).isoformat()
+    order_doc = {
+        "order_id": f"order_{uuid.uuid4().hex[:12]}",
+        "name": name,
+        "phone": phone,
+        "email": email,
+        "company": company,
+        "offer": offer,
+        "message": message,
+        "status": "en_attente",
+        "profile_id": None,
+        "created_at": now,
+        "validated_at": None,
+    }
+    await db.orders.insert_one(order_doc)
+    return {"status": "success", "order_id": order_doc["order_id"]}
+
+
+def can_manage_orders(user_doc: dict) -> bool:
+    if not user_doc:
+        return False
+    return user_doc.get("role") in ("owner", "admin") or is_super_admin(user_doc)
+
+
+@api_router.get("/orders")
+async def list_orders(request: Request):
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not can_manage_orders(user_doc):
+        raise HTTPException(status_code=403)
+    cursor = db.orders.find({}, {"_id": 0}).sort("created_at", -1)
+    return await cursor.to_list(length=1000)
+
+
+@api_router.patch("/orders/{order_id}/validate")
+async def validate_order(order_id: str, request: Request):
+    """Mark an order as paid/validated and create the corresponding profile."""
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not can_manage_orders(user_doc):
+        raise HTTPException(status_code=403)
+    order = await db.orders.find_one({"order_id": order_id})
+    if not order:
+        raise HTTPException(status_code=404)
+    if order.get("status") == "valide":
+        raise HTTPException(status_code=400, detail="Commande déjà validée")
+
+    now = datetime.now(timezone.utc).isoformat()
+    profile_doc = {
+        "profile_id": f"profile_{uuid.uuid4().hex[:12]}",
+        "user_id": user.user_id,
+        "name": order.get("name"),
+        "job": order.get("offer"),
+        "company": order.get("company"),
+        "phone": order.get("phone"),
+        "email": order.get("email"),
+        "card_type": "profile",
+        "template_id": "template1",
+        "photo_url": None,
+        "unique_link": generate_unique_link(order.get("name") or "client"),
+        "is_archived": False,
+        "created_at": now,
+        "updated_at": now,
+    }
+    await db.profiles.insert_one(profile_doc)
+    await db.orders.update_one(
+        {"order_id": order_id},
+        {"$set": {"status": "valide", "validated_at": now, "profile_id": profile_doc["profile_id"]}},
+    )
+    return {"status": "success", "profile_id": profile_doc["profile_id"]}
+
+
+@api_router.delete("/orders/{order_id}")
+async def delete_order(order_id: str, request: Request):
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not can_manage_orders(user_doc):
+        raise HTTPException(status_code=403)
+    await db.orders.delete_one({"order_id": order_id})
+    return {"status": "success"}
+
+
 app.include_router(api_router)
 
 

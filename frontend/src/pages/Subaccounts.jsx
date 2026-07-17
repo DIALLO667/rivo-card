@@ -161,11 +161,11 @@ export default function Subaccounts() {
   return (
     <div className="flex min-h-screen">
   {/* Sidebar - near-black for a luxe look */}
-  <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#050608] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
+  <aside className={`${sidebarCollapsed ? 'w-20' : 'w-56'} fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">
               <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
-              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-[#D4AF37]'}`}> ADMIN</span></div>
+              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span></div>
             </div>
             <div>
               <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
@@ -179,6 +179,10 @@ export default function Subaccounts() {
               <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">Tableau de Bord</span>
+              </li>
+              <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">Commandes</span>
               </li>
               <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-white/5">
                 <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
@@ -197,8 +201,8 @@ export default function Subaccounts() {
         </div>
 
         <div className="px-4 py-6">
-          <div className="border-t border-white/5 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white">Déconnexion</Button>
+          <div className="border-t border-white/10 pt-4">
+            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
           </div>
         </div>
       </aside>
@@ -210,7 +214,7 @@ export default function Subaccounts() {
             <h2 className="text-2xl font-semibold text-gray-900">Gestion des Filiales</h2>
             <div className="flex items-center gap-3">
               <Input placeholder="Rechercher un membre..." className="bg-white border-gray-200" />
-              <Button onClick={() => navigate('/profiles/new')} className="bg-[#D4AF37] text-black">+ Nouveau Profil</Button>
+              <Button onClick={() => navigate('/profiles/new')} className="bg-blue-600 text-white">+ Nouveau Profil</Button>
             </div>
           </div>
 

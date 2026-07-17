@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Phone, MessageCircle, Share2, Globe, MapPin, Briefcase,
   ShoppingBag, Building2, Users, Star, Megaphone, UserCheck,
-  Menu, TrendingUp, Calculator, HandCoins, ChevronDown, ShoppingCart,
+  Menu, ShoppingCart,
   Smartphone, UserPlus, Settings, Check, PlayCircle, X,
 } from "lucide-react";
 
@@ -67,7 +68,6 @@ const offresIndividuelles = [
       "Barre d'accès rapide aux icônes",
       "Intégration des liens vers vos réseaux sociaux",
     ],
-    whatsappText: "Bonjour, je souhaite commander une carte RIVO-CARD Medium (10 000 F).",
   },
   {
     id: "premium",
@@ -84,7 +84,6 @@ const offresIndividuelles = [
       "Liens vers votre site internet et réseaux sociaux",
       "Bouton permettant d'enregistrer votre contact",
     ],
-    whatsappText: "Bonjour, je souhaite commander une carte RIVO-CARD Premium (15 000 F).",
   },
 ];
 
@@ -92,6 +91,7 @@ const packsEntreprise = [
   {
     id: "starter",
     name: "PME Pack Starter",
+    offerValue: "pme-starter",
     popular: false,
     features: [
       "10 cartes NFC personnalisées",
@@ -100,11 +100,11 @@ const packsEntreprise = [
       "Cartes aux couleurs et au logo de l'entreprise",
       "Mise à jour illimitée",
     ],
-    whatsappText: "Bonjour, je suis intéressé par le PME Pack Starter RIVO-CARD.",
   },
   {
     id: "business",
     name: "PME Pack Business",
+    offerValue: "pme-business",
     popular: true,
     features: [
       "25 cartes NFC personnalisées",
@@ -113,11 +113,11 @@ const packsEntreprise = [
       "Cartes aux couleurs et au logo de l'entreprise",
       "Mise à jour illimitée",
     ],
-    whatsappText: "Bonjour, je suis intéressé par le PME Pack Business RIVO-CARD.",
   },
   {
     id: "premium-pme",
     name: "PME Pack Premium",
+    offerValue: "pme-premium",
     popular: false,
     features: [
       "50 cartes NFC personnalisées",
@@ -127,7 +127,6 @@ const packsEntreprise = [
       "Mise à jour illimitée",
       "Gestion avancée des équipes",
     ],
-    whatsappText: "Bonjour, je suis intéressé par le PME Pack Premium RIVO-CARD.",
   },
 ];
 
@@ -140,7 +139,6 @@ function whatsappUrl(phone, text) {
 }
 
 const WHATSAPP_PARTNER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je suis intéressé pour devenir partenaire RIVO-CARD.");
-const WHATSAPP_ORDER = whatsappUrl(WHATSAPP_PHONE, "Bonjour, je souhaite commander une carte RIVO-CARD.");
 const WHATSAPP_ENTREPRISE = whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, "Bonjour, je suis intéressé par un pack entreprise RIVO-CARD.");
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dwe9byiww/video/upload";
@@ -173,7 +171,6 @@ function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = 
 
 const Accueil = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [partnerOpen, setPartnerOpen] = useState(false);
 
   return (
     <div className="landing-page min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -195,11 +192,11 @@ const Accueil = () => {
                 Devenir partenaire
               </button>
             </a>
-            <a href="#tarifs">
+            <Link to="/commander">
               <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors">
                 Commander
               </button>
-            </a>
+            </Link>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -212,11 +209,11 @@ const Accueil = () => {
                 {l.label}
               </a>
             ))}
-            <a href="#tarifs" onClick={() => setMobileOpen(false)}>
+            <Link to="/commander" onClick={() => setMobileOpen(false)}>
               <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors">
                 Commander
               </button>
-            </a>
+            </Link>
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
               <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-full text-sm font-medium transition-colors">
                 Devenir partenaire
@@ -246,11 +243,11 @@ const Accueil = () => {
                 <span className="text-foreground font-medium">C&apos;est moderne, professionnel et pratique.</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a href="#tarifs">
+                <Link to="/commander">
                   <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold w-full sm:w-auto transition-colors">
                     Commander ma carte
                   </button>
-                </a>
+                </Link>
                 <a href="#demo">
                   <button className="border border-border text-foreground hover:border-primary hover:text-primary px-8 py-3 rounded-full text-base font-medium w-full sm:w-auto transition-colors inline-flex items-center justify-center gap-2">
                     <PlayCircle className="h-5 w-5" />
@@ -347,11 +344,11 @@ const Accueil = () => {
                   </li>
                 ))}
               </ul>
-              <a href="#tarifs" className="inline-block pt-2">
+              <Link to="/commander" className="inline-block pt-2">
                 <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold transition-colors">
                   Commander ma carte
                 </button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -454,11 +451,11 @@ const Accueil = () => {
                       </li>
                     ))}
                   </ul>
-                  <a href={whatsappUrl(WHATSAPP_PHONE, offre.whatsappText)} target="_blank" rel="noopener noreferrer">
+                  <Link to={`/commander?offer=${offre.id}`}>
                     <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-semibold transition-colors">
                       Commander
                     </button>
-                  </a>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -498,11 +495,11 @@ const Accueil = () => {
                     <p className="text-2xl font-bold text-primary pt-2 border-t border-border">
                       Sur demande
                     </p>
-                    <a href={whatsappUrl(WHATSAPP_ENTREPRISE_PHONE, pack.whatsappText)} target="_blank" rel="noopener noreferrer">
+                    <Link to={`/commander?offer=${pack.offerValue}`}>
                       <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-full font-semibold transition-colors">
                         Contactez-nous
                       </button>
-                    </a>
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -549,81 +546,11 @@ const Accueil = () => {
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-4">
-            <button
-              onClick={() => setPartnerOpen(!partnerOpen)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold flex items-center gap-2 transition-colors"
-            >
-              Voir les détails du programme
-              <ChevronDown className={`h-5 w-5 transition-transform duration-300 ${partnerOpen ? "rotate-180" : ""}`} />
-            </button>
-          </div>
-
-          {partnerOpen && (
-            <div className="mt-8 space-y-8 animate-fade-in-up">
-              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <div className="rounded-xl border border-border bg-background p-6 space-y-4 blue-glow">
-                  <div className="flex items-center gap-3">
-                    <HandCoins className="h-6 w-6 text-primary" />
-                    <h3 className="text-lg font-bold">Par client</h3>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Commission carte</span>
-                      <span className="font-semibold text-primary">1 000 F</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Commission abonnement</span>
-                      <span className="font-semibold text-primary">2 000 F</span>
-                    </div>
-                    <div className="flex justify-between items-center py-2 bg-primary/10 rounded-lg px-3 mt-2">
-                      <span className="font-semibold text-sm">Total par client</span>
-                      <span className="text-primary font-bold text-lg">3 000 F</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="rounded-xl border border-border bg-background p-6 space-y-4 blue-glow">
-                  <div className="flex items-center gap-3">
-                    <TrendingUp className="h-6 w-6 text-primary" />
-                    <h3 className="text-lg font-bold">Renouvellement</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Chaque année, quand ton client renouvelle son abonnement :
-                  </p>
-                  <div className="flex justify-between items-center py-2 bg-primary/10 rounded-lg px-3">
-                    <span className="font-semibold text-sm">Tu gagnes encore</span>
-                    <span className="text-primary font-bold text-lg">2 000 F</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="max-w-lg mx-auto rounded-2xl border border-border bg-background p-8 space-y-6 blue-glow">
-                <div className="flex items-center justify-center gap-3">
-                  <Calculator className="h-7 w-7 text-primary" />
-                  <h3 className="text-xl font-bold">Exemple avec 10 clients</h3>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-border">
-                    <span className="text-muted-foreground">Gain immédiat</span>
-                    <span className="font-bold text-lg">10 × 3 000 = <span className="text-primary">30 000 F</span></span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-border">
-                    <span className="text-muted-foreground">Revenu annuel récurrent</span>
-                    <span className="font-bold text-lg">10 × 2 000 = <span className="text-primary">20 000 F</span></span>
-                  </div>
-                </div>
-                <p className="text-center text-sm text-muted-foreground">
-                  Plus tu trouves de clients, <span className="text-primary font-semibold">plus ton revenu annuel augmente</span>.
-                </p>
-              </div>
-            </div>
-          )}
-
           <div className="text-center pt-4">
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer">
               <button className="bg-[hsl(142,70%,45%)] text-white hover:bg-[hsl(142,70%,40%)] px-8 py-3 rounded-full text-base font-medium inline-flex items-center gap-2 transition-colors">
                 <MessageCircle className="h-5 w-5" />
-                Devenir partenaire via WhatsApp
+                Nous contacter sur WhatsApp
               </button>
             </a>
           </div>
@@ -636,11 +563,11 @@ const Accueil = () => {
           <h2 className="text-3xl md:text-5xl font-bold">
             Modernisez votre image <span className="text-primary">dès aujourd&apos;hui</span>.
           </h2>
-          <a href={WHATSAPP_ORDER} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block">
+          <Link to="/commander" className="mt-4 inline-block">
             <button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-full font-semibold transition-colors">
               Commander ma carte maintenant
             </button>
-          </a>
+          </Link>
         </div>
       </section>
 
