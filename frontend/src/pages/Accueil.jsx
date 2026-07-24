@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import OrderFormDialog from "@/components/OrderFormDialog";
 import {
   Phone, MessageCircle, Share2, Globe, MapPin, Briefcase,
   ShoppingBag, Building2, Users, Star, Megaphone, UserCheck,
@@ -171,6 +171,14 @@ function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = 
 
 const Accueil = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [orderOffer, setOrderOffer] = useState("");
+
+  const openOrderForm = (offer = "") => {
+    setOrderOffer(offer);
+    setOrderOpen(true);
+    setMobileOpen(false);
+  };
 
   return (
     <div className="landing-page min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -192,11 +200,13 @@ const Accueil = () => {
                 Devenir partenaire
               </button>
             </a>
-            <Link to="/commander">
-              <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors">
-                Commander
-              </button>
-            </Link>
+            <button
+              type="button"
+              onClick={() => openOrderForm()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
+            >
+              Commander
+            </button>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
             {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -209,11 +219,13 @@ const Accueil = () => {
                 {l.label}
               </a>
             ))}
-            <Link to="/commander" onClick={() => setMobileOpen(false)}>
-              <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors">
-                Commander
-              </button>
-            </Link>
+            <button
+              type="button"
+              onClick={() => openOrderForm()}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors"
+            >
+              Commander
+            </button>
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
               <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-full text-sm font-medium transition-colors">
                 Devenir partenaire
@@ -243,11 +255,13 @@ const Accueil = () => {
                 <span className="text-foreground font-medium">C&apos;est moderne, professionnel et pratique.</span>
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/commander">
-                  <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold w-full sm:w-auto transition-colors">
-                    Commander ma carte
-                  </button>
-                </Link>
+                <button
+                  type="button"
+                  onClick={() => openOrderForm()}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold w-full sm:w-auto transition-colors"
+                >
+                  Commander ma carte
+                </button>
                 <a href="#demo">
                   <button className="border border-border text-foreground hover:border-primary hover:text-primary px-8 py-3 rounded-full text-base font-medium w-full sm:w-auto transition-colors inline-flex items-center justify-center gap-2">
                     <PlayCircle className="h-5 w-5" />
@@ -344,11 +358,13 @@ const Accueil = () => {
                   </li>
                 ))}
               </ul>
-              <Link to="/commander" className="inline-block pt-2">
-                <button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold transition-colors">
-                  Commander ma carte
-                </button>
-              </Link>
+              <button
+                type="button"
+                onClick={() => openOrderForm()}
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-3 rounded-full text-base font-semibold transition-colors"
+              >
+                Commander ma carte
+              </button>
             </div>
           </div>
         </div>
@@ -451,11 +467,13 @@ const Accueil = () => {
                       </li>
                     ))}
                   </ul>
-                  <Link to={`/commander?offer=${offre.id}`}>
-                    <button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-semibold transition-colors">
-                      Commander
-                    </button>
-                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => openOrderForm(offre.id)}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-semibold transition-colors"
+                  >
+                    Commander
+                  </button>
                 </div>
               </div>
             ))}
@@ -495,11 +513,13 @@ const Accueil = () => {
                     <p className="text-2xl font-bold text-primary pt-2 border-t border-border">
                       Sur demande
                     </p>
-                    <Link to={`/commander?offer=${pack.offerValue}`}>
-                      <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-full font-semibold transition-colors">
-                        Contactez-nous
-                      </button>
-                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => openOrderForm(pack.offerValue)}
+                      className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-6 py-3 rounded-full font-semibold transition-colors"
+                    >
+                      Contactez-nous
+                    </button>
                   </div>
                 </div>
               ))}
@@ -563,11 +583,13 @@ const Accueil = () => {
           <h2 className="text-3xl md:text-5xl font-bold">
             Modernisez votre image <span className="text-primary">dès aujourd&apos;hui</span>.
           </h2>
-          <Link to="/commander" className="mt-4 inline-block">
-            <button className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-full font-semibold transition-colors">
-              Commander ma carte maintenant
-            </button>
-          </Link>
+          <button
+            type="button"
+            onClick={() => openOrderForm()}
+            className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-10 py-4 rounded-full font-semibold transition-colors"
+          >
+            Commander ma carte maintenant
+          </button>
         </div>
       </section>
 
@@ -612,6 +634,12 @@ const Accueil = () => {
           </div>
         </div>
       </footer>
+
+      <OrderFormDialog
+        open={orderOpen}
+        onOpenChange={setOrderOpen}
+        initialOffer={orderOffer}
+      />
     </div>
   );
 };

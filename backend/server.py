@@ -853,21 +853,47 @@ async def generate_vcard(profile_id: str):
 async def create_order(
     name: str = Form(...),
     phone: str = Form(...),
+    country: str = Form(...),
     email: Optional[str] = Form(None),
     company: Optional[str] = Form(None),
     offer: Optional[str] = Form(None),
     message: Optional[str] = Form(None),
+    photo: Optional[UploadFile] = File(None),
 ):
     """Public endpoint (no auth): capture a lead from the homepage order form."""
+    photo_url = None
+    if photo and photo.filename:
+        try:
+            photo_buf = read_upload_limited(photo, MAX_IMAGE_SIZE)
+            local_buf = local_face_crop(photo_buf)
+            upload_buf = local_buf if local_buf is not None else photo_buf
+            photo_res = cloudinary.uploader.upload(
+                upload_buf,
+                folder="rivo_photos",
+                resource_type='image',
+                transformation=[
+                    {"width": 400, "height": 400, "crop": "fill", "gravity": "face", "zoom": 0.8},
+                    {"format": "webp"}
+                ]
+            )
+            photo_url = photo_res.get('secure_url')
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception('Order photo upload failed')
+            raise HTTPException(status_code=500, detail="Erreur lors de l'envoi de la photo")
+
     now = datetime.now(timezone.utc).isoformat()
     order_doc = {
         "order_id": f"order_{uuid.uuid4().hex[:12]}",
         "name": name,
         "phone": phone,
+        "country": country,
         "email": email,
         "company": company,
         "offer": offer,
         "message": message,
+        "photo_url": photo_url,
         "status": "en_attente",
         "profile_id": None,
         "created_at": now,
@@ -921,7 +947,7 @@ async def validate_order(order_id: str, request: Request):
         "email": order.get("email"),
         "card_type": "profile",
         "template_id": "template1",
-        "photo_url": None,
+        "photo_url": order.get("photo_url"),
         "unique_link": generate_unique_link(order.get("name") or "client"),
         "is_archived": False,
         "created_at": now,

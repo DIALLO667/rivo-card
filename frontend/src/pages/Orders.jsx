@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ShoppingCart, CheckCircle2, Trash2, Phone, Mail, Building2 } from 'lucide-react';
+import { ShoppingCart, CheckCircle2, Trash2, Phone, Mail, Building2, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 const API = process.env.REACT_APP_API_URL || '';
@@ -15,6 +15,12 @@ const OFFER_LABELS = {
   'pme-business': 'PME Pack Business',
   'pme-premium': 'PME Pack Premium',
   autre: 'Autre',
+};
+
+const COUNTRY_LABELS = {
+  senegal: 'Sénégal',
+  'burkina-faso': 'Burkina Faso',
+  autre: 'Autre pays',
 };
 
 export default function Orders() {
@@ -180,6 +186,13 @@ export default function Orders() {
             <div className="space-y-3">
               {filtered.map((order) => (
                 <div key={order.order_id} className="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+                  {order.photo_url && (
+                    <img
+                      src={order.photo_url}
+                      alt={order.name}
+                      className="w-14 h-14 rounded-full object-cover border border-gray-200 shrink-0"
+                    />
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-semibold text-gray-900">{order.name}</h3>
@@ -187,6 +200,12 @@ export default function Orders() {
                         <Badge className="bg-emerald-600 text-white">Validée</Badge>
                       ) : (
                         <Badge className="bg-amber-500 text-white">En attente</Badge>
+                      )}
+                      {order.country && (
+                        <span className="text-xs font-medium text-violet-700 bg-violet-50 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                          <Globe className="h-3 w-3" />
+                          {COUNTRY_LABELS[order.country] || order.country}
+                        </span>
                       )}
                       {order.offer && (
                         <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
