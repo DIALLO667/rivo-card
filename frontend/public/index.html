@@ -1,18 +1,58 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#2563EB" />
-        <meta name="description" content="Rivocard - Cartes de visite digitales NFC professionnelles" />
+
+        <!--
+          Title / description / canonical / Open Graph / Twitter Card sont gérés
+          dynamiquement par react-helmet-async (voir src/components/Seo.jsx) afin
+          d'éviter toute duplication de balises entre ce fichier statique et le
+          rendu React. Valeurs par défaut : voir <DefaultSeo> dans src/App.js.
+        -->
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
+        <link rel="manifest" href="/manifest.json" />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-        <title>Rivo card | Cartes de visite digitales</title>
-        
+
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Rivo Card",
+            "alternateName": "Rivo Studio",
+            "url": "https://card.rivostudiotech.com/",
+            "logo": "https://card.rivostudiotech.com/favicon.png",
+            "sameAs": ["https://rivostudiotech.com"],
+            "areaServed": [
+                { "@type": "City", "name": "Dakar" },
+                { "@type": "City", "name": "Bamako" },
+                { "@type": "Country", "name": "Sénégal" },
+                { "@type": "Country", "name": "Mali" }
+            ],
+            "contactPoint": [{
+                "@type": "ContactPoint",
+                "telephone": "+221-78-520-76-89",
+                "contactType": "sales",
+                "areaServed": ["SN", "ML"],
+                "availableLanguage": ["French"]
+            }]
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Rivo Card",
+            "url": "https://card.rivostudiotech.com/"
+        }
+        </script>
+
         <style>
             /* Style du loader immédiat */
             #initial-loader {

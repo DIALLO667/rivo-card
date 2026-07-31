@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /commander
+
+Disallow: /dashboard
+Disallow: /orders
+Disallow: /subaccounts
+Disallow: /links
+Disallow: /profiles/
+Disallow: /login
+Disallow: /suspended
+Disallow: /p/
+
+Sitemap: https://card.rivostudiotech.com/sitemap.xml

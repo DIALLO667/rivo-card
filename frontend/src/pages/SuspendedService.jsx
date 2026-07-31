@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 
@@ -7,6 +8,7 @@ export default function SuspendedService() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+      <Helmet><title>Service suspendu | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="text-center max-w-md">
         <div className="glass-card rounded-3xl p-12 backdrop-blur-2xl">
           <AlertCircle className="h-20 w-20 text-red-400 mx-auto mb-6" />

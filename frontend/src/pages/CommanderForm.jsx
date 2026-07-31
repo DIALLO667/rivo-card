@@ -1,6 +1,7 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import OrderForm from "@/components/OrderForm";
+import Seo from "@/components/Seo";
 
 export default function CommanderForm() {
   const [searchParams] = useSearchParams();
@@ -8,6 +9,11 @@ export default function CommanderForm() {
 
   return (
     <div className="landing-page min-h-screen bg-background text-foreground px-4 py-12 md:py-20">
+      <Seo
+        title="Commander une carte NFC personnalisée | Rivo Card"
+        description="Commandez votre carte de visite NFC personnalisée Rivo Card, livrée à Dakar, Bamako et dans toute l'Afrique de l'Ouest. Configuration de votre profil digital incluse."
+        path="/commander"
+      />
       <div className="max-w-xl mx-auto">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
           <ArrowLeft className="h-4 w-4" />

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_API_URL;
@@ -45,6 +46,7 @@ export default function AuthCallback() {
 
   return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <Helmet><title>Connexion | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="text-[#EEDC9A] text-lg">Authentification...</div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -84,6 +85,7 @@ export default function Orders() {
 
   return (
     <div className="flex min-h-screen">
+      <Helmet><title>Commandes | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
       <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
         <div>
           <div className="px-4 py-4 flex items-center justify-between">

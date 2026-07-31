@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -273,6 +274,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen">
+  <Helmet><title>Tableau de bord | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
   {/* Sidebar - collapsible, near-black for a luxe look */}
   {/* Desktop sidebar (hidden on small screens) */}
   <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>

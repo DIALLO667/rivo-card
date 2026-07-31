@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/sonner';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -48,12 +49,14 @@ function AppRouter() {
 
 function App() {
   return (
-    <div className="App">
-      <BrowserRouter>
-        <AppRouter />
-        <Toaster position="top-center" />
-      </BrowserRouter>
-    </div>
+    <HelmetProvider>
+      <div className="App">
+        <BrowserRouter>
+          <AppRouter />
+          <Toaster position="top-center" />
+        </BrowserRouter>
+      </div>
+    </HelmetProvider>
   );
 }
 

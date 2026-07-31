@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -188,6 +189,7 @@ export default function ProfileForm() {
 
   return (
     <div className="min-h-screen bg-[#0f1113] text-white p-4 md:p-8 flex justify-center items-center">
+      <Helmet><title>Profil digital | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="w-full max-w-2xl bg-[#1a1c1e] p-6 md:p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
         <h1 className="text-2xl font-bold mb-8 text-[#D4AF37]">
           {profileId ? "MODIFIER LE PROFIL" : "NOUVEAU PROFIL Rivo-Card"}

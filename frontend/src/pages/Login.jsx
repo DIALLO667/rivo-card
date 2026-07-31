@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -53,6 +54,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0f1113] p-4">
+      <Helmet><title>Connexion | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#D4AF37] to-[#F5E0A3]">Rivocard</h1>

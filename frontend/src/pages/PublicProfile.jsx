@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send } from 'lucide-react';
 import TemplateQuietLuxury from '@/components/templates/TemplateQuietLuxury';
@@ -38,11 +39,15 @@ export default function PublicProfile() {
     }
   }, [uniqueLink]);
 
-  if (loading) return <div className="h-screen bg-[#0a0a0b] flex items-center justify-center text-white italic tracking-widest uppercase text-xs">Rivo...</div>;
-  if (!profile) return <div className="h-screen bg-[#0a0a0b] flex items-center justify-center text-white italic">Profil introuvable</div>;
+  const noIndexTag = <Helmet><title>Profil digital | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>;
+
+  if (loading) return <>{noIndexTag}<div className="h-screen bg-[#0a0a0b] flex items-center justify-center text-white italic tracking-widest uppercase text-xs">Rivo...</div></>;
+  if (!profile) return <>{noIndexTag}<div className="h-screen bg-[#0a0a0b] flex items-center justify-center text-white italic">Profil introuvable</div></>;
 
   if (profile.is_archived) {
     return (
+      <>
+      {noIndexTag}
       <div className="h-screen w-full bg-[#0a0a0b] flex justify-center items-center p-6 font-sans">
         <div className="w-full max-w-[400px] bg-gradient-to-b from-[#1a1c1e] to-[#0a0a0b] border border-red-500/20 rounded-[3rem] p-12 text-center shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="flex justify-center mb-8">
@@ -57,6 +62,7 @@ export default function PublicProfile() {
           <p className="text-[10px] text-gray-600 font-black tracking-[0.5em] uppercase">Rivo Card Premium</p>
         </div>
       </div>
+      </>
     );
   }
 
@@ -105,8 +111,11 @@ export default function PublicProfile() {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0a0a0b] flex justify-center items-center overflow-hidden font-sans">
-      {renderByType()}
-    </div>
+    <>
+      {noIndexTag}
+      <div className="h-screen w-full bg-[#0a0a0b] flex justify-center items-center overflow-hidden font-sans">
+        {renderByType()}
+      </div>
+    </>
   );
 }

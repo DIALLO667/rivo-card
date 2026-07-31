@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import OrderFormDialog from "@/components/OrderFormDialog";
+import Seo from "@/components/Seo";
+import {
+  Accordion, AccordionItem, AccordionTrigger, AccordionContent,
+} from "@/components/ui/accordion";
 import {
   Phone, MessageCircle, Share2, Globe, MapPin, Briefcase,
   ShoppingBag, Building2, Users, Star, Megaphone, UserCheck,
@@ -12,7 +17,38 @@ const navLinks = [
   { label: "Démo", href: "#demo" },
   { label: "Avantages", href: "#avantages" },
   { label: "Tarifs", href: "#tarifs" },
-  { label: "Partenaire", href: "#partenaire" },
+  { label: "Zones desservies", href: "#zones" },
+  { label: "FAQ", href: "#faq" },
+];
+
+const villesDesservies = [
+  { ville: "Dakar", pays: "Sénégal" },
+  { ville: "Thiès", pays: "Sénégal" },
+  { ville: "Bamako", pays: "Mali" },
+  { ville: "Abidjan", pays: "Côte d'Ivoire" },
+];
+
+const faqItems = [
+  {
+    q: "Qu'est-ce qu'une carte de visite NFC ?",
+    a: "Une carte de visite NFC (ou carte digitale NFC) est une carte professionnelle sans contact équipée d'une puce. En approchant un téléphone, elle ouvre automatiquement votre profil digital : coordonnées, réseaux sociaux, site web et bouton d'enregistrement du contact, sans application à installer.",
+  },
+  {
+    q: "Rivo Card livre-t-il à Dakar et Bamako ?",
+    a: "Oui. Rivo Card livre les cartes NFC personnalisées à Dakar, Thiès et dans tout le Sénégal, ainsi qu'à Bamako et au Mali. Nous étendons progressivement la livraison à toute l'Afrique de l'Ouest.",
+  },
+  {
+    q: "La carte NFC fonctionne-t-elle avec tous les téléphones ?",
+    a: "Notre carte NFC personnalisée est compatible avec la grande majorité des smartphones récents iOS et Android disposant de la fonction NFC, activée par défaut sur la plupart des appareils.",
+  },
+  {
+    q: "Combien de temps pour recevoir ma carte de visite digitale ?",
+    a: "Après votre commande et la configuration de votre profil digital par notre équipe, votre carte professionnelle sans contact est généralement livrée sous quelques jours ouvrés à Dakar, Bamako et dans les principales villes couvertes.",
+  },
+  {
+    q: "Puis-je modifier les informations de ma carte NFC après l'achat ?",
+    a: "Oui, votre profil digital Rivo Card est modifiable à tout moment : coordonnées, réseaux sociaux, site web et présentation peuvent être mis à jour sans changer de carte physique.",
+  },
 ];
 
 const features = [
@@ -148,7 +184,44 @@ const DEMO_POSTER = `${CLOUDINARY_BASE}/w_720,so_1/${CLOUDINARY_VERSION}.jpg`;
 const TEASER_VIDEO = `${CLOUDINARY_BASE}/so_0,eo_8,w_480,q_auto/${CLOUDINARY_VERSION}.mp4`;
 const TEASER_POSTER = `${CLOUDINARY_BASE}/so_1,w_480/${CLOUDINARY_VERSION}.jpg`;
 
-function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = "max-w-[280px]" }) {
+const PAGE_TITLE = "Rivo Card | Carte de visite NFC digitale à Dakar & Bamako";
+const PAGE_DESCRIPTION = "Carte de visite NFC personnalisée : partagez vos coordonnées, réseaux sociaux et site web en un contact. Rivo Card, la carte professionnelle sans contact livrée à Dakar, Bamako et en Afrique de l'Ouest.";
+
+const HOMEPAGE_JSON_LD = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: "Rivo Card - Carte de visite NFC digitale",
+    description: PAGE_DESCRIPTION,
+    brand: { "@type": "Brand", name: "Rivo Studio" },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "XOF",
+      lowPrice: "10000",
+      highPrice: "15000",
+      offerCount: "2",
+      areaServed: ["Dakar", "Bamako", "Sénégal", "Mali"],
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Accueil", item: "https://card.rivostudiotech.com/" },
+    ],
+  },
+];
+
+function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = "max-w-[280px]", label = "Démonstration de la carte de visite NFC Rivo Card" }) {
   return (
     <div className={`relative w-full ${sizeClass} mx-auto`}>
       <div className="relative aspect-[9/16] rounded-[2.25rem] border-[6px] border-foreground bg-foreground overflow-hidden shadow-[0_25px_60px_-15px_rgba(15,23,42,0.35)]">
@@ -161,8 +234,11 @@ function PhoneFrame({ src, poster, autoPlay, loop, muted, controls, sizeClass = 
           controls={controls}
           playsInline
           preload="metadata"
+          aria-label={label}
           className="w-full h-full object-cover"
-        />
+        >
+          Votre navigateur ne prend pas en charge la vidéo. {label}.
+        </video>
         <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-20 h-4 bg-foreground rounded-b-xl" />
       </div>
     </div>
@@ -182,6 +258,12 @@ const Accueil = () => {
 
   return (
     <div className="landing-page min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Seo
+        title={PAGE_TITLE}
+        description={PAGE_DESCRIPTION}
+        path="/"
+        jsonLd={HOMEPAGE_JSON_LD}
+      />
       {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/85 backdrop-blur-xl">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
@@ -577,6 +659,55 @@ const Accueil = () => {
         </div>
       </section>
 
+      {/* Zones desservies */}
+      <section id="zones" className="py-20 md:py-28 px-4 border-t border-border">
+        <div className="container mx-auto max-w-4xl space-y-10 text-center">
+          <div className="space-y-4">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Votre carte NFC livrée à <span className="text-primary">Dakar, Bamako</span> et en Afrique de l&apos;Ouest
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Rivo Card conçoit et livre des cartes de visite NFC personnalisées pour les professionnels du Sénégal
+              et du Mali. Que vous soyez entrepreneur à Dakar ou entreprise à Bamako, notre équipe configure votre
+              profil digital et vous accompagne du paiement à l&apos;activation de votre carte NFC.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl mx-auto">
+            {villesDesservies.map((v) => (
+              <div key={v.ville} className="p-4 rounded-xl bg-card border border-border flex flex-col items-center gap-2">
+                <MapPin className="h-5 w-5 text-primary" />
+                <p className="font-semibold text-sm">{v.ville}</p>
+                <p className="text-xs text-muted-foreground">{v.pays}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-20 md:py-28 px-4 border-t border-border bg-card">
+        <div className="container mx-auto max-w-3xl space-y-10">
+          <div className="text-center space-y-3">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              Questions <span className="text-primary">fréquentes</span>
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Tout savoir sur la carte de visite NFC Rivo Card.
+            </p>
+          </div>
+          <Accordion type="single" collapsible className="bg-background rounded-2xl border border-border px-6">
+            {faqItems.map((item) => (
+              <AccordionItem key={item.q} value={item.q}>
+                <AccordionTrigger className="text-base font-semibold">{item.q}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-sm leading-relaxed">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
       {/* CTA FINAL */}
       <section id="cta-final" className="py-20 md:py-28 px-4 bg-[hsl(222,47%,11%)] text-white">
         <div className="container mx-auto text-center space-y-8">
@@ -613,6 +744,9 @@ const Accueil = () => {
                     {l.label}
                   </a>
                 ))}
+                <Link to="/commander" className="text-sm hover:text-white transition-colors">
+                  Commander une carte NFC
+                </Link>
               </div>
             </div>
             <div className="space-y-3">
