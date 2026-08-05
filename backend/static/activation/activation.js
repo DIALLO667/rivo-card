@@ -57,11 +57,11 @@
       const res = await fetch(`/api/activation_tokens/${token}/validate`);
       const j = await res.json();
       if(!j.valid){
-        window.location.href = '/static/activation/invalid.html';
+        window.location.href = '/static/activation/invalid.html?reason=' + encodeURIComponent(j.reason || '');
       }
     }catch(e){
       console.error(e);
-      window.location.href = '/static/activation/invalid.html';
+      window.location.href = '/static/activation/invalid.html?reason=network';
     }
   }
 
@@ -140,8 +140,32 @@
   // address search button removed — address field is free-text or a maps URL
 
   const formEl = document.getElementById('activationForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const errorBox = document.getElementById('formError');
+  const successPanel = document.getElementById('successPanel');
+
+  function showError(text){
+    if (!errorBox) return;
+    errorBox.textContent = text;
+    errorBox.style.display = 'block';
+    errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function clearError(){
+    if (!errorBox) return;
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+
   if (formEl) formEl.addEventListener('submit', async function(e){
     e.preventDefault();
+    clearError();
+
+    if (!photoInput || !photoInput.files || !photoInput.files[0]){
+      showError('Veuillez ajouter une photo de profil, elle est obligatoire pour créer votre carte.');
+      if (photoInput) photoInput.focus();
+      return;
+    }
+
     const form = e.target;
     const fd = new FormData(form);
     // if a cropped blob exists, append it as 'photo' (overrides original file)
@@ -150,31 +174,38 @@
     }
     // append other fields
     fd.set('token', token);
-  const msg = document.getElementById('formMsg');
-  if (msg) msg.textContent = 'Envoi en cours...';
+
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Envoi en cours...'; }
+
     try{
       const res = await fetch('/api/activation/submit', {method:'POST', body: fd});
-      const j = await res.json();
+      let j = {};
+      try { j = await res.json(); } catch (parseErr) { /* ignore, handled below */ }
+
       if(res.ok){
-        if (msg) msg.textContent = 'Profil créé — fermeture automatique en cours...';
         // broadcast to other tabs (dashboard) that a new profile was created
         try { localStorage.setItem('rivo_last_created_profile', JSON.stringify({ profile_id: j.profile_id, ts: Date.now() })); } catch (e) {}
-        // show a small success overlay
-        try {
-          const overlay = document.createElement('div');
-          overlay.style.position = 'fixed'; overlay.style.left = 0; overlay.style.top = 0; overlay.style.right = 0; overlay.style.bottom = 0; overlay.style.background = 'rgba(0,0,0,0.4)'; overlay.style.display='flex'; overlay.style.alignItems='center'; overlay.style.justifyContent='center'; overlay.style.zIndex=9999;
-          const box = document.createElement('div'); box.style.background='#fff'; box.style.padding='20px'; box.style.borderRadius='12px'; box.style.boxShadow='0 6px 20px rgba(0,0,0,0.12)'; box.innerText = 'Profil créé avec succès — cette fenêtre va se fermer.';
-          overlay.appendChild(box); document.body.appendChild(overlay);
-        } catch (e) {}
-        // reset form and close after a short delay
-        form.reset(); updatePreview();
-        setTimeout(() => { try { window.close(); } catch(e) { /* ignore */ } }, 1400);
+
+        // Remplace définitivement le formulaire par un écran de succès.
+        // On ne dépend plus de window.close() : ça échoue silencieusement
+        // quand la page n'a pas été ouverte par un script (cas le plus courant
+        // pour un lien partagé sur WhatsApp), laissant l'utilisateur perplexe.
+        formEl.style.display = 'none';
+        if (errorBox) errorBox.style.display = 'none';
+        if (successPanel) {
+          successPanel.style.display = 'block';
+          successPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        try { window.close(); } catch (e) { /* ignore, best-effort only */ }
       } else {
-        if (msg) msg.textContent = j.detail || 'Erreur lors de la création du profil';
+        const detail = (j && j.detail) ? j.detail : `Erreur lors de la création du profil (code ${res.status}).`;
+        showError(detail);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Créer ma Rivo-Card'; }
       }
     }catch(err){
       console.error(err);
-      if (msg) msg.textContent = 'Erreur réseau lors de la soumission';
+      showError('Erreur réseau : vérifiez votre connexion puis réessayez.');
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Créer ma Rivo-Card'; }
     }
   });
 

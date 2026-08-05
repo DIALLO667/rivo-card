@@ -17,6 +17,8 @@
       <h1 class="panel-title">Complétez votre Rivo-Card</h1>
       <p class="panel-sub">Remplissez les informations ci-dessous pour créer votre profil.</p>
 
+      <div id="formError" class="form-alert form-alert-error" style="display:none" role="alert"></div>
+
       <form id="activationForm" enctype="multipart/form-data" class="activation-form">
         <input type="hidden" id="token" name="token" />
         <input type="hidden" id="croppedBlob" name="cropped_blob" />
@@ -85,9 +87,13 @@
               </div>
             </div>
 
-            <label class="field">Photo de Profil
-              <input type="file" name="photo" id="photo" accept="image/*" />
-            </label>
+            <div class="photo-highlight" id="photoHighlight">
+              <label class="field photo-field-label">
+                Photo de Profil <span class="required-badge">Obligatoire</span>
+                <input type="file" name="photo" id="photo" accept="image/*" required />
+              </label>
+              <small class="muted">Cette photo apparaîtra sur votre carte digitale. Format carré recommandé.</small>
+            </div>
 
             <div id="cropperContainer" style="display:none;margin-bottom:12px;">
               <div style="width:100%;max-height:360px;overflow:hidden;">
@@ -105,11 +111,17 @@
         </div>
 
         <div class="actions" style="margin-top:16px">
-          <button type="submit" class="btn primary large">Créer ma Rivo-Card</button>
+          <button type="submit" id="submitBtn" class="btn primary large">Créer ma Rivo-Card</button>
         </div>
 
         <div id="formMsg" class="muted"></div>
       </form>
+
+      <div id="successPanel" class="success-panel" style="display:none">
+        <div class="success-icon">✓</div>
+        <h2>Carte créée avec succès !</h2>
+        <p>Votre profil Rivo-Card a bien été enregistré. Vous pouvez fermer cette page en toute sécurité.</p>
+      </div>
     </div>
   </div>
 

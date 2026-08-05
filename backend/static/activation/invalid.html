@@ -8,8 +8,23 @@
 </head>
 <body>
   <div class="card">
-    <h1>Jeton invalide</h1>
-    <p>Ce lien d'activation est invalide ou a déjà été utilisé.</p>
+    <h1 id="invalidTitle">Jeton invalide</h1>
+    <p id="invalidMsg">Ce lien d'activation est invalide ou a déjà été utilisé.</p>
   </div>
+  <script>
+    (function(){
+      var params = new URLSearchParams(window.location.search);
+      var reason = params.get('reason');
+      var titleEl = document.getElementById('invalidTitle');
+      var msgEl = document.getElementById('invalidMsg');
+      if (reason === 'used') {
+        titleEl.textContent = 'Ce lien a déjà été utilisé';
+        msgEl.textContent = "Une carte a déjà été créée avec ce lien d'activation. Si vous pensez qu'il s'agit d'une erreur, contactez la personne qui vous a envoyé ce lien pour en obtenir un nouveau.";
+      } else if (reason === 'network') {
+        titleEl.textContent = 'Connexion impossible';
+        msgEl.textContent = "Impossible de vérifier ce lien pour le moment. Vérifiez votre connexion internet et réessayez.";
+      }
+    })();
+  </script>
 </body>
 </html>
