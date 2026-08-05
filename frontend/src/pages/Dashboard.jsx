@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import QRCode from 'qrcode';
+import { toWhatsAppHref } from '@/lib/urlUtils';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -298,7 +299,7 @@ export default function Dashboard() {
 
   const openWhatsApp = (phone, name) => {
     const message = encodeURIComponent(`Bonjour ${name}, votre abonnement Rivo-Card arrive à expiration. Souhaitez-vous le renouveler ?`);
-    window.open(`https://wa.me/${(phone || '').replace(/\D/g, '')}?text=${message}`, '_blank');
+    window.open(`${toWhatsAppHref(phone)}?text=${message}`, '_blank');
   };
 
   const countNewThisMonth = profiles.filter((p) => { const d = new Date(p.created_at); return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear(); }).length;

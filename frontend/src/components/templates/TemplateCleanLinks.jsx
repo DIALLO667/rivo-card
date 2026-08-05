@@ -1,5 +1,5 @@
 import React from 'react';
-import { normalizeUrl, makeVCard, splitPhones } from '@/lib/urlUtils';
+import { normalizeUrl, makeVCard, splitPhones, toTelHref } from '@/lib/urlUtils';
 import {
   FaSnapchatGhost,
   FaTiktok,
@@ -43,7 +43,7 @@ function TemplateCleanLinks({ profile }) {
     if (!raw && raw !== 0) return null;
     let v = String(raw).trim();
     if (!v || v === '#') return null;
-    if (key === 'phone') return v.startsWith('tel:') ? v : `tel:${v.replace(/\s+/g, '')}`;
+    if (key === 'phone') return v.startsWith('tel:') ? v : toTelHref(v);
     if (key === 'email') return v.startsWith('mailto:') ? v : `mailto:${v}`;
     if (v.startsWith('tel:') || v.startsWith('mailto:')) return v;
     return normalizeUrl(v);

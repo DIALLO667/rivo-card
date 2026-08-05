@@ -51,3 +51,31 @@ export function splitPhones(raw) {
   const parts = s.split(/[\/,;\n]+/).map(p => p.trim()).filter(Boolean);
   return parts;
 }
+
+// Normalize a raw phone number into a clean form usable by both tel: and
+// wa.me links: keeps a leading "+" if present, converts a leading "00"
+// (the international access code many people dial instead of "+") into "+",
+// and strips everything else that isn't a digit (spaces, dashes, dots...).
+export function cleanPhoneNumber(raw) {
+  if (!raw && raw !== 0) return '';
+  const s = String(raw).trim();
+  if (!s) return '';
+  const hadPlus = s.startsWith('+');
+  const digits = s.replace(/\D/g, '');
+  if (!digits) return '';
+  if (hadPlus) return `+${digits}`;
+  if (digits.startsWith('00')) return `+${digits.slice(2)}`;
+  return digits;
+}
+
+// tel: links are fine with a leading "+".
+export function toTelHref(raw) {
+  const n = cleanPhoneNumber(raw);
+  return n ? `tel:${n}` : '';
+}
+
+// wa.me requires digits only — no "+", no leading zeros.
+export function toWhatsAppHref(raw) {
+  const n = cleanPhoneNumber(raw).replace(/^\+/, '');
+  return n ? `https://wa.me/${n}` : '';
+}

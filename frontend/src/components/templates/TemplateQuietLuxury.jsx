@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { makeVCard, normalizeUrl, toMapsUrl, splitPhones } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl, toMapsUrl, splitPhones, toTelHref, toWhatsAppHref } from '@/lib/urlUtils';
 import {
   FaLinkedin,
   FaInstagram,
@@ -27,10 +27,10 @@ const TemplateQuietLuxury = ({ profile }) => {
 
   const phones = splitPhones(data.phone);
   const primaryPhone = phones.length ? phones[0] : data.phone;
-  const telHrefs = primaryPhone ? [`tel:${String(primaryPhone).replace(/\s+/g, '')}`] : [];
+  const telHrefs = primaryPhone ? [toTelHref(primaryPhone)] : [];
   const mailHref = data.email ? `mailto:${data.email}` : null;
   const websiteHref = data.website && data.website !== "https://" ? normalizeUrl(data.website) : null;
-  const whatsappHref = primaryPhone ? `https://wa.me/${String(primaryPhone).replace(/[^\d+]/g, '')}` : null;
+  const whatsappHref = primaryPhone ? toWhatsAppHref(primaryPhone) : null;
 
   const [callMenuOpen, setCallMenuOpen] = useState(false);
 
@@ -147,7 +147,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         {primaryPhone && (
           <div className="relative w-full">
             <div className="flex gap-2">
-              <a href={`tel:${String(primaryPhone).replace(/\s+/g, '')}`} className="flex-1">
+              <a href={toTelHref(primaryPhone)} className="flex-1">
                 <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
                   <FaPhone className='text-[#C4A77D] text-lg' style={{ transform: 'none' }} /> APPELER
                 </button>
@@ -161,7 +161,7 @@ const TemplateQuietLuxury = ({ profile }) => {
             {callMenuOpen && phones.length > 1 && (
               <div className="absolute right-0 mt-2 w-full sm:w-auto bg-[#0b0b0b]/90 border border-white/10 rounded-lg shadow-lg z-20">
                 {phones.map((p, i) => (
-                  <a key={`menu-tel-${i}`} href={`tel:${String(p).replace(/\s+/g, '')}`} className="block px-4 py-2 text-sm text-white hover:bg-white/5">{p}</a>
+                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-2 text-sm text-white hover:bg-white/5">{p}</a>
                 ))}
               </div>
             )}
