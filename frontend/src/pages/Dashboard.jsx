@@ -339,10 +339,6 @@ export default function Dashboard() {
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Liens'}</span>
               </li>
-              <li onClick={() => { setFilterType('archived'); navigate('/dashboard'); }} className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Archivés'}</span>
-              </li>
             </ul>
           </nav>
         </div>
@@ -370,7 +366,6 @@ export default function Dashboard() {
                   <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/orders'); }}>Commandes</li>
                   <li className="px-3 py-3 rounded-lg flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/subaccounts'); }}>Gestion des Filiales</li>
                   <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/links'); }}>Gestion des Liens</li>
-                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); setFilterType('archived'); }}>Archivés</li>
                 </ul>
               </nav>
             </div>
@@ -406,7 +401,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-100">
               {(currentUser?.role === 'owner' || currentUser?.role === 'admin' || subaccounts.length > 0) && (
                 <div className="flex items-center gap-3">
-                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded-lg text-sm">
+                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded-lg text-sm text-gray-900 font-medium">
                     <option value="me">Mes profils</option>
                     <option value="all">Tous</option>
                     {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
@@ -440,6 +435,7 @@ export default function Dashboard() {
                     </div>
                     <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
                     <div className="flex flex-col sm:flex-row gap-2 justify-end">
+                      <Button onClick={() => window.open(generatedActivationUrl, '_blank', 'noopener,noreferrer')} variant="outline" className="border-gray-200 text-gray-700">Ouvrir le lien</Button>
                       <Button onClick={copyActivationLink} className="bg-blue-600 text-white">Copier le lien</Button>
                       <Button onClick={() => setShowActivationModal(false)} variant="ghost">Fermer</Button>
                     </div>

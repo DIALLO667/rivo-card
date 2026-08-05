@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Link2, Copy, Plus } from 'lucide-react';
+import { Link2, Copy, Plus, ExternalLink } from 'lucide-react';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -257,9 +257,14 @@ export default function LinkManagement() {
                         )}
                         <td className="px-4 py-3 text-right">
                           {!link.used && (
-                            <Button size="sm" variant="ghost" onClick={() => copyLink(link.url)} title="Copier">
-                              <Copy className="h-4 w-4" />
-                            </Button>
+                            <div className="flex justify-end gap-2">
+                              <Button size="sm" variant="outline" onClick={() => window.open(link.url, '_blank', 'noopener,noreferrer')} title="Ouvrir le lien" className="border-gray-200 text-gray-700">
+                                <ExternalLink className="h-4 w-4 mr-1.5" /> Ouvrir
+                              </Button>
+                              <Button size="sm" onClick={() => copyLink(link.url)} title="Copier le lien" className="bg-blue-600 hover:bg-blue-700 text-white">
+                                <Copy className="h-4 w-4 mr-1.5" /> Copier
+                              </Button>
+                            </div>
                           )}
                         </td>
                       </tr>
