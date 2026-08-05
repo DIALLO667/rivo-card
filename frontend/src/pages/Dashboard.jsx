@@ -213,11 +213,11 @@ export default function Dashboard() {
     return () => window.removeEventListener('storage', onStorage);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
-  // Auto-refresh polling to keep dashboard in sync (every 15 seconds)
+  // Auto-refresh polling to keep dashboard in sync (every 20 seconds)
   useEffect(() => {
     const iv = setInterval(() => {
       fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
-    }, 15000);
+    }, 20000);
     return () => clearInterval(iv);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
@@ -386,23 +386,27 @@ export default function Dashboard() {
       <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10 transition-margin duration-200`}>
         <div className="max-w-7xl mx-auto">
           {/* Header card */}
-          <div className="bg-white rounded-xl p-4 shadow-sm mb-6">
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                {/* Mobile menu toggle */}
-                <button className="md:hidden p-2 rounded hover:bg-gray-100 mr-2" onClick={() => setMobileSidebarVisible(true)} aria-label="Ouvrir le menu">
-                  <svg className="h-5 w-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                </button>
-              </div>
-              <div className="relative w-full md:max-w-md">
+          <div className="bg-white rounded-xl p-4 shadow-sm mb-6 space-y-4">
+            {/* Row 1: recherche + action principale */}
+            <div className="flex items-center gap-3">
+              {/* Mobile menu toggle */}
+              <button className="md:hidden p-2 rounded hover:bg-gray-100 shrink-0" onClick={() => setMobileSidebarVisible(true)} aria-label="Ouvrir le menu">
+                <svg className="h-5 w-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              </button>
+              <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input placeholder="Rechercher un membre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 bg-white border border-gray-200 h-12 rounded-xl" />
               </div>
+              <Button onClick={() => navigate('/profiles/new')} className="bg-blue-600 hover:bg-blue-700 text-white font-black h-12 px-6 rounded-xl shrink-0 ml-auto">
+                <Plus className="mr-2 h-5 w-5" /> <span className="hidden sm:inline">NOUVEAU PROFIL</span><span className="sm:hidden">Nouveau</span>
+              </Button>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                {(currentUser?.role === 'owner' || currentUser?.role === 'admin' || subaccounts.length > 0) && (
-                <div className="flex items-center gap-2">
-                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded">
+            {/* Row 2: filtres de portée + actions secondaires */}
+            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-100">
+              {(currentUser?.role === 'owner' || currentUser?.role === 'admin' || subaccounts.length > 0) && (
+                <div className="flex items-center gap-3">
+                  <select value={selectedSub} onChange={(e) => { const v = e.target.value; setSelectedSub(v); fetchProfiles({ ownerOv: ownerOverview, sel: v }); }} className="bg-white border border-gray-200 h-10 px-3 rounded-lg text-sm">
                     <option value="me">Mes profils</option>
                     <option value="all">Tous</option>
                     {subaccounts.map((s) => <option key={s.user_id} value={s.user_id}>{s.name}</option>)}
@@ -410,23 +414,19 @@ export default function Dashboard() {
                   <label className="flex items-center gap-2 text-sm text-gray-600">
                     <input type="checkbox" checked={ownerOverview} onChange={(e) => { const v = e.target.checked; setOwnerOverview(v); fetchProfiles({ ownerOv: v, sel: selectedSub }); }} /> Vue d'ensemble
                   </label>
+                  {selectedSub && selectedSub !== 'me' && selectedSub !== 'all' && (
+                    <Button onClick={() => { setSelectedSub('me'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ ownerOv: ownerOverview, sel: 'me' }); }} variant="outline" size="sm" className="h-9 bg-white border-gray-200 text-gray-700">Retour</Button>
+                  )}
                 </div>
-                )}
+              )}
 
-                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                  <Button onClick={() => navigate('/profiles/new')} className="bg-blue-600 text-white font-black w-full sm:w-auto h-12 px-6 rounded-xl">
-                    <Plus className="mr-2 h-5 w-5" /> NOUVEAU PROFIL
-                  </Button>
-                  <Button onClick={generateActivationLink} className="bg-blue-600 text-white font-black w-full sm:w-auto h-12 px-4 rounded-xl" disabled={generatingActivation}>
-                    {generatingActivation ? 'Génération...' : 'Générer un lien d\'activation'}
-                  </Button>
-                </div>
-                <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-12 bg-white border border-gray-200 text-gray-700">
-                  <Users className="mr-2 h-5 w-5" /> Filiales
+              <div className="flex items-center gap-3 ml-auto">
+                <Button onClick={generateActivationLink} variant="outline" className="h-10 px-4 rounded-lg border-gray-200 text-gray-700 font-semibold" disabled={generatingActivation}>
+                  {generatingActivation ? 'Génération...' : "Lien d'activation"}
                 </Button>
-                {selectedSub && selectedSub !== 'me' && selectedSub !== 'all' && (
-                  <Button onClick={() => { setSelectedSub('me'); window.history.replaceState({}, '', '/dashboard'); fetchProfiles({ ownerOv: ownerOverview, sel: 'me' }); }} variant="outline" className="h-12 bg-white border border-gray-200 text-gray-700">Retour</Button>
-                )}
+                <Button onClick={() => navigate('/subaccounts')} variant="ghost" className="h-10 bg-white border border-gray-200 text-gray-700">
+                  <Users className="mr-2 h-4 w-4" /> Filiales
+                </Button>
               </div>
             </div>
 

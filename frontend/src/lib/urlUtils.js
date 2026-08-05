@@ -10,6 +10,20 @@ export function normalizeUrl(raw) {
   return 'https://' + s;
 }
 
+// Turns a pasted Google Maps link OR a plain-text address into a URL that
+// always opens correctly in Maps. A raw address (no scheme, no maps domain)
+// would otherwise get "https://" tacked on by normalizeUrl and 404.
+export function toMapsUrl(raw) {
+  if (!raw && raw !== '') return '';
+  const s = String(raw).trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/(maps\.app\.goo\.gl|goo\.gl\/maps|google\.[a-z.]+\/maps|maps\.google\.)/i.test(s)) {
+    return normalizeUrl(s);
+  }
+  return `https://www.google.com/maps/search/?api=query&query=${encodeURIComponent(s)}`;
+}
+
 export function makeVCard({ name = '', phone = '', email = '' } = {}) {
   const lines = [
     'BEGIN:VCARD',

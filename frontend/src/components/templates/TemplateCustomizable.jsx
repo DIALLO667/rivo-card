@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeVCard, normalizeUrl, splitPhones } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl, toMapsUrl, splitPhones } from '@/lib/urlUtils';
 import { FaSave, FaMapMarkerAlt, FaEnvelope, FaGlobe, FaInstagram, FaLinkedin, FaFacebook, FaYoutube, FaTwitter, FaPalette, FaPhoneAlt, FaChevronDown } from 'react-icons/fa';
 import { FaTelegramPlane } from 'react-icons/fa';
 import { SiTiktok } from 'react-icons/si';
@@ -219,7 +219,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         </button>
 
         {profile?.location && (
-          <a href={normalizeUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
+          <a href={toMapsUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
             <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
               <FaMapMarkerAlt style={{ color: prefs.button }} /> Adresse
             </button>

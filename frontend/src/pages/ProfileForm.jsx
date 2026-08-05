@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { normalizeUrl } from '@/lib/urlUtils';
+import { normalizeUrl, toMapsUrl } from '@/lib/urlUtils';
 import { toast } from 'sonner';
 
 const BASE_URL = process.env.REACT_APP_API_URL || '';
@@ -16,7 +16,7 @@ export default function ProfileForm() {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    name: '', job: '', company: '', phone: '', email: '', location: '', address: '', lat:'', lng:'',
+    name: '', job: '', company: '', phone: '', email: '', location: '',
     website: '', instagram: '', facebook: '', linkedin: '', tiktok: '',
     snapchat: '', telegram: '', youtube: '', twitter: '', design_type: 'classic'
   });
@@ -142,6 +142,7 @@ export default function ProfileForm() {
     ['instagram','linkedin','facebook','tiktok','telegram','youtube','twitter','snapchat','website'].forEach(k => {
       if (normalizedForm[k]) normalizedForm[k] = normalizeUrl(normalizedForm[k]);
     });
+    if (normalizedForm.location) normalizedForm.location = toMapsUrl(normalizedForm.location);
 
     Object.keys(normalizedForm).forEach(key => {
       const v = normalizedForm[key];
@@ -281,21 +282,8 @@ export default function ProfileForm() {
 
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-[#D4AF37] ml-1 uppercase tracking-widest">Adresse / Localisation</label>
-                <div className="flex gap-2">
-                  <Input name="address" value={formData.address} onChange={handleInputChange} className="bg-white/5 h-12 border-[#D4AF37]/20 rounded-lg" placeholder="Entrez une adresse ou collez un lien Maps" />
-                  <button type="button" onClick={async () => {
-                    const q = formData.address || formData.location || '';
-                    if (!q) return toast.error('Adresse vide');
-                    try {
-                      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`);
-                      const j = await res.json();
-                      if (j && j[0]) {
-                        setFormData(prev => ({ ...prev, address: j[0].display_name, lat: j[0].lat, lng: j[0].lon }));
-                        toast.success('Localisation trouvée');
-                      } else { toast.error('Adresse introuvable'); }
-                    } catch (e) { toast.error('Erreur géocodage'); }
-                  }} className="bg-[#D4AF37] px-4 rounded-lg text-black">Chercher</button>
-                </div>
+                <Input name="location" value={formData.location} onChange={handleInputChange} className="bg-white/5 h-12 border-[#D4AF37]/20 rounded-lg" placeholder="Collez un lien Google Maps ou tapez une adresse" />
+                <p className="text-[10px] text-gray-500 ml-1">Un lien Google Maps collé est utilisé tel quel. Une adresse texte est automatiquement transformée en lien Maps valide.</p>
               </div>
 
               <div className="space-y-1">

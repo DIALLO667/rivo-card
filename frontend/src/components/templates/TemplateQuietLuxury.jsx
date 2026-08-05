@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { makeVCard, normalizeUrl, splitPhones } from '@/lib/urlUtils';
+import { makeVCard, normalizeUrl, toMapsUrl, splitPhones } from '@/lib/urlUtils';
 import {
   FaLinkedin,
   FaInstagram,
@@ -129,7 +129,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         </button>
 
         {data.location && (
-          <a href={normalizeUrl(data.location)} target="_blank" rel="noopener noreferrer" className="block w-full">
+          <a href={toMapsUrl(data.location)} target="_blank" rel="noopener noreferrer" className="block w-full">
             <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
               <FaMapMarkerAlt className='text-[#C4A77D] text-base' /> Adresse
             </button>
