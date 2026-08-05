@@ -5,8 +5,9 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart } from 'lucide-react';
+import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import QRCode from 'qrcode';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -32,6 +33,7 @@ export default function Dashboard() {
   const [generatedActivationUrl, setGeneratedActivationUrl] = useState('');
   const [activationError, setActivationError] = useState('');
   const [generatingActivation, setGeneratingActivation] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
   // load profiles; accepts explicit overrides so callers pass freshly-fetched
@@ -211,13 +213,42 @@ export default function Dashboard() {
     return () => window.removeEventListener('storage', onStorage);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
-  // Auto-refresh polling to keep dashboard in sync (every 10 seconds)
+  // Auto-refresh polling to keep dashboard in sync (every 15 seconds)
   useEffect(() => {
     const iv = setInterval(() => {
       fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub, cur: currentUser, subs: subaccounts });
-    }, 10000);
+    }, 15000);
     return () => clearInterval(iv);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
+
+  const handleCopyLink = (profile) => {
+    if (!profile.unique_link) return;
+    navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`);
+    setCopiedId(profile.profile_id);
+    setTimeout(() => setCopiedId((c) => (c === profile.profile_id ? null : c)), 1000);
+  };
+
+  const downloadQrCode = async (profile) => {
+    if (!profile.unique_link) return;
+    try {
+      const url = `${window.location.origin}/p/${profile.unique_link}`;
+      const dataUrl = await QRCode.toDataURL(url, {
+        width: 512,
+        margin: 2,
+        color: { dark: '#0B1220', light: '#FFFFFF' },
+      });
+      const filename = `${(profile.name || 'profil').trim().toLowerCase().replace(/\s+/g, '-')}-qrcode.png`;
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error('downloadQrCode error', err);
+      toast.error('Impossible de générer le QR code');
+    }
+  };
 
   const generateActivationLink = async () => {
     setActivationError('');
@@ -461,8 +492,24 @@ export default function Dashboard() {
                         <button title="Voir" onClick={() => profile.unique_link && window.open(`/p/${profile.unique_link}`, '_blank')} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         </button>
-                        <button title="Copier" onClick={() => profile.unique_link && navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`)} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
-                          <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><rect x="3" y="3" width="13" height="13" rx="2" ry="2"/></svg>
+                        <button
+                          title="Copier"
+                          onClick={() => handleCopyLink(profile)}
+                          disabled={!profile.unique_link}
+                          className={`p-2 border rounded-md transition-colors duration-300 hover:shadow-sm ${
+                            copiedId === profile.profile_id
+                              ? 'bg-emerald-50 border-emerald-300 text-emerald-600'
+                              : 'bg-white border-gray-100 text-gray-700'
+                          }`}
+                        >
+                          {copiedId === profile.profile_id ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><rect x="3" y="3" width="13" height="13" rx="2" ry="2"/></svg>
+                          )}
+                        </button>
+                        <button title="Télécharger le QR code (PNG)" onClick={() => downloadQrCode(profile)} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm text-gray-700">
+                          <QrCode className="h-4 w-4" />
                         </button>
                         <button title="Éditer" onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 4h7a1 1 0 011 1v7"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 3l-12 12H3v-6L15 3z"/></svg>
