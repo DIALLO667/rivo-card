@@ -237,21 +237,28 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         {primaryPhone && (
           <div className="relative w-full">
             <div className="flex gap-2">
-              <a href={toTelHref(primaryPhone)} className="flex-1">
-                <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase" style={{ borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 10, }}>
+              {phones.length > 1 ? (
+                <button type="button" onClick={() => setCallMenuOpen(v => !v)}
+                  className="flex-1 bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase"
+                  style={{ borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 10, }}>
                   <FaPhoneAlt style={{ color: prefs.button }} className="text-lg" /> APPELER
+                  <FaChevronDown className={`text-xs transition-transform ${callMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
-              </a>
-              {phones.length > 1 && (
-                <button type="button" onClick={() => setCallMenuOpen(v => !v)} className="w-12 bg-white/[0.03] border border-white/10 text-white/90 rounded-xl flex items-center justify-center">
-                  <FaChevronDown />
-                </button>
+              ) : (
+                <a href={toTelHref(primaryPhone)} className="flex-1">
+                  <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase" style={{ borderRadius: prefs.iconStyle === 'rounded' ? 9999 : 10, }}>
+                    <FaPhoneAlt style={{ color: prefs.button }} className="text-lg" /> APPELER
+                  </button>
+                </a>
               )}
             </div>
             {callMenuOpen && phones.length > 1 && (
-              <div className="absolute right-0 mt-2 w-full sm:w-auto bg-black/90 border border-white/10 rounded-lg shadow-lg z-20">
+              <div className="absolute left-0 right-0 mt-2 bg-black/90 border border-white/10 rounded-lg shadow-lg z-20 overflow-hidden">
                 {phones.map((p, i) => (
-                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-2 text-sm text-white hover:bg-white/5">{p}</a>
+                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-3 text-sm text-white hover:bg-white/5">
+                    {i === 0 && <span className="text-[9px] tracking-widest uppercase mr-2" style={{ color: prefs.button }}>WhatsApp</span>}
+                    {p}
+                  </a>
                 ))}
               </div>
             )}
