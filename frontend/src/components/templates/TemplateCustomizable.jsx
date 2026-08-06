@@ -235,7 +235,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
         )}
 
         {primaryPhone && (
-          <div className="relative w-full">
+          <div className="w-full">
             <div className="flex gap-2">
               {phones.length > 1 ? (
                 <button type="button" onClick={() => setCallMenuOpen(v => !v)}
@@ -253,10 +253,9 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
               )}
             </div>
             {callMenuOpen && phones.length > 1 && (
-              <div className="absolute left-0 right-0 mt-2 bg-black/90 border border-white/10 rounded-lg shadow-lg z-20 overflow-hidden">
+              <div className="mt-2 bg-black border border-white/10 rounded-lg shadow-lg overflow-hidden divide-y divide-white/5">
                 {phones.map((p, i) => (
-                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-3 text-sm text-white hover:bg-white/5">
-                    {i === 0 && <span className="text-[9px] tracking-widest uppercase mr-2" style={{ color: prefs.button }}>WhatsApp</span>}
+                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-3 text-sm text-white hover:bg-white/5 relative z-10">
                     {p}
                   </a>
                 ))}

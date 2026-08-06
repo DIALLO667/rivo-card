@@ -145,7 +145,7 @@ const TemplateQuietLuxury = ({ profile }) => {
         )}
 
         {primaryPhone && (
-          <div className="relative w-full">
+          <div className="w-full">
             <div className="flex gap-2">
               {phones.length > 1 ? (
                 <button type="button" onClick={() => setCallMenuOpen(v => !v)}
@@ -162,10 +162,9 @@ const TemplateQuietLuxury = ({ profile }) => {
               )}
             </div>
             {callMenuOpen && phones.length > 1 && (
-              <div className="absolute left-0 right-0 mt-2 bg-[#0b0b0b]/90 border border-white/10 rounded-lg shadow-lg z-20 overflow-hidden">
+              <div className="mt-2 bg-[#0b0b0b] border border-white/10 rounded-lg shadow-lg overflow-hidden divide-y divide-white/5">
                 {phones.map((p, i) => (
-                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-3 text-sm text-white hover:bg-white/5">
-                    {i === 0 && <span className="text-[9px] text-[#C4A77D] tracking-widest uppercase mr-2">WhatsApp</span>}
+                  <a key={`menu-tel-${i}`} href={toTelHref(p)} onClick={() => setCallMenuOpen(false)} className="block px-4 py-3 text-sm text-white hover:bg-white/5 relative z-10">
                     {p}
                   </a>
                 ))}
