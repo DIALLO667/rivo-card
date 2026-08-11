@@ -10,3 +10,5 @@ passlib[bcrypt]
 requests
 Pillow
 email-validator
+qrcode[pil]
+numpy

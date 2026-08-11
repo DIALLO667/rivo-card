@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode } from 'lucide-react';
+import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode, CreditCard, X, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import QRCode from 'qrcode';
 import { toWhatsAppHref } from '@/lib/urlUtils';
@@ -227,6 +227,74 @@ export default function Dashboard() {
     navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`);
     setCopiedId(profile.profile_id);
     setTimeout(() => setCopiedId((c) => (c === profile.profile_id ? null : c)), 1000);
+  };
+
+  const [cardModalProfile, setCardModalProfile] = useState(null);
+  const [cardPreview, setCardPreview] = useState(null);
+  const [cardLoading, setCardLoading] = useState(false);
+  const [cardDownloading, setCardDownloading] = useState(false);
+  const [cardBgColor, setCardBgColor] = useState('#1F6B4A');
+  const [cardAccentColor, setCardAccentColor] = useState('#E8622C');
+
+  const fetchCardPreview = async (profile, bg, accent) => {
+    setCardLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API}/profiles/${profile.profile_id}/card-preview`, {
+        params: { bg_color: bg, accent_color: accent },
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      setCardPreview(res.data);
+    } catch (err) {
+      console.error('fetchCardPreview error', err);
+      toast.error("Impossible de générer l'aperçu de la carte");
+    } finally {
+      setCardLoading(false);
+    }
+  };
+
+  const openCardModal = (profile) => {
+    const bg = profile.bg_color || '#1F6B4A';
+    const accent = profile.icon_color || profile.button_color || '#E8622C';
+    setCardModalProfile(profile);
+    setCardBgColor(bg);
+    setCardAccentColor(accent);
+    setCardPreview(null);
+    fetchCardPreview(profile, bg, accent);
+  };
+
+  const closeCardModal = () => {
+    setCardModalProfile(null);
+    setCardPreview(null);
+  };
+
+  const downloadCardPdf = async () => {
+    if (!cardModalProfile) return;
+    setCardDownloading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${API}/profiles/${cardModalProfile.profile_id}/card-pdf`, {
+        params: { bg_color: cardBgColor, accent_color: cardAccentColor },
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const filename = `${(cardModalProfile.name || 'carte').trim().toLowerCase().replace(/\s+/g, '-')}-rivo-card.pdf`;
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('downloadCardPdf error', err);
+      toast.error('Impossible de télécharger le PDF');
+    } finally {
+      setCardDownloading(false);
+    }
   };
 
   const downloadQrCode = async (profile) => {
@@ -508,6 +576,9 @@ export default function Dashboard() {
                         <button title="Télécharger le QR code (PNG)" onClick={() => downloadQrCode(profile)} disabled={!profile.unique_link} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm text-gray-700">
                           <QrCode className="h-4 w-4" />
                         </button>
+                        <button title="Générer la carte imprimable" onClick={() => openCardModal(profile)} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm text-gray-700">
+                          <CreditCard className="h-4 w-4" />
+                        </button>
                         <button title="Éditer" onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 4h7a1 1 0 011 1v7"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 3l-12 12H3v-6L15 3z"/></svg>
                         </button>
@@ -533,6 +604,65 @@ export default function Dashboard() {
           )}
         </div>
       </main>
+
+      {cardModalProfile && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900">
+                Carte imprimable — {cardModalProfile.name}
+              </h2>
+              <button onClick={closeCardModal} className="p-2 rounded-md hover:bg-gray-100">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-4 mb-4 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Couleur de fond</label>
+                <input type="color" value={cardBgColor} onChange={(e) => setCardBgColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Couleur d'accent</label>
+                <input type="color" value={cardAccentColor} onChange={(e) => setCardAccentColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
+              </div>
+              <Button
+                onClick={() => fetchCardPreview(cardModalProfile, cardBgColor, cardAccentColor)}
+                disabled={cardLoading}
+                className="bg-gray-900 hover:bg-gray-800 text-white h-9"
+              >
+                {cardLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Régénérer l\'aperçu'}
+              </Button>
+            </div>
+
+            {cardLoading && !cardPreview ? (
+              <div className="py-20 flex items-center justify-center text-gray-400">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : cardPreview ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Recto</p>
+                  <img src={cardPreview.front} alt="Recto de la carte" className="w-full rounded-lg border border-gray-200" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 mb-2">Verso</p>
+                  <img src={cardPreview.back} alt="Verso de la carte" className="w-full rounded-lg border border-gray-200" />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mt-6 flex justify-end gap-3">
+              <Button onClick={closeCardModal} className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                Fermer
+              </Button>
+              <Button onClick={downloadCardPdf} disabled={!cardPreview || cardDownloading} className="bg-[#D4AF37] hover:bg-yellow-600 text-black font-semibold">
+                {cardDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Télécharger le PDF'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

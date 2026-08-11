@@ -23,6 +23,8 @@ export default function ProfileForm() {
   
   const [photoFile, setPhotoFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
+  const [existingLogoUrl, setExistingLogoUrl] = useState('');
   const [cardType, setCardType] = useState('profile');
   const [templateId, setTemplateId] = useState('template1');
   const [bgColor, setBgColor] = useState('');
@@ -70,6 +72,7 @@ export default function ProfileForm() {
           if (res.data.job_color) setJobColor(res.data.job_color);
           if (res.data.font_choice) setFontChoice(res.data.font_choice);
           if (res.data.icon_style) setIconStyle(res.data.icon_style);
+          if (res.data.logo_url) setExistingLogoUrl(res.data.logo_url);
         } catch (err) {
           toast.error("Impossible de charger les données");
         }
@@ -168,6 +171,7 @@ export default function ProfileForm() {
     // N'ajoute les fichiers QUE s'ils sont sélectionnés
     if (photoFile) data.append('photo', photoFile);
     if (cardType === 'profile' && coverFile) data.append('cover', coverFile);
+    if (logoFile) data.append('logo', logoFile);
 
     try {
       const config = {
@@ -320,6 +324,17 @@ export default function ProfileForm() {
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-[#D4AF37]">Couverture</label>
                   <input type="file" accept="image/*" onChange={e => setCoverFile(e.target.files[0])} className="text-[10px] text-gray-400" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-[#D4AF37]">Logo de l'entreprise (Optionnel)</label>
+                  <input type="file" accept="image/*" onChange={e => setLogoFile(e.target.files[0])} className="text-[10px] text-gray-400" />
+                  {(logoFile || existingLogoUrl) && (
+                    <img
+                      alt="logo preview"
+                      src={logoFile ? URL.createObjectURL(logoFile) : existingLogoUrl}
+                      style={{ display: 'block', maxWidth: '100px', maxHeight: '60px', marginTop: '8px', objectFit: 'contain' }}
+                    />
+                  )}
                 </div>
               </div>
             </>

@@ -18,8 +18,10 @@ import secrets
 import cloudinary
 import cloudinary.uploader
 import io
+import base64
 import requests
 from PIL import Image
+import card_generator
 import logging
 
 # Optional local face detection dependencies (used only if installed)
@@ -488,7 +490,8 @@ async def create_profile(
     job_color: Optional[str] = Form(None),
     font_choice: Optional[str] = Form(None),
     icon_style: Optional[str] = Form(None),
-    photo: UploadFile = File(...), cover: Optional[UploadFile] = File(None)
+    photo: UploadFile = File(...), cover: Optional[UploadFile] = File(None),
+    logo: Optional[UploadFile] = File(None)
 ):
     user = await get_user_from_token(request)
     if not user: raise HTTPException(status_code=401)
@@ -577,6 +580,13 @@ async def create_profile(
         if cover:
             cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
             cover_res = cloudinary.uploader.upload(cover_buf, folder="rivo_covers")
+        logo_res = None
+        if logo and logo.filename:
+            logo_buf = read_upload_limited(logo, MAX_IMAGE_SIZE)
+            logo_res = cloudinary.uploader.upload(
+                logo_buf, folder="rivo_logos", resource_type='image',
+                transformation=[{"format": "png", "background": "transparent"}]
+            )
         now = datetime.now(timezone.utc).isoformat()
         profile_doc = {
             "profile_id": f"profile_{uuid.uuid4().hex[:12]}", "user_id": user.user_id,
@@ -593,6 +603,7 @@ async def create_profile(
             "font_choice": font_choice,
             "icon_style": icon_style,
             "photo_url": photo_url_final, "cover_url": (cover_res['secure_url'] if cover_res else None),
+            "logo_url": (logo_res['secure_url'] if logo_res else None),
             "unique_link": generate_unique_link(name), "is_archived": False,
             "created_at": now, "updated_at": now
         }
@@ -636,7 +647,8 @@ async def update_profile(
     icon_color: Optional[str] = Form(None),
     font_choice: Optional[str] = Form(None),
     icon_style: Optional[str] = Form(None),
-    photo: Optional[UploadFile] = File(None), cover: Optional[UploadFile] = File(None)
+    photo: Optional[UploadFile] = File(None), cover: Optional[UploadFile] = File(None),
+    logo: Optional[UploadFile] = File(None), remove_logo: Optional[bool] = Form(False)
 ):
     user = await get_user_from_token(request)
     if not user: raise HTTPException(status_code=401)
@@ -697,6 +709,15 @@ async def update_profile(
         cover_buf = read_upload_limited(cover, MAX_IMAGE_SIZE)
         res = cloudinary.uploader.upload(cover_buf, folder="rivo_covers")
         update_data["cover_url"] = res['secure_url']
+    if logo and logo.filename:
+        logo_buf = read_upload_limited(logo, MAX_IMAGE_SIZE)
+        res = cloudinary.uploader.upload(
+            logo_buf, folder="rivo_logos", resource_type='image',
+            transformation=[{"format": "png", "background": "transparent"}]
+        )
+        update_data["logo_url"] = res['secure_url']
+    elif remove_logo:
+        update_data["logo_url"] = None
 
     await db.profiles.update_one({"profile_id": profile_id, "user_id": user.user_id}, {"$set": update_data})
     return {"status": "success"}
@@ -733,6 +754,53 @@ async def get_single_profile(profile_id: str, request: Request):
     p = await db.profiles.find_one({"profile_id": profile_id}, {"_id": 0})
     if not p: raise HTTPException(status_code=404)
     return p
+
+@api_router.get("/profiles/{profile_id}/card-preview")
+async def preview_profile_card(
+    profile_id: str, request: Request,
+    bg_color: Optional[str] = None, accent_color: Optional[str] = None,
+    name: Optional[str] = None, job: Optional[str] = None,
+):
+    user = await get_user_from_token(request)
+    if not user: raise HTTPException(status_code=401)
+    p = await db.profiles.find_one({"profile_id": profile_id, "user_id": user.user_id}, {"_id": 0})
+    if not p: raise HTTPException(status_code=404)
+    overrides = {k: v for k, v in {
+        "bg_color": bg_color, "accent_color": accent_color, "name": name, "job": job
+    }.items() if v}
+    try:
+        front_buf = card_generator.generate_card_png(p, side="front", overrides=overrides)
+        back_buf = card_generator.generate_card_png(p, side="back", overrides=overrides)
+    except Exception as e:
+        logger.error(f"Card preview generation failed for {profile_id}: {e}")
+        raise HTTPException(status_code=500, detail="Échec de la génération de l'aperçu")
+    return {
+        "front": "data:image/png;base64," + base64.b64encode(front_buf.getvalue()).decode(),
+        "back": "data:image/png;base64," + base64.b64encode(back_buf.getvalue()).decode(),
+    }
+
+
+@api_router.get("/profiles/{profile_id}/card-pdf")
+async def download_profile_card_pdf(
+    profile_id: str, request: Request,
+    bg_color: Optional[str] = None, accent_color: Optional[str] = None,
+    name: Optional[str] = None, job: Optional[str] = None,
+):
+    user = await get_user_from_token(request)
+    if not user: raise HTTPException(status_code=401)
+    p = await db.profiles.find_one({"profile_id": profile_id, "user_id": user.user_id}, {"_id": 0})
+    if not p: raise HTTPException(status_code=404)
+    overrides = {k: v for k, v in {
+        "bg_color": bg_color, "accent_color": accent_color, "name": name, "job": job
+    }.items() if v}
+    try:
+        pdf_buf = card_generator.generate_card_pdf(p, overrides=overrides)
+    except Exception as e:
+        logger.error(f"Card PDF generation failed for {profile_id}: {e}")
+        raise HTTPException(status_code=500, detail="Échec de la génération du PDF")
+    filename = f"{p.get('name', 'carte')}_rivo_card.pdf".replace(" ", "_")
+    return StreamingResponse(pdf_buf, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename=\"{filename}\""})
+
 
 @api_router.patch("/profiles/{profile_id}/archive")
 async def archive_profile(profile_id: str, request: Request):
