@@ -384,7 +384,7 @@ export default function Dashboard() {
               <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span></div>
             </div>
             <div>
-              <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
+              <button title={sidebarCollapsed ? 'Déplier le menu' : 'Réduire le menu'} aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
                 <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
               </button>
             </div>
@@ -427,7 +427,7 @@ export default function Dashboard() {
             <div>
               <div className="px-2 py-4 flex items-center justify-between">
                 <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-blue-500">ADMIN</span></div>
-                <button onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
+                <button title="Fermer le menu" onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
               </div>
               <nav className="mt-6 px-2">
                 <ul className="space-y-3">
@@ -454,7 +454,7 @@ export default function Dashboard() {
             {/* Row 1: recherche + action principale */}
             <div className="flex items-center gap-3">
               {/* Mobile menu toggle */}
-              <button className="md:hidden p-2 rounded hover:bg-gray-100 shrink-0" onClick={() => setMobileSidebarVisible(true)} aria-label="Ouvrir le menu">
+              <button title="Ouvrir le menu" className="md:hidden p-2 rounded hover:bg-gray-100 shrink-0" onClick={() => setMobileSidebarVisible(true)} aria-label="Ouvrir le menu">
                 <svg className="h-5 w-5 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
               </button>
               <div className="relative flex-1 max-w-md">
@@ -500,7 +500,7 @@ export default function Dashboard() {
                   <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-semibold">Lien d'activation généré</h3>
-                      <button aria-label="Fermer" onClick={() => setShowActivationModal(false)} className="ml-2 p-2 rounded hover:bg-gray-100">✕</button>
+                      <button title="Fermer" aria-label="Fermer" onClick={() => setShowActivationModal(false)} className="ml-2 p-2 rounded hover:bg-gray-100">✕</button>
                     </div>
                     <p className="text-sm text-gray-600 break-words mb-4">{generatedActivationUrl}</p>
                     <div className="flex flex-col sm:flex-row gap-2 justify-end">
@@ -612,7 +612,7 @@ export default function Dashboard() {
               <h2 className="text-lg font-bold text-gray-900">
                 Carte imprimable — {cardModalProfile.name}
               </h2>
-              <button onClick={closeCardModal} className="p-2 rounded-md hover:bg-gray-100">
+              <button title="Fermer" onClick={closeCardModal} className="p-2 rounded-md hover:bg-gray-100">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -620,11 +620,11 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-4 mb-4 items-end">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1">Couleur de fond</label>
-                <input type="color" value={cardBgColor} onChange={(e) => setCardBgColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
+                <input title="Choisir la couleur de fond de la carte" type="color" value={cardBgColor} onChange={(e) => setCardBgColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 mb-1">Couleur d'accent</label>
-                <input type="color" value={cardAccentColor} onChange={(e) => setCardAccentColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
+                <input title="Choisir la couleur d'accent (blob et titre du poste)" type="color" value={cardAccentColor} onChange={(e) => setCardAccentColor(e.target.value)} className="h-9 w-16 rounded border border-gray-200" />
               </div>
               <Button
                 onClick={() => fetchCardPreview(cardModalProfile, cardBgColor, cardAccentColor)}
@@ -636,8 +636,11 @@ export default function Dashboard() {
             </div>
 
             {cardLoading && !cardPreview ? (
-              <div className="py-20 flex items-center justify-center text-gray-400">
+              <div className="py-20 flex flex-col items-center justify-center text-gray-400 gap-3">
                 <Loader2 className="h-8 w-8 animate-spin" />
+                <p className="text-xs text-center max-w-xs">
+                  Génération en cours… le premier chargement peut prendre jusqu'à 30s si le serveur était en veille.
+                </p>
               </div>
             ) : cardPreview ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

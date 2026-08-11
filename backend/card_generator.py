@@ -2,11 +2,10 @@
 Génération programmatique des cartes de visite imprimables (recto/verso),
 en remplacement du travail manuel fait jusqu'ici dans Canva.
 
-Approche : un template unique (fond couleur + motif de vagues + blob dégradé
-+ nom/poste + logo Rivo + logo client + QR code au verso) paramétré par les
-couleurs et informations du profil. Ce n'est pas un pixel-perfect du rendu
-Canva d'origine — c'est une approximation générée par code, pensée pour être
-ajustée par petites itérations plutôt que redessinée à la main.
+Template unique reproduisant la maquette de référence : fond couleur uni +
+motif de vagues concentriques + anneau dégradé (coin haut-droit) + swoosh
+flou (coin bas-gauche) + logo Rivo + nom/poste + logo client + QR code au
+verso. Paramétré par les couleurs et informations du profil.
 """
 import io
 import math
@@ -19,17 +18,21 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 LOGO_PATH = os.path.join(ASSETS_DIR, "rivo_logo_white.png")
-FONT_PATH = os.path.join(ASSETS_DIR, "fonts", "Inter-Variable.ttf")
+FONT_BLACK = os.path.join(ASSETS_DIR, "fonts", "Poppins-Black.ttf")
+FONT_SEMIBOLD = os.path.join(ASSETS_DIR, "fonts", "Poppins-SemiBold.ttf")
 
 # Format d'export : proche du ratio des maquettes fournies (~1.78:1),
 # taille confortable pour l'impression. À ajuster si l'imprimeur donne
 # un format/bleed précis en mm.
 CARD_W, CARD_H = 1800, 1013
+SS = 2  # supersampling pour des courbes/anti-aliasing propres
 
 SITE_URL = "https://card.rivostudiotech.com"
 
 DEFAULT_BG = "#1F6B4A"      # vert par défaut si le profil n'a pas de bg_color
-DEFAULT_ACCENT = "#E8622C"  # orange par défaut pour le blob / accents
+DEFAULT_ACCENT = "#E8622C"  # orange par défaut pour l'anneau / accents
+
+_FONT_CACHE = {}
 
 
 def _hex_to_rgb(value, fallback):
@@ -52,57 +55,73 @@ def _luminance(rgb):
 def _shade(rgb, amount):
     """amount > 0 éclaircit, < 0 assombrit."""
     if amount >= 0:
-        return tuple(int(c + (255 - c) * amount) for c in rgb)
-    return tuple(int(c * (1 + amount)) for c in rgb)
+        return tuple(min(255, int(c + (255 - c) * amount)) for c in rgb)
+    return tuple(max(0, int(c * (1 + amount))) for c in rgb)
 
 
-def _font(size, weight=700, optical=None):
-    f = ImageFont.truetype(FONT_PATH, size)
-    try:
-        f.set_variation_by_axes([optical or min(32, max(14, size // 4)), weight])
-    except Exception:
-        pass
-    return f
+def _font(path, size):
+    key = (path, size)
+    if key not in _FONT_CACHE:
+        _FONT_CACHE[key] = ImageFont.truetype(path, size)
+    return _FONT_CACHE[key]
 
 
 def _draw_wave_texture(base_rgb, w, h):
-    """Bandes ondulées discrètes, superposées au fond uni."""
+    """Anneaux concentriques déformés (motif topographique), centrés hors-canvas."""
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(layer)
-    lighter = _shade(base_rgb, 0.06)
-    band_count = 9
-    spacing = h / band_count
-    for i in range(-1, band_count + 2):
-        base_y = i * spacing
+    lighter = _shade(base_rgb, 0.10)
+    cx, cy = w * -0.05, h * 1.15  # centre hors-cadre, bas-gauche
+    max_r = math.hypot(w * 1.2, h * 1.3)
+    step = max_r / 26
+    for i in range(1, 27):
+        r = i * step
         points = []
-        for x in range(0, w + 20, 20):
-            offset = math.sin((x / w) * math.pi * 2.3 + i * 0.7) * (spacing * 0.35)
-            points.append((x, base_y + offset))
-        draw.line(points, fill=(*lighter, 35), width=3)
+        for a_deg in range(0, 361, 4):
+            a = math.radians(a_deg)
+            wobble = math.sin(a * 3 + i * 0.5) * step * 0.28
+            rr = r + wobble
+            points.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
+        draw.line(points, fill=(*lighter, 30), width=3, joint="curve")
     return layer
 
 
-def _draw_blob(w, h, color_a, color_b):
-    """Dégradé radial doux, positionné pour déborder du coin supérieur droit."""
-    size = int(max(w, h) * 1.1)
+def _radial_band(w, h, cx, cy, inner_r, outer_r, color_inner, color_outer, blur=0):
+    """Anneau (donut) avec dégradé radial entre inner_r et outer_r.
+
+    Calculé à résolution réduite (le flou masque la perte de détail) puis
+    remis à l'échelle : un GaussianBlur/numpy en pleine résolution était le
+    principal goulot d'étranglement de la génération (plusieurs secondes).
+    """
+    full_size = int(max(w, h) * 1.3)
+    size = min(full_size, 520)  # résolution de calcul plafonnée
+    scale = size / max(w, h)
+
     yy, xx = np.mgrid[0:size, 0:size]
-    cx, cy = size * 0.62, size * 0.38
-    max_r = size * 0.55
-    dist = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2) / max_r
-    dist = np.clip(dist, 0, 1)
-    t = (1 - dist) ** 1.6  # intensité au centre, s'estompe vers les bords
+    lcx, lcy = size * (cx / w if w else 0.5), size * (cy / h if h else 0.5)
+    dist = np.sqrt((xx - lcx) ** 2 + (yy - lcy) ** 2)
+    ir, orr = inner_r * scale, outer_r * scale
+    blur_px = blur * scale
 
-    a = np.array(color_a, dtype=np.float32)
-    b = np.array(color_b, dtype=np.float32)
-    rgb = a[None, None, :] * t[:, :, None] + b[None, None, :] * (1 - t[:, :, None])
-    alpha = (t * 200).astype(np.uint8)
+    band = np.clip((dist - ir) / max(1.0, (orr - ir)), 0, 1)
+    edge_fade = np.clip(np.minimum(dist - (ir - blur_px), (orr + blur_px) - dist) / max(1.0, blur_px + 1), 0, 1)
+    alpha = (edge_fade * 255).astype(np.uint8)
 
-    arr = np.dstack([rgb.astype(np.uint8), alpha])
-    blob = Image.fromarray(arr, mode="RGBA").filter(ImageFilter.GaussianBlur(size * 0.03))
+    a = np.array(color_inner, dtype=np.float32)
+    b = np.array(color_outer, dtype=np.float32)
+    t = band[:, :, None]
+    rgb = (a[None, None, :] * (1 - t) + b[None, None, :] * t).astype(np.uint8)
+
+    arr = np.dstack([rgb, alpha])
+    img = Image.fromarray(arr, mode="RGBA")
+    if blur:
+        img = img.filter(ImageFilter.GaussianBlur(max(1.0, blur_px * 0.35)))
 
     layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    # positionne le blob pour qu'il déborde du coin haut-droit du canvas
-    layer.alpha_composite(blob, (w - int(size * 0.72), -int(size * 0.28)))
+    off_x = int(cx - lcx / scale)
+    off_y = int(cy - lcy / scale)
+    resized = img.resize((int(size / scale), int(size / scale)), Image.LANCZOS)
+    layer.alpha_composite(resized, (off_x, off_y))
     return layer
 
 
@@ -143,62 +162,79 @@ def _paste_contain(base, overlay, box, anchor="center"):
 def _base_canvas(bg_color, accent_color):
     bg_rgb = _hex_to_rgb(bg_color, DEFAULT_BG)
     accent_rgb = _hex_to_rgb(accent_color, DEFAULT_ACCENT)
+    secondary_rgb = _shade(bg_rgb, 0.55)  # ton clair de la même teinte pour le swoosh
 
     canvas = Image.new("RGBA", (CARD_W, CARD_H), (*bg_rgb, 255))
     canvas.alpha_composite(_draw_wave_texture(bg_rgb, CARD_W, CARD_H))
-    canvas.alpha_composite(_draw_blob(CARD_W, CARD_H, accent_rgb, bg_rgb))
+
+    # anneau net, coin haut-droit : dégradé bg -> accent
+    canvas.alpha_composite(_radial_band(
+        CARD_W, CARD_H, cx=CARD_W * 1.02, cy=CARD_H * -0.08,
+        inner_r=CARD_W * 0.12, outer_r=CARD_W * 0.34,
+        color_inner=bg_rgb, color_outer=accent_rgb, blur=2,
+    ))
+
+    # swoosh flou, coin bas-gauche : dégradé ton clair -> bg, centré près du coin
+    canvas.alpha_composite(_radial_band(
+        CARD_W, CARD_H, cx=CARD_W * 0.02, cy=CARD_H * 0.98,
+        inner_r=0, outer_r=CARD_W * 0.34,
+        color_inner=secondary_rgb, color_outer=bg_rgb, blur=40,
+    ))
+
     return canvas, bg_rgb, accent_rgb
+
+
+def _name_lines(draw, name, font, max_width):
+    """Découpe le nom : dernier mot sur sa propre ligne (comme les maquettes),
+    sauf si le nom tient sur une seule ligne."""
+    words = name.split()
+    if not words:
+        return [""]
+    if len(words) == 1:
+        return [words[0]]
+    if draw.textlength(name, font=font) <= max_width:
+        return [name]
+    return [" ".join(words[:-1]), words[-1]]
 
 
 def render_front(profile, overrides=None):
     overrides = overrides or {}
     bg_color = overrides.get("bg_color") or profile.get("bg_color")
     accent_color = overrides.get("accent_color") or profile.get("icon_color") or profile.get("button_color")
-    name = overrides.get("name") or profile.get("name") or ""
-    job = overrides.get("job") or profile.get("job") or ""
+    name = (overrides.get("name") or profile.get("name") or "").strip()
+    job = (overrides.get("job") or profile.get("job") or "").strip()
 
     canvas, bg_rgb, accent_rgb = _base_canvas(bg_color, accent_color)
-    is_light_bg = _luminance(bg_rgb) > 0.6
-    text_rgb = (20, 20, 20) if is_light_bg else (255, 255, 255)
+    is_light_bg = _luminance(bg_rgb) > 0.65
+    natural_rgb = (20, 20, 20) if is_light_bg else (255, 255, 255)
+    text_rgb = _hex_to_rgb(profile.get("name_color"), None) if profile.get("name_color") else natural_rgb
+    job_rgb = _hex_to_rgb(profile.get("job_color"), None) if profile.get("job_color") else _shade(bg_rgb, 0.55 if not is_light_bg else -0.1)
 
-    logo = _recolor_logo(text_rgb)
-    _paste_contain(canvas, logo, (90, 70, 300, 110), anchor="top-left")
+    logo = _recolor_logo(natural_rgb)
+    _paste_contain(canvas, logo, (95, 75, 300, 110), anchor="top-left")
 
     draw = ImageDraw.Draw(canvas)
-    name_font = _font(120, weight=800)
-    job_font = _font(48, weight=600)
+    name_font = _font(FONT_BLACK, 118)
+    job_font = _font(FONT_SEMIBOLD, 40)
 
-    name_y = CARD_H * 0.42
-    # gère les noms longs sur 2 lignes si nécessaire
-    max_width = CARD_W * 0.62
-    words = name.split()
-    lines, current = [], ""
-    for word in words:
-        trial = f"{current} {word}".strip()
-        if draw.textlength(trial, font=name_font) > max_width and current:
-            lines.append(current)
-            current = word
-        else:
-            current = trial
-    if current:
-        lines.append(current)
-    lines = lines[:2] or [""]
-
+    max_width = CARD_W * 0.60
+    lines = _name_lines(draw, name, name_font, max_width)
     line_height = name_font.size * 1.05
     total_h = line_height * len(lines)
-    y = name_y - total_h / 2
+    y = CARD_H * 0.46 - total_h / 2
     for line in lines:
-        draw.text((95, y), line, font=name_font, fill=(*text_rgb, 255))
+        draw.text((98, y), line, font=name_font, fill=(*text_rgb, 255))
         y += line_height
 
     if job:
-        draw.text((98, y + 10), job.upper(), font=job_font, fill=(*accent_rgb, 255))
+        spaced = "  ".join(list(job.upper()))
+        draw.text((100, y + 14), spaced, font=job_font, fill=(*job_rgb, 255))
 
     logo_url = profile.get("logo_url")
     if logo_url:
         client_logo = _fetch_remote_image(logo_url)
         if client_logo:
-            _paste_contain(canvas, client_logo, (CARD_W - 420, CARD_H - 260, 340, 190), anchor="bottom-right")
+            _paste_contain(canvas, client_logo, (CARD_W - 430, CARD_H - 250, 350, 180), anchor="bottom-right")
 
     return canvas.convert("RGB")
 
@@ -209,11 +245,11 @@ def render_back(profile, overrides=None):
     accent_color = overrides.get("accent_color") or profile.get("icon_color") or profile.get("button_color")
 
     canvas, bg_rgb, accent_rgb = _base_canvas(bg_color, accent_color)
-    is_light_bg = _luminance(bg_rgb) > 0.6
+    is_light_bg = _luminance(bg_rgb) > 0.65
     text_rgb = (20, 20, 20) if is_light_bg else (255, 255, 255)
 
     logo = _recolor_logo(text_rgb)
-    _paste_contain(canvas, logo, (90, 70, 300, 110), anchor="top-left")
+    _paste_contain(canvas, logo, (95, 75, 300, 110), anchor="top-left")
 
     unique_link = profile.get("unique_link", "")
     qr_url = f"{SITE_URL}/p/{unique_link}"
@@ -225,7 +261,6 @@ def render_back(profile, overrides=None):
     qr_size = 460
     qr_img = qr_img.resize((qr_size, qr_size), Image.LANCZOS)
 
-    # petit badge blanc arrondi derrière le QR pour la lisibilité au scan
     pad = 36
     plate = Image.new("RGBA", (qr_size + pad * 2, qr_size + pad * 2), (0, 0, 0, 0))
     ImageDraw.Draw(plate).rounded_rectangle(
@@ -233,7 +268,6 @@ def render_back(profile, overrides=None):
     )
     plate.alpha_composite(qr_img, (pad, pad))
 
-    # icône Rivo au centre du QR (haute correction d'erreur → tolère l'occlusion)
     icon = _recolor_logo((20, 20, 20))
     icon_box = int(qr_size * 0.2)
     icon_ratio = min(icon_box / icon.width, icon_box / icon.height)
