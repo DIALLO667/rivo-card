@@ -65,8 +65,18 @@ export default async (request, context) => {
     <meta name="twitter:image" content="${i}" />
   </head>`;
 
+      // Le HTML de base servi ici est en réalité la page d'accueil pré-rendue
+      // (voir scripts/prerender.js) : elle contient déjà ses propres title/meta
+      // og:*/twitter:*/robots/canonical/description. On les retire avant
+      // d'insérer les nôtres pour éviter les doublons (le crawler prendrait
+      // sinon la première occurrence, donc la mauvaise).
       html = html
         .replace(/<title>.*?<\/title>/s, "")
+        .replace(/<meta\s+name="description"[^>]*>/i, "")
+        .replace(/<meta\s+name="robots"[^>]*>/i, "")
+        .replace(/<link\s+rel="canonical"[^>]*>/i, "")
+        .replace(/<meta\s+property="og:[^"]*"[^>]*>/gi, "")
+        .replace(/<meta\s+name="twitter:[^"]*"[^>]*>/gi, "")
         .replace(/<\/head>/, metaBlock);
     }
   } catch (_err) {
