@@ -112,6 +112,63 @@ export default function PublicProfile() {
     return () => document.removeEventListener('click', onClick, true);
   }, [uniqueLink]);
 
+  // Micro-interactions : petite onde au tap sur un bouton/lien + pulsation
+  // discrète au focus d'un champ. Sans dépendance, fonctionne sur tous les
+  // templates (clairs comme sombres) et respecte prefers-reduced-motion.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes rivo-tap { from { transform: scale(.35); opacity: .85 } to { transform: scale(4.6); opacity: 0 } }
+      .rivo-tap { position: fixed; z-index: 99999; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+        border-radius: 9999px; border: 2px solid rgba(150,150,150,.55); pointer-events: none;
+        animation: rivo-tap 480ms cubic-bezier(.22,.61,.36,1) forwards; will-change: transform, opacity; }
+      /* propriété 'scale' (et non 'transform') pour composer avec un éventuel translate */
+      @keyframes rivo-press { 50% { scale: .94 } }
+      .rivo-press { animation: rivo-press 180ms ease-out; }
+      @keyframes rivo-field { 0% { box-shadow: 0 0 0 0 rgba(99,102,241,.45) } 100% { box-shadow: 0 0 0 6px rgba(99,102,241,0) } }
+      .rivo-field { animation: rivo-field 500ms ease-out; border-radius: 12px; }
+    `;
+    document.head.appendChild(style);
+
+    const onDown = (e) => {
+      const el = e.target && e.target.closest ? e.target.closest('a,button,[role="button"]') : null;
+      const p = e.touches ? e.touches[0] : e;
+      if (p && typeof p.clientX === 'number') {
+        const ring = document.createElement('span');
+        ring.className = 'rivo-tap';
+        ring.style.left = p.clientX + 'px';
+        ring.style.top = p.clientY + 'px';
+        document.body.appendChild(ring);
+        setTimeout(() => ring.remove(), 520);
+      }
+      if (el) {
+        el.classList.remove('rivo-press');
+        // reflow pour rejouer l'animation si on re-clique vite
+        void el.offsetWidth;
+        el.classList.add('rivo-press');
+        setTimeout(() => el.classList.remove('rivo-press'), 220);
+      }
+    };
+    const onFocusIn = (e) => {
+      const t = e.target;
+      if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) {
+        t.classList.add('rivo-field');
+        setTimeout(() => t.classList.remove('rivo-field'), 520);
+      }
+    };
+
+    document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('focusin', onFocusIn, true);
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('focusin', onFocusIn, true);
+      style.remove();
+    };
+  }, []);
+
   const noIndexTag = <Helmet><title>Profil digital | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>;
 
   if (loading) return <>{noIndexTag}<div className="h-screen bg-[#0a0a0b] flex items-center justify-center text-white italic tracking-widest uppercase text-xs">Rivo...</div></>;
@@ -194,20 +251,23 @@ export default function PublicProfile() {
   );
 }
 
-// Bouton flottant discret : permet à quiconque consulte un profil de commander
-// sa propre Rivo Card. Placé bas-centre pour ne pas gêner les CTA des templates
-// (certains ont un bouton flottant en bas à droite).
+// Étiquette flottante discrète en haut à gauche : permet à quiconque consulte
+// un profil de commander sa propre Rivo Card. Coin haut-gauche = zone libre sur
+// tous les templates (les CTA et boutons flottants sont ailleurs).
 function OrderYourOwn() {
   return (
     <a
       href="/commander"
       title="Commander ma Rivo Card"
-      className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[60] flex items-center gap-2 rounded-full
-                 border border-white/15 bg-black/55 px-4 py-2 text-white shadow-lg backdrop-blur-md
-                 text-[11px] font-semibold tracking-wide active:scale-95 transition-all hover:bg-black/70"
+      className="fixed left-3 top-3 z-[60] inline-flex items-center gap-1.5 rounded-lg
+                 border border-white/15 bg-black/45 py-1.5 pl-2 pr-2.5 text-white shadow-lg
+                 backdrop-blur-md text-[11px] font-semibold tracking-wide
+                 transition-colors hover:bg-black/70"
     >
-      <CreditCard className="h-3.5 w-3.5 opacity-80" />
-      Commander ma Rivo Card
+      <span className="grid h-4 w-4 place-items-center rounded bg-white/15">
+        <CreditCard className="h-3 w-3" />
+      </span>
+      Commander
     </a>
   );
 }
