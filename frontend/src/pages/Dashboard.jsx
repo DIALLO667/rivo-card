@@ -5,7 +5,7 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode, CreditCard, X, Loader2 } from 'lucide-react';
+import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, ShoppingCart, Check, QrCode, CreditCard, X, Loader2, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import QRCode from 'qrcode';
 import { toWhatsAppHref } from '@/lib/urlUtils';
@@ -396,6 +396,10 @@ export default function Dashboard() {
                 <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
               </li>
+              <li onClick={() => navigate('/stats')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
+                <span className="w-3 h-3 rounded-full bg-transparent" />
+                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Statistiques'}</span>
+              </li>
               <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
                 <span className="w-3 h-3 rounded-full bg-transparent" />
                 <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Commandes'}</span>
@@ -432,6 +436,7 @@ export default function Dashboard() {
               <nav className="mt-6 px-2">
                 <ul className="space-y-3">
                   <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/dashboard'); }}>Tableau de Bord</li>
+                  <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/stats'); }}>Statistiques</li>
                   <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/orders'); }}>Commandes</li>
                   <li className="px-3 py-3 rounded-lg flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/subaccounts'); }}>Gestion des Filiales</li>
                   <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/links'); }}>Gestion des Liens</li>
@@ -543,6 +548,13 @@ export default function Dashboard() {
                           <div className="flex items-center text-gray-600 text-[12px] uppercase tracking-wider">
                             <Calendar className="h-3 w-3 mr-1" /> Créé le {new Date(profile.created_at).toLocaleDateString()}
                           </div>
+                          <button
+                            onClick={() => navigate('/stats')}
+                            title="Voir les statistiques"
+                            className="mt-1 inline-flex items-center gap-1 text-[12px] font-semibold text-blue-600 hover:text-blue-700"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> {profile.scan_count || 0} scan{(profile.scan_count || 0) > 1 ? 's' : ''}
+                          </button>
                           <div className="flex items-center gap-2 mt-2">
                             {profile.instagram && (<a href={`https://instagram.com/${profile.instagram.replace(/^@/,'')}`} target="_blank" rel="noreferrer" className="text-pink-500 text-sm">IG</a>)}
                             {profile.linkedin && (<a href={profile.linkedin} target="_blank" rel="noreferrer" className="text-blue-600 text-sm">IN</a>)}

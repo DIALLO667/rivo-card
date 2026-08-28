@@ -42,6 +42,18 @@ async function main() {
     return;
   }
 
+  // Conserve une copie du shell CRA d'origine (root vide, sans le hero/vidéo de
+  // l'accueil) AVANT qu'on écrase build/index.html avec le pré-rendu marketing.
+  // Les routes purement CSR — au premier chef /p/:uniqueLink — sont servies à
+  // partir de ce fichier via une règle _redirects, pour ne plus afficher un
+  // flash de la page d'accueil (et sa vidéo) le temps que React monte le profil.
+  const pristineShell = path.join(BUILD_DIR, "index.html");
+  const appShell = path.join(BUILD_DIR, "app.html");
+  if (fs.existsSync(pristineShell)) {
+    fs.copyFileSync(pristineShell, appShell);
+    console.log(`[prerender] shell CSR -> ${appShell}`);
+  }
+
   let server;
   let browser;
   try {

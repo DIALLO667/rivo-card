@@ -63,7 +63,7 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "postbuild": "node scripts/prerender.js || true",
+    "postbuild": "node -e \"const fs=require('fs');fs.existsSync('build/index.html')&&fs.copyFileSync('build/index.html','build/app.html')\" && node scripts/prerender.js || true",
     "test": "craco test"
   },
   "browserslist": {

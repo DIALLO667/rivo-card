@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
-import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send } from 'lucide-react';
+import { Phone, Globe, Mail, Instagram, Facebook, Linkedin,Youtube,Twitter, ShieldAlert, MapPin, Send, CreditCard } from 'lucide-react';
 import TemplateQuietLuxury from '@/components/templates/TemplateQuietLuxury';
 import TemplateCleanLinks from '@/components/templates/TemplateCleanLinks';
 import TemplateCustomizable from '@/components/templates/TemplateCustomizable';
@@ -10,6 +10,48 @@ import { normalizeUrl } from '@/lib/urlUtils';
 import CVView from '@/components/templates/CVView';
 
 const API = process.env.REACT_APP_API_URL;
+
+// Fuseau horaire du navigateur -> sert de "zone" côté stats (aucune pop-up).
+function browserTz() {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; }
+}
+
+// Envoi "fire and forget" d'un événement de suivi. text/plain => pas de préflight
+// CORS ; le backend lit le corps quel que soit le Content-Type.
+function sendHit(url, data) {
+  try {
+    const body = JSON.stringify(data || {});
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(url, new Blob([body], { type: 'text/plain' }));
+    } else {
+      fetch(url, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'text/plain' } }).catch(() => {});
+    }
+  } catch (e) { /* noop */ }
+}
+
+// Devine le type de lien cliqué à partir de l'élément (fonctionne pour tous les
+// templates sans les modifier). null = clic non pertinent.
+function classifyClick(target) {
+  const el = target && target.closest ? target.closest('a,button') : null;
+  if (!el) return null;
+  const href = (el.getAttribute('href') || '').toLowerCase();
+  const label = ((el.textContent || '') + ' ' + (el.getAttribute('title') || '') + ' ' + (el.getAttribute('aria-label') || '')).toLowerCase();
+  if (href.startsWith('tel:')) return 'call';
+  if (href.startsWith('mailto:')) return 'email';
+  if (/wa\.me|whatsapp/.test(href)) return 'whatsapp';
+  if (/linkedin\./.test(href)) return 'linkedin';
+  if (/instagram\./.test(href)) return 'instagram';
+  if (/facebook\.|fb\.me/.test(href)) return 'facebook';
+  if (/tiktok\./.test(href)) return 'tiktok';
+  if (/youtube\.|youtu\.be/.test(href)) return 'youtube';
+  if (/twitter\.|x\.com/.test(href)) return 'twitter';
+  if (/t\.me\/|telegram\./.test(href)) return 'telegram';
+  if (/snapchat\./.test(href)) return 'snapchat';
+  if (/maps\.app|google\.[a-z.]+\/maps|maps\.google/.test(href)) return 'location';
+  if (/enregistrer|save.?contact|\.vcf|t[eé]l[eé]charger|\bpdf\b/.test(label)) return 'save_contact';
+  if (el.tagName === 'A' && /^https?:/.test(href)) return 'website';
+  return null;
+}
 
 const TikTokIcon = ({ size = 24, color = 'currentColor' }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} xmlns="http://www.w3.org/2000/svg">
@@ -21,6 +63,7 @@ export default function PublicProfile() {
   const { uniqueLink } = useParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const scanSentRef = useRef(false);
 
   useEffect(() => {
     if (uniqueLink) {
@@ -34,9 +77,39 @@ export default function PublicProfile() {
           });
           setProfile(normalized);
           setLoading(false);
+
+          // Enregistre le scan une seule fois. Garde-fou 30 min via sessionStorage
+          // pour ne pas regonfler le compteur sur un simple rechargement.
+          if (!p.is_archived && !scanSentRef.current) {
+            scanSentRef.current = true;
+            try {
+              const key = `rivo_scan_${uniqueLink}`;
+              const last = Number(sessionStorage.getItem(key) || 0);
+              if (Date.now() - last > 30 * 60 * 1000) {
+                sessionStorage.setItem(key, String(Date.now()));
+                sendHit(`${API}/profiles/public/${uniqueLink}/scan`, {
+                  tz: browserTz(),
+                  referrer: document.referrer || '',
+                });
+              }
+            } catch (e) {
+              sendHit(`${API}/profiles/public/${uniqueLink}/scan`, { tz: browserTz(), referrer: document.referrer || '' });
+            }
+          }
         })
         .catch(() => setLoading(false));
     }
+  }, [uniqueLink]);
+
+  // Suivi des clics sur les liens de la carte (tous templates), en capture.
+  useEffect(() => {
+    if (!uniqueLink) return;
+    const onClick = (e) => {
+      const type = classifyClick(e.target);
+      if (type) sendHit(`${API}/profiles/public/${uniqueLink}/event`, { type, tz: browserTz() });
+    };
+    document.addEventListener('click', onClick, true);
+    return () => document.removeEventListener('click', onClick, true);
   }, [uniqueLink]);
 
   const noIndexTag = <Helmet><title>Profil digital | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>;
@@ -116,6 +189,25 @@ export default function PublicProfile() {
       <div className="h-screen w-full bg-[#0a0a0b] flex justify-center items-center overflow-hidden font-sans">
         {renderByType()}
       </div>
+      <OrderYourOwn />
     </>
+  );
+}
+
+// Bouton flottant discret : permet à quiconque consulte un profil de commander
+// sa propre Rivo Card. Placé bas-centre pour ne pas gêner les CTA des templates
+// (certains ont un bouton flottant en bas à droite).
+function OrderYourOwn() {
+  return (
+    <a
+      href="/commander"
+      title="Commander ma Rivo Card"
+      className="fixed left-1/2 -translate-x-1/2 bottom-3 z-[60] flex items-center gap-2 rounded-full
+                 border border-white/15 bg-black/55 px-4 py-2 text-white shadow-lg backdrop-blur-md
+                 text-[11px] font-semibold tracking-wide active:scale-95 transition-all hover:bg-black/70"
+    >
+      <CreditCard className="h-3.5 w-3.5 opacity-80" />
+      Commander ma Rivo Card
+    </a>
   );
 }

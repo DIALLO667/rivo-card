@@ -14,6 +14,8 @@ from typing import Optional
 import uuid
 from datetime import datetime, timezone, timedelta
 import hashlib
+import hmac
+import re
 import secrets
 import cloudinary
 import cloudinary.uploader
@@ -1039,6 +1041,363 @@ async def delete_order(order_id: str, request: Request):
         raise HTTPException(status_code=403)
     await db.orders.delete_one({"order_id": order_id})
     return {"status": "success"}
+
+
+# =========================================================================
+# STATISTIQUES / SUIVI DES SCANS
+# Enregistre un événement par ouverture de profil ("scan") et par clic sur un
+# lien de la carte ("event"). Sert des agrégats au dashboard : classement des
+# commerciaux, taux de conversion (scan -> Enregistrer le contact), alertes
+# d'inactivité, comparaison semaine / semaine précédente, liens les plus cliqués.
+# La "zone" est déduite du fuseau horaire du navigateur (aucune pop-up).
+# =========================================================================
+
+SCAN_SALT = os.environ.get("SCAN_SALT", "rivo-card-stats-salt")
+
+_BOT_UA_RE = re.compile(
+    r"bot|crawler|spider|crawling|facebookexternalhit|whatsapp|telegrambot|"
+    r"slackbot|discordbot|embedly|preview|curl|wget|python-requests|headless|"
+    r"lighthouse|bingpreview|pinterest|vkshare|redditbot|apache-httpclient",
+    re.I,
+)
+
+# Types de clics suivis sur une carte
+EVENT_TYPES = {
+    "call", "email", "whatsapp", "website", "location", "linkedin", "instagram",
+    "facebook", "tiktok", "youtube", "twitter", "telegram", "snapchat",
+    "save_contact",
+}
+# Ces types comptent comme "lien cliqué" ; save_contact est traité à part (conversion)
+LINK_EVENT_TYPES = EVENT_TYPES - {"save_contact"}
+
+
+def _client_ip(request: Request) -> str:
+    xff = request.headers.get("x-forwarded-for")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.client.host if request.client else "0.0.0.0"
+
+
+def _visitor_hash(ip: str, ua: str) -> str:
+    """Empreinte anonyme et non réversible du visiteur (jamais l'IP en clair)."""
+    return hmac.new(SCAN_SALT.encode(), f"{ip}|{ua}".encode(), hashlib.sha256).hexdigest()[:16]
+
+
+def _is_bot(ua: str) -> bool:
+    return (not ua) or bool(_BOT_UA_RE.search(ua))
+
+
+def _zone_from_tz(tz: str) -> str:
+    if not tz or "/" not in tz:
+        return tz or "Inconnue"
+    return tz.split("/")[-1].replace("_", " ")
+
+
+def _parse_ts(value: str):
+    try:
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception:
+        return None
+
+
+async def _record_hit(unique_link: str, request: Request, kind: str,
+                      tz: str = "", referrer: str = "", event_type: str = ""):
+    prof = await db.profiles.find_one(
+        {"unique_link": unique_link}, {"profile_id": 1, "user_id": 1}
+    )
+    if not prof:
+        return None
+    ua = request.headers.get("user-agent", "")
+    if _is_bot(ua):
+        return {"ok": True, "ignored": "bot"}
+    now = datetime.now(timezone.utc)
+    doc = {
+        "hit_id": uuid.uuid4().hex,
+        "kind": kind,                                  # "scan" | "event"
+        "event_type": (event_type or None),
+        "profile_id": prof["profile_id"],
+        "user_id": prof.get("user_id"),
+        "ts": now.isoformat(),
+        "hour": now.hour,                              # heure UTC (≈ heure locale au Sénégal / Mali)
+        "tz": (tz or "")[:64],
+        "zone": _zone_from_tz(tz or ""),
+        "visitor": _visitor_hash(_client_ip(request), ua),
+        "referrer": (referrer or "")[:300],
+    }
+    await db.profile_hits.insert_one(doc)
+    if kind == "scan":
+        await db.profiles.update_one(
+            {"profile_id": prof["profile_id"]},
+            {"$set": {"last_scan_at": now.isoformat()}, "$inc": {"scan_count": 1}},
+        )
+    return {"ok": True}
+
+
+async def _read_json_body(request: Request) -> dict:
+    try:
+        data = await request.json()
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+@api_router.post("/profiles/public/{unique_link}/scan")
+async def track_scan(unique_link: str, request: Request):
+    body = await _read_json_body(request)
+    res = await _record_hit(
+        unique_link, request, "scan",
+        tz=str(body.get("tz", "")), referrer=str(body.get("referrer", "")),
+    )
+    if res is None:
+        raise HTTPException(status_code=404)
+    return res
+
+
+@api_router.post("/profiles/public/{unique_link}/event")
+async def track_event(unique_link: str, request: Request):
+    body = await _read_json_body(request)
+    et = str(body.get("type", "")).strip().lower()
+    if et not in EVENT_TYPES:
+        raise HTTPException(status_code=422, detail="type d'événement invalide")
+    res = await _record_hit(
+        unique_link, request, "event",
+        tz=str(body.get("tz", "")), referrer=str(body.get("referrer", "")),
+        event_type=et,
+    )
+    if res is None:
+        raise HTTPException(status_code=404)
+    return res
+
+
+def _bucket_stats(hits: list, now: datetime, days: int) -> dict:
+    """Construit les agrégats à partir d'une liste brute d'événements."""
+    scans = [h for h in hits if h.get("kind") == "scan"]
+    events = [h for h in hits if h.get("kind") == "event"]
+
+    # par jour (N derniers jours)
+    day_keys = [(now - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(days - 1, -1, -1)]
+    by_day = {k: 0 for k in day_keys}
+    for h in scans:
+        dt = _parse_ts(h.get("ts", ""))
+        if not dt:
+            continue
+        k = dt.strftime("%Y-%m-%d")
+        if k in by_day:
+            by_day[k] += 1
+
+    # par heure (0-23)
+    by_hour = [0] * 24
+    for h in scans:
+        try:
+            by_hour[int(h.get("hour", 0)) % 24] += 1
+        except Exception:
+            pass
+
+    # par zone
+    by_zone = {}
+    for h in scans:
+        z = h.get("zone") or _zone_from_tz(h.get("tz", "")) or "Inconnue"
+        by_zone[z] = by_zone.get(z, 0) + 1
+    by_zone_list = sorted(
+        ({"zone": z, "scans": c} for z, c in by_zone.items()),
+        key=lambda x: x["scans"], reverse=True,
+    )
+
+    # liens cliqués
+    link_counts = {}
+    conversions = 0
+    for h in events:
+        et = h.get("event_type")
+        if et == "save_contact":
+            conversions += 1
+        elif et in LINK_EVENT_TYPES:
+            link_counts[et] = link_counts.get(et, 0) + 1
+    link_list = sorted(
+        ({"type": t, "count": c} for t, c in link_counts.items()),
+        key=lambda x: x["count"], reverse=True,
+    )
+
+    # semaine vs semaine précédente
+    wk_start = now - timedelta(days=7)
+    prev_start = now - timedelta(days=14)
+    this_week = sum(1 for h in scans if (_parse_ts(h.get("ts", "")) or prev_start) >= wk_start)
+    last_week = sum(
+        1 for h in scans
+        if prev_start <= (_parse_ts(h.get("ts", "")) or now) < wk_start
+    )
+    delta_pct = None
+    if last_week:
+        delta_pct = round((this_week - last_week) / last_week * 100)
+    elif this_week:
+        delta_pct = 100
+
+    total_scans = len(scans)
+    visitors = len({h.get("visitor") for h in scans if h.get("visitor")})
+    last_scan_at = max((h.get("ts") for h in scans), default=None)
+
+    return {
+        "total_scans": total_scans,
+        "visiteurs": visitors,
+        "conversions": conversions,
+        "conversion_rate": round(conversions / total_scans * 100) if total_scans else 0,
+        "this_week": this_week,
+        "last_week": last_week,
+        "delta_pct": delta_pct,
+        "by_day": [{"date": k, "scans": by_day[k]} for k in day_keys],
+        "by_hour": [{"hour": i, "scans": by_hour[i]} for i in range(24)],
+        "by_zone": by_zone_list,
+        "links": link_list,
+        "last_scan_at": last_scan_at,
+    }
+
+
+@api_router.get("/profiles/{profile_id}/stats")
+async def profile_stats(profile_id: str, request: Request, days: int = 30):
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    prof = await db.profiles.find_one({"profile_id": profile_id}, {"_id": 0})
+    if not prof:
+        raise HTTPException(status_code=404)
+    manageable = await get_manageable_user_ids(user.user_id)
+    if prof.get("user_id") not in manageable:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+    days = max(1, min(days, 365))
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=max(days, 14))
+    hits = await db.profile_hits.find(
+        {"profile_id": profile_id, "ts": {"$gte": since.isoformat()}}, {"_id": 0}
+    ).to_list(length=50000)
+    stats = _bucket_stats(hits, now, days)
+    stats["profile"] = {
+        "profile_id": prof["profile_id"],
+        "name": prof.get("name"),
+        "photo_url": prof.get("photo_url"),
+    }
+    return stats
+
+
+@api_router.get("/stats/overview")
+async def stats_overview(request: Request, scope: Optional[str] = None,
+                         filter_user_id: Optional[str] = None, days: int = 30):
+    user = await get_user_from_token(request)
+    if not user:
+        raise HTTPException(status_code=401)
+    user_doc = await db.users.find_one({"user_id": user.user_id})
+    if not user_doc:
+        raise HTTPException(status_code=401)
+
+    manageable = await get_manageable_user_ids(user.user_id)
+    sub_ids = manageable[1:] if len(manageable) > 1 else []
+    is_manager = is_account_manager(user_doc, len(sub_ids))
+
+    if filter_user_id:
+        if filter_user_id not in manageable:
+            raise HTTPException(status_code=403, detail="Accès refusé pour cette filiale")
+        target_ids = [filter_user_id]
+    elif scope == "all" and is_manager:
+        target_ids = manageable
+    else:
+        target_ids = [user.user_id]
+
+    days = max(7, min(days, 365))
+    now = datetime.now(timezone.utc)
+    since = now - timedelta(days=max(days, 14))
+
+    profiles = await db.profiles.find(
+        {"user_id": {"$in": target_ids}},
+        {"_id": 0, "profile_id": 1, "name": 1, "photo_url": 1,
+         "last_scan_at": 1, "scan_count": 1, "is_archived": 1},
+    ).to_list(length=5000)
+    pids = [p["profile_id"] for p in profiles]
+
+    hits = []
+    if pids:
+        hits = await db.profile_hits.find(
+            {"profile_id": {"$in": pids}, "ts": {"$gte": since.isoformat()}}, {"_id": 0}
+        ).to_list(length=200000)
+
+    agg = _bucket_stats(hits, now, days)
+
+    # regroupe les scans par profil pour le classement et la comparaison hebdo
+    wk_start = now - timedelta(days=7)
+    prev_start = now - timedelta(days=14)
+    per_profile = {}
+    for h in hits:
+        if h.get("kind") != "scan":
+            continue
+        pid = h.get("profile_id")
+        d = per_profile.setdefault(pid, {"scans": 0, "this_week": 0, "last_week": 0, "visitors": set()})
+        d["scans"] += 1
+        if h.get("visitor"):
+            d["visitors"].add(h["visitor"])
+        dt = _parse_ts(h.get("ts", ""))
+        if dt and dt >= wk_start:
+            d["this_week"] += 1
+        elif dt and prev_start <= dt < wk_start:
+            d["last_week"] += 1
+
+    name_by_pid = {p["profile_id"]: p for p in profiles}
+    leaderboard = []
+    for pid, d in per_profile.items():
+        p = name_by_pid.get(pid, {})
+        leaderboard.append({
+            "profile_id": pid,
+            "name": p.get("name") or "—",
+            "photo_url": p.get("photo_url"),
+            "scans": d["scans"],
+            "visiteurs": len(d["visitors"]),
+            "this_week": d["this_week"],
+            "last_week": d["last_week"],
+            "last_scan_at": p.get("last_scan_at"),
+        })
+    leaderboard.sort(key=lambda x: x["scans"], reverse=True)
+
+    # alertes d'inactivité : profils actifs sans scan depuis >= 7 jours (ou jamais)
+    inactive = []
+    for p in profiles:
+        if p.get("is_archived"):
+            continue
+        last = _parse_ts(p.get("last_scan_at", "")) if p.get("last_scan_at") else None
+        days_since = (now - last).days if last else None
+        if days_since is None or days_since >= 7:
+            inactive.append({
+                "profile_id": p["profile_id"],
+                "name": p.get("name") or "—",
+                "days_since": days_since,
+                "last_scan_at": p.get("last_scan_at"),
+            })
+    inactive.sort(key=lambda x: (x["days_since"] is not None, x["days_since"] or 0), reverse=True)
+
+    return {
+        "range_days": days,
+        "total_scans": agg["total_scans"],
+        "visiteurs": agg["visiteurs"],
+        "conversions": agg["conversions"],
+        "conversion_rate": agg["conversion_rate"],
+        "this_week": agg["this_week"],
+        "last_week": agg["last_week"],
+        "delta_pct": agg["delta_pct"],
+        "by_day": agg["by_day"],
+        "top_zones": agg["by_zone"][:8],
+        "links": agg["links"],
+        "leaderboard": leaderboard[:20],
+        "inactive": inactive[:20],
+        "profiles_count": len([p for p in profiles if not p.get("is_archived")]),
+    }
+
+
+@app.on_event("startup")
+async def _ensure_stats_indexes():
+    try:
+        await db.profile_hits.create_index([("profile_id", 1), ("ts", -1)])
+        await db.profile_hits.create_index([("user_id", 1), ("ts", -1)])
+        await db.profile_hits.create_index([("ts", -1)])
+    except Exception:
+        logger.warning("Impossible de créer les index profile_hits")
 
 
 app.include_router(api_router)

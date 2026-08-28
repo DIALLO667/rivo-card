@@ -17,6 +17,7 @@ const AuthCallback = lazy(() => import('./pages/AuthCallback'));
 const Accueil = lazy(() => import('./pages/Accueil'));
 const CommanderForm = lazy(() => import('./pages/CommanderForm'));
 const Orders = lazy(() => import('./pages/Orders'));
+const Stats = lazy(() => import('./pages/Stats'));
 
 function AppRouter() {
   const location = useLocation();
@@ -35,6 +36,7 @@ function AppRouter() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/stats" element={<ProtectedRoute><Stats /></ProtectedRoute>} />
           <Route path="/subaccounts" element={<ProtectedRoute><Subaccounts /></ProtectedRoute>} />
           <Route path="/links" element={<ProtectedRoute><LinkManagement /></ProtectedRoute>} />
           <Route path="/profiles/new" element={<ProtectedRoute><ProfileForm /></ProtectedRoute>} />

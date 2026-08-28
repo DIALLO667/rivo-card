@@ -1,1 +1,7 @@
-/* /index.html   200
+# Les pages profil sont 100% CSR : on les sert depuis le shell vide (app.html)
+# et non depuis index.html pré-rendu (page d'accueil + vidéo), pour éviter le
+# flash de la page d'accueil avant que React ne monte le profil.
+# app.html est généré par scripts/prerender.js (copie du shell CRA d'origine).
+/p/*  /app.html   200
+
+/*    /index.html  200
