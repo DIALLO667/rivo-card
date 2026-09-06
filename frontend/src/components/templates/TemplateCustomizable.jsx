@@ -218,22 +218,6 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
           <FaSave size={16} /> ENREGISTRER CONTACT
         </button>
 
-        {profile?.location && (
-          <a href={toMapsUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
-              <FaMapMarkerAlt style={{ color: prefs.button }} /> Adresse
-            </button>
-          </a>
-        )}
-
-        {profile?.email && mailHref && (
-          <a href={mailHref} className="block w-full">
-            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
-              <FaEnvelope style={{ color: prefs.button }} /> RDV par email
-            </button>
-          </a>
-        )}
-
         {primaryPhone && (
           <div className="w-full">
             <div className="flex gap-2">
@@ -262,6 +246,22 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
               </div>
             )}
           </div>
+        )}
+
+        {profile?.location && (
+          <a href={toMapsUrl(profile.location)} target="_blank" rel="noreferrer" className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+              <FaMapMarkerAlt style={{ color: prefs.button }} /> Adresse
+            </button>
+          </a>
+        )}
+
+        {profile?.email && mailHref && (
+          <a href={mailHref} className="block w-full">
+            <button className="w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl py-4 text-sm flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase">
+              <FaEnvelope style={{ color: prefs.button }} /> RDV par email
+            </button>
+          </a>
         )}
 
         {websiteHref && (

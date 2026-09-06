@@ -128,22 +128,6 @@ const TemplateQuietLuxury = ({ profile }) => {
           <FaSave className='text-base' /> ENREGISTRER CONTACT
         </button>
 
-        {data.location && (
-          <a href={toMapsUrl(data.location)} target="_blank" rel="noopener noreferrer" className="block w-full">
-            <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
-              <FaMapMarkerAlt className='text-[#C4A77D] text-base' /> Adresse
-            </button>
-          </a>
-        )}
-
-        {data.email && mailHref && (
-          <a href={mailHref} className="block w-full">
-            <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
-              <FaEnvelope className='text-[#C4A77D] text-base' /> RDV par email
-            </button>
-          </a>
-        )}
-
         {primaryPhone && (
           <div className="w-full">
             <div className="flex gap-2">
@@ -171,6 +155,22 @@ const TemplateQuietLuxury = ({ profile }) => {
               </div>
             )}
           </div>
+        )}
+
+        {data.location && (
+          <a href={toMapsUrl(data.location)} target="_blank" rel="noopener noreferrer" className="block w-full">
+            <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
+              <FaMapMarkerAlt className='text-[#C4A77D] text-base' /> Adresse
+            </button>
+          </a>
+        )}
+
+        {data.email && mailHref && (
+          <a href={mailHref} className="block w-full">
+            <button className={`w-full bg-white/[0.03] border border-white/10 text-white/90 rounded-xl ${hasPortfolio ? 'py-4' : 'py-5'} text-[10px] tracking-[0.15em] flex items-center justify-center gap-3 active:bg-white/10 transition-all backdrop-blur-sm uppercase`}>
+              <FaEnvelope className='text-[#C4A77D] text-base' /> RDV par email
+            </button>
+          </a>
         )}
 
         {websiteHref && (

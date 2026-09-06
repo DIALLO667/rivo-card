@@ -15,6 +15,7 @@ export const OFFERS = [
 ];
 
 export const COUNTRIES = [
+  { value: "mali", label: "Mali" },
   { value: "senegal", label: "Sénégal" },
   { value: "burkina-faso", label: "Burkina Faso" },
   { value: "autre", label: "Autre pays" },
@@ -31,7 +32,7 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
     phone: "",
     email: "",
     company: "",
-    country: "",
+    country: "mali",
     offer: OFFERS.some((o) => o.value === initialOffer) ? initialOffer : "",
     message: "",
   });
