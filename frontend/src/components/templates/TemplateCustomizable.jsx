@@ -145,7 +145,7 @@ export default function TemplateCustomizable({ profile, onChange: onFormChange =
   const websiteHref = profile?.website && profile.website !== 'https://' ? normalizeUrl(profile.website) : null;
 
   const downloadVCard = () => {
-    const vcard = makeVCard({ name, phone: phones.length ? phones : (profile?.phone || ''), email: profile?.email || '' });
+    const vcard = makeVCard({ name, phone: primaryPhone || '', email: profile?.email || '' });
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

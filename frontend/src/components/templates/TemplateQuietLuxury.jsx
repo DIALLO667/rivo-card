@@ -67,7 +67,7 @@ const TemplateQuietLuxury = ({ profile }) => {
   const downloadVCard = () => {
     const vcard = makeVCard({
       name,
-      phone: data.phone || '',
+      phone: primaryPhone || '',
       email: data.email || ''
     });
     const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });

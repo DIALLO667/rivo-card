@@ -30,12 +30,10 @@ export function makeVCard({ name = '', phone = '', email = '' } = {}) {
     'VERSION:3.0',
     `FN:${name || ''}`,
   ];
-  // phone may be a string or an array of strings
-  if (Array.isArray(phone)) {
-    phone.forEach(p => lines.push(`TEL:${p || ''}`));
-  } else {
-    lines.push(`TEL:${phone || ''}`);
-  }
+  // phone may be a string or an array of strings. On ne garde qu'un seul
+  // numéro dans le contact enregistré : le premier (numéro principal).
+  const primary = Array.isArray(phone) ? (phone[0] || '') : (phone || '');
+  lines.push(`TEL:${primary}`);
   lines.push(`EMAIL:${email || ''}`);
   lines.push('END:VCARD');
   return lines.join('\n');
