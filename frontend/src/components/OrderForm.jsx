@@ -23,6 +23,17 @@ export const COUNTRIES = [
 
 const WHATSAPP_PHONE = "+221785207689";
 
+// Indicatif affiché devant le champ téléphone (Mali). On le préfixe au numéro
+// saisi à l'envoi, en évitant les doublons si l'utilisateur le retape.
+const PHONE_PREFIX = "00223";
+
+function buildPhone(raw) {
+  let d = (raw || "").replace(/[\s.\-()]/g, "").replace(/^\+/, "00");
+  if (d.startsWith("00223")) return d;
+  if (d.startsWith("223")) return "00" + d;
+  return PHONE_PREFIX + d.replace(/^0+/, "");
+}
+
 const inputClass =
   "w-full h-12 px-4 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40";
 
@@ -31,10 +42,8 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
     name: "",
     phone: "",
     email: "",
-    company: "",
     country: "mali",
     offer: OFFERS.some((o) => o.value === initialOffer) ? initialOffer : "",
-    message: "",
   });
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -96,12 +105,10 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
     try {
       const fd = new FormData();
       fd.append("name", form.name.trim());
-      fd.append("phone", form.phone.trim());
+      fd.append("phone", buildPhone(form.phone));
       fd.append("country", form.country);
       if (form.email.trim()) fd.append("email", form.email.trim());
-      if (form.company.trim()) fd.append("company", form.company.trim());
       if (form.offer) fd.append("offer", form.offer);
-      if (form.message.trim()) fd.append("message", form.message.trim());
       if (photo) fd.append("photo", photo);
       await axios.post(`${API}/orders`, fd);
       setDone(true);
@@ -198,15 +205,20 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
         <label className="block text-sm font-medium mb-1.5" htmlFor="order-phone">
           Téléphone (WhatsApp) *
         </label>
-        <input
-          id="order-phone"
-          type="tel"
-          required
-          value={form.phone}
-          onChange={update("phone")}
-          placeholder="Ex : 77 123 45 67"
-          className={inputClass}
-        />
+        <div className="flex">
+          <span className="inline-flex items-center h-12 px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm font-medium select-none">
+            {PHONE_PREFIX}
+          </span>
+          <input
+            id="order-phone"
+            type="tel"
+            required
+            value={form.phone}
+            onChange={update("phone")}
+            placeholder="76 12 34 56"
+            className="w-full h-12 px-4 rounded-r-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
       </div>
 
       <div>
@@ -221,37 +233,6 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
           placeholder="vous@exemple.com"
           className={inputClass}
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1.5" htmlFor="order-company">
-          Entreprise (si pack PME)
-        </label>
-        <input
-          id="order-company"
-          type="text"
-          value={form.company}
-          onChange={update("company")}
-          placeholder="Nom de votre entreprise"
-          className={inputClass}
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1.5" htmlFor="order-offer">
-          Offre souhaitée
-        </label>
-        <select
-          id="order-offer"
-          value={form.offer}
-          onChange={update("offer")}
-          className={inputClass}
-        >
-          <option value="">Sélectionnez une offre</option>
-          {OFFERS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
       </div>
 
       <div>
@@ -293,20 +274,6 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
           accept="image/*"
           onChange={handlePhotoChange}
           className="hidden"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1.5" htmlFor="order-message">
-          Précisions (optionnel)
-        </label>
-        <textarea
-          id="order-message"
-          rows={3}
-          value={form.message}
-          onChange={update("message")}
-          placeholder="Nombre de cartes, personnalisation souhaitée..."
-          className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
         />
       </div>
 

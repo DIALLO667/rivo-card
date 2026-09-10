@@ -9,6 +9,7 @@ import { Plus, LogOut, Archive, MessageCircle, Search, Calendar, Users, Shopping
 import { Badge } from '@/components/ui/badge';
 import QRCode from 'qrcode';
 import { toWhatsAppHref } from '@/lib/urlUtils';
+import AdminSidebar from '@/components/AdminSidebar';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -35,6 +36,10 @@ export default function Dashboard() {
   const [activationError, setActivationError] = useState('');
   const [generatingActivation, setGeneratingActivation] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  // Suppression de profil : confirmation par saisie du nom exact
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
   // selectedSub default is 'all'; if a `sub` query param exists we'll read it on mount
 
   // load profiles; accepts explicit overrides so callers pass freshly-fetched
@@ -187,16 +192,22 @@ export default function Dashboard() {
     }
   };
 
-  // delete profile
-  const deleteProfile = async (profileId) => {
+  // delete profile — appelé seulement après confirmation par saisie du nom
+  const confirmDeleteProfile = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`${API}/profiles/${profileId}`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
+      await axios.delete(`${API}/profiles/${deleteTarget.profile_id}`, { headers: { Authorization: `Bearer ${token}` }, withCredentials: true });
       toast.success('Profil supprimé');
+      setDeleteTarget(null);
+      setDeleteConfirmText('');
       await fetchProfiles({ ownerOv: ownerOverview, sel: selectedSub });
     } catch (err) {
       console.error('deleteProfile error', err);
       toast.error('Impossible de supprimer le profil');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -375,82 +386,13 @@ export default function Dashboard() {
   return (
     <div className="flex min-h-screen">
   <Helmet><title>Tableau de bord | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
-  {/* Sidebar - collapsible, near-black for a luxe look */}
-  {/* Desktop sidebar (hidden on small screens) */}
-  <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
-  <div>
-          <div className="px-4 py-4 flex items-center justify-between">
-              <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
-              <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span></div>
-            </div>
-            <div>
-              <button title={sidebarCollapsed ? 'Déplier le menu' : 'Réduire le menu'} aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
-                <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <nav className="mt-6 px-2">
-            <ul className="space-y-3">
-              <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5 bg-white/5">
-                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
-              </li>
-              <li onClick={() => navigate('/stats')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Statistiques'}</span>
-              </li>
-              <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Commandes'}</span>
-              </li>
-              <li onClick={() => navigate('/subaccounts')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Filiales'}</span>
-              </li>
-              <li onClick={() => navigate('/links')} className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Liens'}</span>
-              </li>
-            </ul>
-          </nav>
-        </div>
-
-        <div className="px-4 py-6">
-          <div className="border-t border-white/10 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Mobile sidebar (overlay) */}
-      {mobileSidebarVisible && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarVisible(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B1220] text-white flex flex-col justify-between shadow-xl p-4">
-            <div>
-              <div className="px-2 py-4 flex items-center justify-between">
-                <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-blue-500">ADMIN</span></div>
-                <button title="Fermer le menu" onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
-              </div>
-              <nav className="mt-6 px-2">
-                <ul className="space-y-3">
-                  <li className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/dashboard'); }}>Tableau de Bord</li>
-                  <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/stats'); }}>Statistiques</li>
-                  <li className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5" onClick={() => { setMobileSidebarVisible(false); navigate('/orders'); }}>Commandes</li>
-                  <li className="px-3 py-3 rounded-lg flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/subaccounts'); }}>Gestion des Filiales</li>
-                  <li className="px-3 py-3 rounded-lg hover:bg-white/5 flex items-center gap-3" onClick={() => { setMobileSidebarVisible(false); navigate('/links'); }}>Gestion des Liens</li>
-                </ul>
-              </nav>
-            </div>
-            <div className="px-4 py-6">
-              <div className="border-t border-white/10 pt-4">
-                <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+  {/* Menu latéral partagé (identique sur toutes les pages admin) */}
+  <AdminSidebar
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+        mobileOpen={mobileSidebarVisible}
+        onCloseMobile={() => setMobileSidebarVisible(false)}
+      />
 
       <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10 transition-margin duration-200`}>
         <div className="max-w-7xl mx-auto">
@@ -594,7 +536,7 @@ export default function Dashboard() {
                         <button title="Éditer" onClick={() => navigate(`/profiles/edit/${profile.profile_id}`)} className="p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M11 4h7a1 1 0 011 1v7"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 3l-12 12H3v-6L15 3z"/></svg>
                         </button>
-                        <button title="Supprimer" onClick={() => deleteProfile(profile.profile_id)} className="p-2 bg-red-50 text-red-600 border border-red-100 rounded-md hover:shadow-sm">
+                        <button title="Supprimer" onClick={() => { setDeleteTarget(profile); setDeleteConfirmText(''); }} className="p-2 bg-red-50 text-red-600 border border-red-100 rounded-md hover:shadow-sm">
                           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m5 0V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"/></svg>
                         </button>
                         <button title={profile.is_archived ? 'Réactiver' : 'Archiver'} onClick={() => handleArchive(profile.profile_id, profile.is_archived)} className={`p-2 bg-white border border-gray-100 rounded-md hover:shadow-sm ${profile.is_archived ? 'text-emerald-600' : 'text-gray-500 hover:text-red-500'}`}><Archive className="h-4 w-4" /></button>
@@ -673,6 +615,48 @@ export default function Dashboard() {
               </Button>
               <Button onClick={downloadCardPdf} disabled={!cardPreview || cardDownloading} className="bg-[#D4AF37] hover:bg-yellow-600 text-black font-semibold">
                 {cardDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Télécharger le PDF'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation de suppression : il faut retaper le nom exact du profil */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-gray-900">Supprimer ce profil ?</h2>
+              <button title="Fermer" onClick={() => { setDeleteTarget(null); setDeleteConfirmText(''); }} className="p-2 rounded-md hover:bg-gray-100">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600">
+              Cette action est <span className="font-semibold text-red-600">définitive</span>. Pour confirmer, saisissez le nom exact du profil :
+            </p>
+            <p className="mt-2 mb-3 text-sm font-semibold text-gray-900 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 select-all">
+              {deleteTarget.name}
+            </p>
+            <Input
+              autoFocus
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="Saisir le nom du profil"
+              className="h-11 rounded-lg border-gray-200"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && deleteConfirmText.trim() === (deleteTarget.name || '').trim() && !deleting) confirmDeleteProfile();
+              }}
+            />
+            <div className="mt-6 flex justify-end gap-3">
+              <Button onClick={() => { setDeleteTarget(null); setDeleteConfirmText(''); }} className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">
+                Annuler
+              </Button>
+              <Button
+                onClick={confirmDeleteProfile}
+                disabled={deleting || deleteConfirmText.trim() !== (deleteTarget.name || '').trim()}
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Supprimer définitivement'}
               </Button>
             </div>
           </div>

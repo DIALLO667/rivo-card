@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Link2, Copy, Plus, ExternalLink } from 'lucide-react';
+import AdminSidebar from '@/components/AdminSidebar';
 
 const API = process.env.REACT_APP_API_URL || '';
 
 export default function LinkManagement() {
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarVisible, setMobileSidebarVisible] = useState(false);
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -135,51 +137,19 @@ export default function LinkManagement() {
   return (
     <div className="flex min-h-screen">
       <Helmet><title>Gestion des liens | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
-      <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
-        <div>
-          <div className="px-4 py-4 flex items-center justify-between">
-            <div className={`flex items-center gap-3 ${sidebarCollapsed ? 'justify-center w-full' : ''}`}>
-              <div className="text-white font-extrabold text-sm">
-                {sidebarCollapsed ? 'RC' : 'RIVO-CARD'}
-                <span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span>
-              </div>
-            </div>
-            <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
-              <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6" /></svg>
-            </button>
-          </div>
-          <nav className="mt-6 px-2">
-            <ul className="space-y-3">
-              <li onClick={() => navigate('/dashboard')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Tableau de Bord'}</span>
-              </li>
-              <li onClick={() => navigate('/orders')} className="px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Commandes'}</span>
-              </li>
-              <li onClick={() => navigate('/subaccounts')} className="px-3 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 cursor-pointer">
-                <span className="w-3 h-3 rounded-full bg-transparent" />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Filiales'}</span>
-              </li>
-              <li className="px-3 py-3 rounded-lg flex items-center gap-3 bg-white/5">
-                <span className={`w-3 h-3 rounded-full ${sidebarCollapsed ? 'mx-auto' : ''} ring-2 ring-blue-500`} />
-                <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && 'Gestion des Liens'}</span>
-              </li>
-            </ul>
-          </nav>
-        </div>
-        <div className="px-4 py-6">
-          <div className="border-t border-white/10 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
-          </div>
-        </div>
-      </aside>
+      <AdminSidebar
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+        mobileOpen={mobileSidebarVisible}
+        onCloseMobile={() => setMobileSidebarVisible(false)}
+      />
 
       <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10`}>
         <div className="max-w-5xl mx-auto">
           <div className="md:hidden mb-4 flex items-center gap-3">
-            <button onClick={() => navigate('/dashboard')} className="p-2 rounded-lg bg-white border border-gray-200 text-sm text-gray-700">← Retour</button>
+            <button onClick={() => setMobileSidebarVisible(true)} className="p-2 rounded-lg bg-white border border-gray-200 text-gray-700" aria-label="Ouvrir le menu">
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
             <span className="font-semibold text-gray-900">Gestion des Liens</span>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-sm mb-6">

@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { BarChart3, TrendingUp, TrendingDown, Users, Eye, MousePointerClick, AlertTriangle, Trophy, Clock, MapPin, X } from 'lucide-react';
+import AdminSidebar from '@/components/AdminSidebar';
 
 const API = process.env.REACT_APP_API_URL || '';
 
@@ -62,7 +62,6 @@ function Bars({ data, labelKey, valueKey, max, unit = '' }) {
 }
 
 export default function Stats() {
-  const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarVisible, setMobileSidebarVisible] = useState(false);
   const [scopeAll, setScopeAll] = useState(false);
@@ -109,62 +108,16 @@ export default function Stats() {
     }
   };
 
-  const navItems = [
-    { label: 'Tableau de Bord', path: '/dashboard' },
-    { label: 'Statistiques', path: '/stats', active: true },
-    { label: 'Commandes', path: '/orders' },
-    { label: 'Gestion des Filiales', path: '/subaccounts' },
-    { label: 'Gestion des Liens', path: '/links' },
-  ];
-
   return (
     <div className="flex min-h-screen">
       <Helmet><title>Statistiques | Rivo Card</title><meta name="robots" content="noindex, nofollow" /></Helmet>
 
-      <aside className={`${sidebarCollapsed ? 'md:w-20' : 'md:w-56'} hidden md:flex fixed left-0 top-0 bottom-0 bg-[#0B1220] text-white flex-col justify-between transition-width duration-200 shadow-xl`}>
-        <div>
-          <div className="px-4 py-4 flex items-center justify-between">
-            <div className="text-white font-extrabold text-sm">{sidebarCollapsed ? 'RC' : 'RIVO-CARD'}<span className={`${sidebarCollapsed ? 'hidden' : 'ml-1 text-blue-500'}`}> ADMIN</span></div>
-            <button aria-label="Toggle sidebar" onClick={() => setSidebarCollapsed((c) => !c)} className="p-2 rounded hover:bg-white/10">
-              <svg className={`h-4 w-4 transform ${sidebarCollapsed ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 9l6 6 6-6"/></svg>
-            </button>
-          </div>
-          <nav className="mt-6 px-2">
-            <ul className="space-y-3">
-              {navItems.map((it) => (
-                <li key={it.path} onClick={() => navigate(it.path)} className={`px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5 ${it.active ? 'bg-white/5' : ''}`}>
-                  <span className={`w-3 h-3 rounded-full ${it.active ? 'ring-2 ring-blue-500' : 'bg-transparent'}`} />
-                  <span className="font-medium text-sm tracking-wide">{!sidebarCollapsed && it.label}</span>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </div>
-        <div className="px-4 py-6">
-          <div className="border-t border-white/10 pt-4">
-            <Button onClick={() => { localStorage.removeItem('token'); navigate('/login'); }} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
-          </div>
-        </div>
-      </aside>
-
-      {mobileSidebarVisible && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMobileSidebarVisible(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B1220] text-white flex flex-col shadow-xl p-4">
-            <div className="px-2 py-4 flex items-center justify-between">
-              <div className="text-white font-extrabold">RIVO-CARD <span className="ml-1 text-blue-500">ADMIN</span></div>
-              <button onClick={() => setMobileSidebarVisible(false)} className="p-2 rounded hover:bg-white/10">✕</button>
-            </div>
-            <nav className="mt-6 px-2">
-              <ul className="space-y-3">
-                {navItems.map((it) => (
-                  <li key={it.path} className={`px-3 py-3 rounded-lg cursor-pointer flex items-center gap-3 hover:bg-white/5 ${it.active ? 'bg-white/5' : ''}`} onClick={() => { setMobileSidebarVisible(false); navigate(it.path); }}>{it.label}</li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      )}
+      <AdminSidebar
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((c) => !c)}
+        mobileOpen={mobileSidebarVisible}
+        onCloseMobile={() => setMobileSidebarVisible(false)}
+      />
 
       <main className={`flex-1 ${sidebarCollapsed ? 'md:ml-20 ml-0' : 'md:ml-56 ml-0'} bg-gray-50 min-h-screen p-4 md:p-10 transition-margin duration-200`}>
         <div className="max-w-6xl mx-auto">
