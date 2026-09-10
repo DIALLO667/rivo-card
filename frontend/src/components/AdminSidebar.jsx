@@ -41,10 +41,60 @@ function usePendingOrders() {
   return count;
 }
 
+// Compte actuellement connecté (nom + email), affiché au-dessus de la déconnexion.
+function useCurrentUser() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await axios.get(`${API}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+        if (!cancelled) setUser(res.data || null);
+      } catch {
+        /* silencieux : on n'affiche simplement pas le compte */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  return user;
+}
+
+const ROLE_LABELS = { owner: 'Propriétaire', admin: 'Admin', sub: 'Filiale', user: 'Membre' };
+
+function AccountBox({ user, compact }) {
+  if (!user) return null;
+  const name = user.name || user.email || 'Mon compte';
+  const initials = name.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const roleLabel = ROLE_LABELS[user.role] || user.role;
+  if (compact) {
+    return (
+      <div className="flex justify-center mb-3" title={`${name}${user.email ? ` — ${user.email}` : ''}`}>
+        <div className="w-9 h-9 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">{initials}</div>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-center gap-3 mb-3 px-1">
+      <div className="w-9 h-9 shrink-0 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center">{initials}</div>
+      <div className="min-w-0">
+        <div className="text-sm font-semibold text-white truncate">{name}</div>
+        {user.email && <div className="text-[11px] text-white/50 truncate">{user.email}</div>}
+        {roleLabel && <div className="text-[11px] text-blue-400 truncate">{roleLabel}</div>}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSidebar({ collapsed = false, onToggleCollapse, mobileOpen = false, onCloseMobile }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const pendingOrders = usePendingOrders();
+  const currentUser = useCurrentUser();
 
   const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
   const logout = () => { localStorage.removeItem('token'); navigate('/login'); };
@@ -100,6 +150,7 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse, mobi
         </div>
         <div className="px-4 py-6">
           <div className="border-t border-white/10 pt-4">
+            <AccountBox user={currentUser} compact={collapsed} />
             <Button onClick={logout} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
           </div>
         </div>
@@ -121,6 +172,7 @@ export default function AdminSidebar({ collapsed = false, onToggleCollapse, mobi
             </div>
             <div className="px-4 py-6">
               <div className="border-t border-white/10 pt-4">
+                <AccountBox user={currentUser} compact={false} />
                 <Button onClick={logout} variant="ghost" className="w-full text-white hover:bg-white/10">Déconnexion</Button>
               </div>
             </div>
