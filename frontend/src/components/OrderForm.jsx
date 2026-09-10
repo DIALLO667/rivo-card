@@ -1,18 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { CheckCircle2, MessageCircle, Camera, X } from "lucide-react";
+import { CheckCircle2, MessageCircle, Camera, X, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const API = process.env.REACT_APP_API_URL || "";
-
-export const OFFERS = [
-  { value: "medium", label: "Carte NFC Medium — 10 000 F" },
-  { value: "premium", label: "Carte NFC Premium — 15 000 F" },
-  { value: "pme-starter", label: "PME Pack Starter" },
-  { value: "pme-business", label: "PME Pack Business" },
-  { value: "pme-premium", label: "PME Pack Premium" },
-  { value: "autre", label: "Autre / je ne sais pas encore" },
-];
 
 export const COUNTRIES = [
   { value: "mali", label: "Mali" },
@@ -21,42 +12,66 @@ export const COUNTRIES = [
   { value: "autre", label: "Autre pays" },
 ];
 
+// Indicatifs proposés devant le champ téléphone. `dial` = indicatif sans le "+".
+export const DIAL_CODES = [
+  { code: "223", label: "🇲🇱 Mali (+223)" },
+  { code: "221", label: "🇸🇳 Sénégal (+221)" },
+  { code: "226", label: "🇧🇫 Burkina Faso (+226)" },
+  { code: "225", label: "🇨🇮 Côte d'Ivoire (+225)" },
+  { code: "224", label: "🇬🇳 Guinée (+224)" },
+  { code: "227", label: "🇳🇪 Niger (+227)" },
+  { code: "228", label: "🇹🇬 Togo (+228)" },
+  { code: "229", label: "🇧🇯 Bénin (+229)" },
+  { code: "233", label: "🇬🇭 Ghana (+233)" },
+  { code: "234", label: "🇳🇬 Nigeria (+234)" },
+  { code: "33", label: "🇫🇷 France (+33)" },
+  { code: "1", label: "🇺🇸 USA / Canada (+1)" },
+];
+
 const WHATSAPP_PHONE = "+221785207689";
 
-// Indicatif affiché devant le champ téléphone (Mali). On le préfixe au numéro
-// saisi à l'envoi, en évitant les doublons si l'utilisateur le retape.
-const PHONE_PREFIX = "00223";
+// Construit le numéro final au format international "00<indicatif><numéro local>".
+// - on ne garde que les chiffres du numéro local
+// - on retire les zéros de tête du numéro local (ex : 0 76 12 34 -> 76 12 34)
+// - on préfixe "00" + l'indicatif choisi dans le menu déroulant
+function buildPhone(rawLocal, dial) {
+  const local = (rawLocal || "").replace(/\D/g, "").replace(/^0+/, "");
+  return `00${dial}${local}`;
+}
 
-function buildPhone(raw) {
-  let d = (raw || "").replace(/[\s.\-()]/g, "").replace(/^\+/, "00");
-  if (d.startsWith("00223")) return d;
-  if (d.startsWith("223")) return "00" + d;
-  return PHONE_PREFIX + d.replace(/^0+/, "");
+// Chiffres utiles du numéro local (pour la validation de longueur).
+function localDigits(rawLocal) {
+  return (rawLocal || "").replace(/\D/g, "").replace(/^0+/, "");
 }
 
 const inputClass =
   "w-full h-12 px-4 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40";
 
-export default function OrderForm({ initialOffer = "", onSuccess, compact = false }) {
+const SOCIAL_FIELDS = [
+  { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/mon_pseudo" },
+  { key: "facebook", label: "Facebook", placeholder: "https://facebook.com/ma.page" },
+  { key: "snapchat", label: "Snapchat", placeholder: "https://snapchat.com/add/mon_pseudo" },
+];
+
+export default function OrderForm({ onSuccess, compact = false }) {
   const [form, setForm] = useState({
     name: "",
+    dial: "223",
     phone: "",
     email: "",
     country: "mali",
-    offer: OFFERS.some((o) => o.value === initialOffer) ? initialOffer : "",
+    website: "",
+    instagram: "",
+    facebook: "",
+    snapchat: "",
   });
+  const [socialOpen, setSocialOpen] = useState(false);
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    if (initialOffer && OFFERS.some((o) => o.value === initialOffer)) {
-      setForm((f) => ({ ...f, offer: initialOffer }));
-    }
-  }, [initialOffer]);
 
   useEffect(() => {
     return () => {
@@ -93,23 +108,34 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!form.name.trim() || !form.phone.trim()) {
-      setError("Le nom et le numéro de téléphone sont obligatoires.");
+    if (!form.name.trim()) {
+      setError("Le nom complet est obligatoire.");
+      return;
+    }
+    if (localDigits(form.phone).length < 6) {
+      setError("Le numéro de téléphone est incomplet (au moins 6 chiffres).");
       return;
     }
     if (!form.country) {
       setError("Veuillez indiquer votre pays.");
       return;
     }
+    if (!photo) {
+      setError("La photo de profil est obligatoire.");
+      return;
+    }
     setSubmitting(true);
     try {
       const fd = new FormData();
       fd.append("name", form.name.trim());
-      fd.append("phone", buildPhone(form.phone));
+      fd.append("phone", buildPhone(form.phone, form.dial));
       fd.append("country", form.country);
       if (form.email.trim()) fd.append("email", form.email.trim());
-      if (form.offer) fd.append("offer", form.offer);
-      if (photo) fd.append("photo", photo);
+      if (form.website.trim()) fd.append("website", form.website.trim());
+      if (form.instagram.trim()) fd.append("instagram", form.instagram.trim());
+      if (form.facebook.trim()) fd.append("facebook", form.facebook.trim());
+      if (form.snapchat.trim()) fd.append("snapchat", form.snapchat.trim());
+      fd.append("photo", photo);
       await axios.post(`${API}/orders`, fd);
       setDone(true);
       onSuccess?.();
@@ -206,9 +232,16 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
           Téléphone (WhatsApp) *
         </label>
         <div className="flex">
-          <span className="inline-flex items-center h-12 px-3 rounded-l-lg border border-r-0 border-border bg-muted text-muted-foreground text-sm font-medium select-none">
-            {PHONE_PREFIX}
-          </span>
+          <select
+            aria-label="Indicatif pays"
+            value={form.dial}
+            onChange={update("dial")}
+            className="h-12 px-2 rounded-l-lg border border-r-0 border-border bg-muted text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 max-w-[7.5rem]"
+          >
+            {DIAL_CODES.map((d) => (
+              <option key={d.code} value={d.code}>{d.label}</option>
+            ))}
+          </select>
           <input
             id="order-phone"
             type="tel"
@@ -219,6 +252,9 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
             className="w-full h-12 px-4 rounded-r-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Numéro final : +{form.dial} {localDigits(form.phone) || "…"}
+        </p>
       </div>
 
       <div>
@@ -236,11 +272,57 @@ export default function OrderForm({ initialOffer = "", onSuccess, compact = fals
       </div>
 
       <div>
+        <label className="block text-sm font-medium mb-1.5" htmlFor="order-website">
+          Lien du site
+        </label>
+        <input
+          id="order-website"
+          type="url"
+          value={form.website}
+          onChange={update("website")}
+          placeholder="https://mon-site.com"
+          className={inputClass}
+        />
+      </div>
+
+      <div>
+        <button
+          type="button"
+          onClick={() => setSocialOpen((o) => !o)}
+          className="w-full flex items-center justify-between h-12 px-4 rounded-lg border border-border bg-background text-sm font-medium hover:border-primary/50 transition-colors"
+        >
+          <span>
+            Réseaux sociaux <span className="text-muted-foreground font-normal">(facultatif)</span>
+          </span>
+          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${socialOpen ? "rotate-180" : ""}`} />
+        </button>
+        {socialOpen && (
+          <div className="mt-3 space-y-3">
+            {SOCIAL_FIELDS.map((s) => (
+              <div key={s.key}>
+                <label className="block text-xs font-medium mb-1 text-muted-foreground" htmlFor={`order-${s.key}`}>
+                  {s.label}
+                </label>
+                <input
+                  id={`order-${s.key}`}
+                  type="url"
+                  value={form[s.key]}
+                  onChange={update(s.key)}
+                  placeholder={s.placeholder}
+                  className={inputClass}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
         <label className="block text-sm font-medium mb-1.5">
-          Photo de profil
+          Photo de profil *
         </label>
         <p className="text-xs text-muted-foreground mb-2">
-          Ajoutez votre photo pour accélérer la configuration de votre carte (optionnel).
+          Obligatoire — elle sera utilisée pour configurer votre carte.
         </p>
         {photoPreview ? (
           <div className="flex items-center gap-4">

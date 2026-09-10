@@ -233,6 +233,61 @@ export default function Dashboard() {
     return () => clearInterval(iv);
   }, [ownerOverview, selectedSub, currentUser, subaccounts]);
 
+  // À chaque ouverture du tableau de bord : s'il reste des commandes non
+  // confirmées, on affiche une notification + un petit "bip" sonore.
+  useEffect(() => {
+    let cancelled = false;
+    const playBeep = () => {
+      try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const beep = (freq, start, dur) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          gain.gain.setValueAtTime(0.0001, ctx.currentTime + start);
+          gain.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + start + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + dur);
+          osc.start(ctx.currentTime + start);
+          osc.stop(ctx.currentTime + start + dur);
+        };
+        beep(880, 0, 0.15);
+        beep(1180, 0.18, 0.2);
+        setTimeout(() => ctx.close(), 700);
+      } catch {
+        /* le son n'est pas critique */
+      }
+    };
+    (async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        const res = await axios.get(`${API}/orders`, {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
+        if (cancelled) return;
+        const pending = (res.data || []).filter((o) => o.status === 'en_attente');
+        if (pending.length > 0) {
+          toast(`${pending.length} commande${pending.length > 1 ? 's' : ''} en attente de confirmation`, {
+            description: 'Ouvrez la page Commandes pour les valider.',
+            action: { label: 'Voir', onClick: () => navigate('/orders') },
+            duration: 8000,
+          });
+          playBeep();
+        }
+      } catch {
+        /* pas d'accès aux commandes (sous-compte) : on ignore */
+      }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleCopyLink = (profile) => {
     if (!profile.unique_link) return;
     navigator.clipboard.writeText(`${window.location.origin}/p/${profile.unique_link}`);

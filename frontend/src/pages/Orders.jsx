@@ -163,7 +163,19 @@ export default function Orders() {
                       {order.company && (
                         <span className="flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> {order.company}</span>
                       )}
+                      {order.website && (
+                        <a href={order.website} target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-blue-600 truncate max-w-[220px]">
+                          <Globe className="h-3.5 w-3.5" /> {order.website.replace(/^https?:\/\//, '')}
+                        </a>
+                      )}
                     </div>
+                    {(order.instagram || order.facebook || order.snapchat) && (
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-500">
+                        {order.instagram && <a href={order.instagram} target="_blank" rel="noreferrer" className="hover:text-blue-600">Instagram</a>}
+                        {order.facebook && <a href={order.facebook} target="_blank" rel="noreferrer" className="hover:text-blue-600">Facebook</a>}
+                        {order.snapchat && <a href={order.snapchat} target="_blank" rel="noreferrer" className="hover:text-blue-600">Snapchat</a>}
+                      </div>
+                    )}
                     {order.message && <p className="text-sm text-gray-500 mt-2 italic">&laquo; {order.message} &raquo;</p>}
                     <p className="text-xs text-gray-400 mt-2">Reçue le {new Date(order.created_at).toLocaleDateString()} à {new Date(order.created_at).toLocaleTimeString().slice(0, 5)}</p>
                   </div>
