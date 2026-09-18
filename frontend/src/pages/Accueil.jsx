@@ -287,7 +287,7 @@ const Accueil = () => {
               onClick={() => openOrderForm()}
               className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
             >
-              Commander
+              Commander ma Rivo card
             </button>
           </div>
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu">
@@ -306,7 +306,7 @@ const Accueil = () => {
               onClick={() => openOrderForm()}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 rounded-full text-sm font-semibold transition-colors"
             >
-              Commander
+              Commander ma Rivo card
             </button>
             <a href={WHATSAPP_PARTNER} target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)}>
               <button className="w-full border border-primary text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-full text-sm font-medium transition-colors">
@@ -554,7 +554,7 @@ const Accueil = () => {
                     onClick={() => openOrderForm(offre.id)}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-full font-semibold transition-colors"
                   >
-                    Commander
+                    Commander ma Rivo card
                   </button>
                 </div>
               </div>
