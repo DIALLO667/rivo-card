@@ -267,7 +267,7 @@ function OrderYourOwn() {
       <span className="grid h-4 w-4 place-items-center rounded bg-white/15">
         <CreditCard className="h-3 w-3" />
       </span>
-      Commander
+      Commander ma Rivo card
     </a>
   );
 }
