@@ -164,6 +164,17 @@ def local_face_crop(buf: io.BytesIO, target_size=(400, 400)) -> Optional[io.Byte
 async def health_check():
     return {"status": "ok", "message": "Server is active", "timestamp": datetime.now(timezone.utc).isoformat()}
 
+
+_FAVICON_PATH = ROOT_DIR / "static" / "activation" / "favicon.svg"
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    """Browsers request /favicon.ico on any page load, including bare API URLs."""
+    if _FAVICON_PATH.is_file():
+        return FileResponse(_FAVICON_PATH, media_type="image/svg+xml")
+    return Response(status_code=204)
+
 api_router = APIRouter(prefix="/api")
 
 
