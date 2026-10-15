@@ -1353,8 +1353,10 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
         if h.get("kind") != "scan":
             continue
         pid = h.get("profile_id")
-        d = per_profile.setdefault(pid, {"scans": 0, "this_week": 0, "last_week": 0, "visitors": set()})
+        d = per_profile.setdefault(pid, {"scans": 0, "this_week": 0, "last_week": 0, "visitors": set(), "last_ts": None})
         d["scans"] += 1
+        if h.get("ts") and (d["last_ts"] is None or h["ts"] > d["last_ts"]):
+            d["last_ts"] = h["ts"]
         if h.get("visitor"):
             d["visitors"].add(h["visitor"])
         dt = _parse_ts(h.get("ts", ""))
@@ -1375,9 +1377,10 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
             "visiteurs": len(d["visitors"]),
             "this_week": d["this_week"],
             "last_week": d["last_week"],
-            "last_scan_at": p.get("last_scan_at"),
+            "last_scan_at": p.get("last_scan_at") or d["last_ts"],
         })
-    leaderboard.sort(key=lambda x: x["scans"], reverse=True)
+    # les cartes scannées le plus récemment en premier
+    leaderboard.sort(key=lambda x: x["last_scan_at"] or "", reverse=True)
 
     # alertes d'inactivité : profils actifs sans scan depuis >= 7 jours (ou jamais)
     inactive = []

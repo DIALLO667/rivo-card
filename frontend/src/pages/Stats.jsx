@@ -190,7 +190,7 @@ export default function Stats() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Classement */}
                 <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                  <h2 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-500" /> Classement des commerciaux</h2>
+                  <h2 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-amber-500" /> Cartes récemment scannées</h2>
                   {data.leaderboard?.length ? (
                     <div className="divide-y divide-gray-100">
                       {data.leaderboard.map((row, i) => (
