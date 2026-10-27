@@ -1116,6 +1116,10 @@ def _zone_from_tz(tz: str) -> str:
     return tz.split("/")[-1].replace("_", " ")
 
 
+def _hit_zone(h: dict) -> str:
+    return h.get("zone") or _zone_from_tz(h.get("tz", "")) or "Inconnue"
+
+
 def _parse_ts(value: str):
     try:
         dt = datetime.fromisoformat(value)
@@ -1222,7 +1226,7 @@ def _bucket_stats(hits: list, now: datetime, days: int) -> dict:
     # par zone
     by_zone = {}
     for h in scans:
-        z = h.get("zone") or _zone_from_tz(h.get("tz", "")) or "Inconnue"
+        z = _hit_zone(h)
         by_zone[z] = by_zone.get(z, 0) + 1
     by_zone_list = sorted(
         ({"zone": z, "scans": c} for z, c in by_zone.items()),
@@ -1382,6 +1386,28 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
     # les cartes scannées le plus récemment en premier
     leaderboard.sort(key=lambda x: x["last_scan_at"] or "", reverse=True)
 
+    # profils scannés dans chaque zone (affichés au clic sur une ville)
+    zone_profiles = {}
+    for h in hits:
+        if h.get("kind") != "scan":
+            continue
+        counts = zone_profiles.setdefault(_hit_zone(h), {})
+        pid = h.get("profile_id")
+        counts[pid] = counts.get(pid, 0) + 1
+    top_zones = []
+    for z in agg["by_zone"][:8]:
+        plist = []
+        for pid, c in zone_profiles.get(z["zone"], {}).items():
+            p = name_by_pid.get(pid, {})
+            plist.append({
+                "profile_id": pid,
+                "name": p.get("name") or "—",
+                "photo_url": p.get("photo_url"),
+                "scans": c,
+            })
+        plist.sort(key=lambda x: x["scans"], reverse=True)
+        top_zones.append({**z, "profiles": plist})
+
     # alertes d'inactivité : profils actifs sans scan depuis >= 7 jours (ou jamais)
     inactive = []
     for p in profiles:
@@ -1408,7 +1434,7 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
         "last_week": agg["last_week"],
         "delta_pct": agg["delta_pct"],
         "by_day": agg["by_day"],
-        "top_zones": agg["by_zone"][:8],
+        "top_zones": top_zones,
         "links": agg["links"],
         "leaderboard": leaderboard[:20],
         "inactive": inactive[:20],

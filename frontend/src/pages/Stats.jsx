@@ -44,12 +44,16 @@ function Kpi({ icon: Icon, label, value, sub }) {
   );
 }
 
-function Bars({ data, labelKey, valueKey, max, unit = '' }) {
+function Bars({ data, labelKey, valueKey, max, unit = '', onRowClick }) {
   const top = max || Math.max(1, ...data.map((d) => d[valueKey]));
   return (
     <div className="space-y-2">
       {data.map((d, i) => (
-        <div key={i} className="flex items-center gap-3 text-sm">
+        <div
+          key={i}
+          className={`flex items-center gap-3 text-sm ${onRowClick ? 'cursor-pointer hover:bg-gray-50 rounded-lg px-1 -mx-1' : ''}`}
+          onClick={onRowClick ? () => onRowClick(d, i) : undefined}
+        >
           <div className="w-28 shrink-0 text-gray-600 truncate">{d[labelKey]}</div>
           <div className="flex-1 bg-gray-100 rounded-full h-3 overflow-hidden">
             <div className="bg-blue-600 h-full rounded-full" style={{ width: `${(d[valueKey] / top) * 100}%` }} />
@@ -69,6 +73,7 @@ export default function Stats() {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [zone, setZone] = useState(null);
 
   const fetchOverview = useCallback(async () => {
     setLoading(true);
@@ -224,7 +229,7 @@ export default function Stats() {
 
                   <h2 className="font-bold text-gray-900 mt-6 mb-3 text-sm uppercase tracking-wide flex items-center gap-2"><MapPin className="h-4 w-4" /> Zones (top)</h2>
                   {data.top_zones?.length ? (
-                    <Bars data={data.top_zones.map((z) => ({ label: z.zone, scans: z.scans }))} labelKey="label" valueKey="scans" />
+                    <Bars data={data.top_zones.map((z) => ({ label: z.zone, scans: z.scans }))} labelKey="label" valueKey="scans" onRowClick={(d, i) => setZone(data.top_zones[i])} />
                   ) : <p className="text-sm text-gray-400 py-4 text-center">—</p>}
                 </div>
               </div>
@@ -232,6 +237,32 @@ export default function Stats() {
           )}
         </div>
       </main>
+
+      {/* Profils scannés dans une zone */}
+      {zone && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setZone(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><MapPin className="h-5 w-5" /> {zone.zone}</h2>
+              <button onClick={() => setZone(null)} className="p-2 rounded-md hover:bg-gray-100"><X className="h-5 w-5" /></button>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">{zone.scans} scan{zone.scans > 1 ? 's' : ''} sur les 30 derniers jours</p>
+            {zone.profiles?.length ? (
+              <div className="divide-y divide-gray-100">
+                {zone.profiles.map((p) => (
+                  <button key={p.profile_id} onClick={() => { setZone(null); openDetail(p.profile_id); }} className="w-full flex items-center gap-3 py-2.5 text-left hover:bg-gray-50 rounded-lg px-1">
+                    {p.photo_url ? (
+                      <img src={p.photo_url} alt={p.name} className="w-8 h-8 rounded-full object-cover border border-gray-200" onError={(e) => { e.target.style.display = 'none'; }} />
+                    ) : <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500">{(p.name || 'U').charAt(0)}</div>}
+                    <div className="flex-1 min-w-0 font-semibold text-gray-900 text-sm truncate">{p.name}</div>
+                    <div className="font-black text-gray-900">{p.scans}</div>
+                  </button>
+                ))}
+              </div>
+            ) : <p className="text-sm text-gray-400 py-6 text-center">Aucun profil</p>}
+          </div>
+        </div>
+      )}
 
       {/* Détail par profil */}
       {detail && (
