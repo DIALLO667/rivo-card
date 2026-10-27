@@ -136,7 +136,7 @@ export default function Stats() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-gray-900">Statistiques</h1>
-                <p className="text-xs text-gray-500">Scans des cartes sur les 30 derniers jours</p>
+                <p className="text-xs text-gray-500">Total des scans depuis le début</p>
               </div>
             </div>
             <label className="flex items-center gap-2 text-sm text-gray-600">
@@ -167,15 +167,15 @@ export default function Stats() {
 
               {/* KPIs */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <Kpi icon={Eye} label="Scans (30 j)" value={data.total_scans} />
-                <Kpi icon={Users} label="Visiteurs (30 j)" value={data.visiteurs} />
+                <Kpi icon={Eye} label="Scans (total)" value={data.total_scans} />
+                <Kpi icon={Users} label="Visiteurs (total)" value={data.visiteurs} />
                 <Kpi icon={TrendingUp} label="Cette semaine" value={data.this_week} sub={<Delta pct={data.delta_pct} />} />
                 <Kpi icon={MousePointerClick} label="Taux de conversion" value={`${data.conversion_rate}%`} sub={<span className="text-xs text-gray-400">{data.conversions} contacts enregistrés</span>} />
               </div>
 
               {/* Scans par jour */}
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <h2 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Scans par jour</h2>
+                <h2 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Scans par jour (30 derniers jours)</h2>
                 <div className="flex items-end gap-1 h-32">
                   {data.by_day.map((d, i) => {
                     const top = Math.max(1, ...data.by_day.map((x) => x.scans));
@@ -217,7 +217,7 @@ export default function Stats() {
                         </button>
                       ))}
                     </div>
-                  ) : <p className="text-sm text-gray-400 py-6 text-center">Aucun scan sur la période</p>}
+                  ) : <p className="text-sm text-gray-400 py-6 text-center">Aucun scan pour le moment</p>}
                 </div>
 
                 {/* Liens cliqués */}
@@ -246,7 +246,7 @@ export default function Stats() {
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2"><MapPin className="h-5 w-5" /> {zone.zone}</h2>
               <button onClick={() => setZone(null)} className="p-2 rounded-md hover:bg-gray-100"><X className="h-5 w-5" /></button>
             </div>
-            <p className="text-xs text-gray-500 mb-3">{zone.scans} scan{zone.scans > 1 ? 's' : ''} sur les 30 derniers jours</p>
+            <p className="text-xs text-gray-500 mb-3">{zone.scans} scan{zone.scans > 1 ? 's' : ''} au total</p>
             {zone.profiles?.length ? (
               <div className="divide-y divide-gray-100">
                 {zone.profiles.map((p) => (

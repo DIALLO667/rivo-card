@@ -1294,10 +1294,10 @@ async def profile_stats(profile_id: str, request: Request, days: int = 30):
         raise HTTPException(status_code=403, detail="Accès refusé")
     days = max(1, min(days, 365))
     now = datetime.now(timezone.utc)
-    since = now - timedelta(days=max(days, 14))
+    # totaux depuis le début ; `days` ne borne que le graphique par jour
     hits = await db.profile_hits.find(
-        {"profile_id": profile_id, "ts": {"$gte": since.isoformat()}}, {"_id": 0}
-    ).to_list(length=50000)
+        {"profile_id": profile_id}, {"_id": 0}
+    ).to_list(length=200000)
     stats = _bucket_stats(hits, now, days)
     stats["profile"] = {
         "profile_id": prof["profile_id"],
@@ -1332,7 +1332,6 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
 
     days = max(7, min(days, 365))
     now = datetime.now(timezone.utc)
-    since = now - timedelta(days=max(days, 14))
 
     profiles = await db.profiles.find(
         {"user_id": {"$in": target_ids}},
@@ -1343,9 +1342,10 @@ async def stats_overview(request: Request, scope: Optional[str] = None,
 
     hits = []
     if pids:
+        # totaux depuis le début ; `days` ne borne que le graphique par jour
         hits = await db.profile_hits.find(
-            {"profile_id": {"$in": pids}, "ts": {"$gte": since.isoformat()}}, {"_id": 0}
-        ).to_list(length=200000)
+            {"profile_id": {"$in": pids}}, {"_id": 0}
+        ).to_list(length=500000)
 
     agg = _bucket_stats(hits, now, days)
 
